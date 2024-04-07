@@ -1,0 +1,230 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "schema for a simple JSON file to import layouts",
+    "description": "mostly for tests",
+    "version": "0.1.0",
+    "definitions": {
+        "Doc": {
+            "description": "a container for an initial layout",
+            "type": "object",
+            "properties": {
+                "layout": {
+                    "oneOf": [
+                        {
+                            "type": "object",
+                            "properties": {
+                                "content": {
+                                    "$ref": "#/definitions/SimpleLayout"
+                                }
+                            }
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "verticalLayout": {
+                                    "$ref": "#/definitions/VerticalLayout"
+                                }
+                            }
+                        },
+                        {
+                            "properties": {
+                                "horizontalLayout": {
+                                    "$ref": "#/definitions/HorizontalLayout"
+                                }
+                            }
+                        },
+                        {
+                            "properties": {
+                                "gridLayout": {
+                                    "$ref": "#/definitions/GridLayout"
+                                }
+                            }
+                        }
+                    ]
+                }
+            },
+            "required": [
+                "layout"
+            ]
+        },
+        "SimpleLayout": {
+            "description": "Smallest part of the design",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "unique identifier of that entry",
+                    "type": "string"
+                },
+                "caption": {
+                    "description": "Some kind of the main text",
+                    "type": "string"
+                },
+                "text1": {
+                    "description": "First additional text",
+                    "type": "string"
+                },
+                "text2": {
+                    "description": "Second additional text",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "id",
+                "caption"
+            ]
+        },
+        "VerticalLayout": {
+            "description": "all members of that layout are positioned in one column",
+            "type": "object",
+            "properties": {
+                "parts": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "layout": {
+                                "oneOf": [
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "content": {
+                                                "$ref": "#/definitions/SimpleLayout"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "verticalLayout": {
+                                                "$ref": "#/definitions/VerticalLayout"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "properties": {
+                                            "horizontalLayout": {
+                                                "$ref": "#/definitions/HorizontalLayout"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "properties": {
+                                            "gridLayout": {
+                                                "$ref": "#/definitions/GridLayout"
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                }
+            },
+            "required": [
+                "parts"
+            ]
+        },
+        "HorizontalLayout": {
+            "description": "all members of that layout are positioned in one row",
+            "type": "object",
+            "properties": {
+                "parts": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "layout": {
+                                "oneOf": [
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "content": {
+                                                "$ref": "#/definitions/SimpleLayout"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "verticalLayout": {
+                                                "$ref": "#/definitions/VerticalLayout"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "properties": {
+                                            "horizontalLayout": {
+                                                "$ref": "#/definitions/HorizontalLayout"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "properties": {
+                                            "gridLayout": {
+                                                "$ref": "#/definitions/GridLayout"
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                }
+            },
+            "required": [
+                "parts"
+            ]
+        },
+        "GridLayout": {
+            "description": "all members of that layout are positioned in one row",
+            "type": "object",
+            "properties": {
+                "parts": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "layout": {
+                                "oneOf": [
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "content": {
+                                                "$ref": "#/definitions/SimpleLayout"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "verticalLayout": {
+                                                "$ref": "#/definitions/VerticalLayout"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "properties": {
+                                            "horizontalLayout": {
+                                                "$ref": "#/definitions/HorizontalLayout"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "properties": {
+                                            "gridLayout": {
+                                                "$ref": "#/definitions/GridLayout"
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                }
+            },
+            "required": [
+                "parts"
+            ]
+        }
+    }
+}

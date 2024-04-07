@@ -1,0 +1,9 @@
+[package]
+name = "bimpl"
+version = "0.1.0"
+edition = "2021"
+description = "Library crate that contains the possible layouts"
+
+
+[dependencies]
+builder_m4cro = "0.1.0"

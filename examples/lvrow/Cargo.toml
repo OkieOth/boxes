@@ -1,0 +1,9 @@
+[package]
+name = "lvrow"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+bimpl = { path = "../../bimpl" }
+builder_m4cro = "0.1.0"
+    
