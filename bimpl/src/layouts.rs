@@ -1,49 +1,56 @@
+use serde::Deserialize;
 use std::fmt;
 use std::fmt::{Debug, Formatter};
 
-use crate::traits::Content;
 
-pub struct SimpleCell {
+#[derive(Debug, Deserialize)]
+pub struct Content {
+    pub id: String,
+    pub caption: String,
+    pub text1: Option<String>,
+    pub text2: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct Geometry {
     pub x: usize,
     pub y: usize,
     pub width: usize,
     pub height: usize,
-    pub content: Box<dyn Content>,
 }
 
-impl Debug for SimpleCell {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        f.debug_struct("SimpleCell")
-            .field("width", &self.width)
-            .field("height", &self.height)
-            // You might want to customize how you print content depending on its type
-            .field(
-                "content",
-                &format_args!("{}:{}", &self.content.id(), &self.content.caption()),
-            )
-            .finish()
-    }
+#[derive(Debug, Deserialize)]
+pub struct SimpleCell {
+    pub geometry: Option<Geometry>,
+    pub content: Content,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Deserialize)]
 pub struct Horizontal {
     pub parts: Vec<Box<Layout>>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Deserialize)]
 pub struct Vertical {
     pub parts: Vec<Box<Layout>>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Deserialize)]
 pub struct Grid {
     pub parts: Vec<Vec<Box<Layout>>>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Deserialize)]
 pub enum Layout {
+    #[serde(rename(deserialize = "simple"))]
     Simple(SimpleCell),
+
+    #[serde(rename(deserialize = "vertical"))]
     Vertical(Vertical),
+
+    #[serde(rename(deserialize = "horizontal"))]
     Horizontal(Horizontal),
+
+    #[serde(rename(deserialize = "grid"))]
     Grid(Grid),
 }
