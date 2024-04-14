@@ -1,0 +1,56 @@
+{
+    "layout": {
+        "vertical": [
+            {
+                "simple": {
+                    "content": {
+                        "id": "id1",
+                        "caption": "Box 1",
+                        "text1": "This is an additional text",
+                        "text2": "Here is a second text, that is a little bit larger than the first one"
+                    }
+                }
+            },
+            {
+                "horizontal": [
+                    {
+                        "simple": {
+                            "content": {
+                                "id": "id2",
+                                "caption": "Box 2-1",
+                                "text1": "First box in horizontal layout",
+                                "text2": "First box in the horizontal layout, as test case how a possible rendering can look like"
+                            }
+                        }
+                    },
+                    {
+                        "simple": {
+                            "content": {
+                                "id": "id3",
+                                "caption": "Box 2-2",
+                                "text1": "Second box in the horizontal part"
+                            }
+                        }
+                    },
+                    {
+                        "simple": {
+                            "content": {
+                                "id": "id4",
+                                "caption": "Box 2-3",
+                                "text1": "This is the third column in the second row"
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                "simple": {
+                    "content": {
+                        "id": "id5",
+                        "caption": "Box 3 - aka another box"
+                    }
+                }
+            }
+        ]
+    }
+}

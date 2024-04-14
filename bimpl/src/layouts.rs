@@ -26,31 +26,16 @@ pub struct SimpleCell {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct Horizontal {
-    pub parts: Vec<Box<Layout>>,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct Vertical {
-    pub parts: Vec<Box<Layout>>,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct Grid {
-    pub parts: Vec<Vec<Box<Layout>>>,
-}
-
-#[derive(Debug, Deserialize)]
 pub enum Layout {
     #[serde(rename(deserialize = "simple"))]
     Simple(SimpleCell),
 
     #[serde(rename(deserialize = "vertical"))]
-    Vertical(Vertical),
+    Vertical(Vec<Layout>),
 
     #[serde(rename(deserialize = "horizontal"))]
-    Horizontal(Horizontal),
+    Horizontal(Vec<Layout>),
 
     #[serde(rename(deserialize = "grid"))]
-    Grid(Grid),
+    Grid(Vec<Vec<Layout>>),
 }
