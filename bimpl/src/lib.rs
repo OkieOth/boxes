@@ -2,6 +2,7 @@ pub mod doc;
 pub mod layouts;
 pub mod serialize;
 pub mod traits;
+pub mod text_helper;
 
 pub fn add(left: usize, right: usize) -> usize {
     left + right

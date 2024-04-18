@@ -1,7 +1,7 @@
 use crate::layouts;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct Doc {
     pub layout: layouts::Layout,
 }

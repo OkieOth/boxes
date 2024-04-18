@@ -1,3 +1,5 @@
+use std::env;
+use std::fs;
 use rusttype::{point, Font, Scale};
 
 pub enum FontGroup {
@@ -9,6 +11,56 @@ pub enum FontGroup {
     MonoItalic,
 }
 
-pub fn get_text_bbox(text: &str, font_size: usize, font_group: FontGroup) -> (usize, usize) {
-    
+fn get_font_file(font_group: FontGroup) -> Vec<u8> {
+    let cur_dir = env::current_dir().unwrap();
+    let cur_dir_str = cur_dir.to_str().unwrap();
+    let s = format!("{}/resources/fonts/{}", cur_dir_str, "FreeMono.ttf");
+
+    fs::read(s).expect("Failed to read font file")
+}
+
+/// Returns (width, height) of a given text
+/// ```rust
+/// use bimpl::text_helper::{get_text_bbox, FontGroup};
+/// 
+/// let (w1,h1) = get_text_bbox("hallo", 18,FontGroup::Mono);
+/// assert_eq!((w1, h1),(53, 18));
+/// let (w2,h2) = get_text_bbox("hallo", 24,FontGroup::Mono);
+/// assert_eq!((w2, h2),(70, 24));
+/// let (w3,h3) = get_text_bbox("hallo", 36,FontGroup::Mono);
+/// assert_eq!((w3, h3),(105, 36));
+/// ```
+pub fn get_text_bbox(text: &str, font_size: usize, font_group: FontGroup) -> (u32, u32) {
+    // Example from here: https://gitlab.redox-os.org/redox-os/rusttype/-/blob/master/dev/examples/image.rs
+
+    let scale = Scale::uniform(font_size as f32);
+
+    let font_file_bytes = get_font_file(font_group);
+    let font = Font::try_from_bytes(&font_file_bytes).unwrap();
+
+    let v_metrics = font.v_metrics(scale);
+    let glyphs: Vec<_> = font.layout(text, scale, point(0.0, 0.0)).collect();
+    let glyphs_height = (v_metrics.ascent - v_metrics.descent).ceil() as u32;
+    let glyphs_width = {
+        let min_x = glyphs
+            .first()
+            .map(|g| g.pixel_bounding_box().unwrap().min.x)
+            .unwrap();
+        let max_x = glyphs
+            .last()
+            .map(|g| g.pixel_bounding_box().unwrap().max.x)
+            .unwrap();
+        (max_x - min_x) as u32
+    };
+    (glyphs_width, glyphs_height)
+}
+
+#[test]
+fn test_get_text_bbox() {
+    let (w1,h1) = get_text_bbox("hallo", 18,FontGroup::Mono);
+    assert_eq!((w1, h1),(53, 18));
+    let (w2,h2) = get_text_bbox("hallo", 24,FontGroup::Mono);
+    assert_eq!((w2, h2),(70, 24));
+    let (w3,h3) = get_text_bbox("hallo", 36,FontGroup::Mono);
+    assert_eq!((w3, h3),(105, 36));
 }

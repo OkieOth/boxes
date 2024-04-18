@@ -1,4 +1,6 @@
 use std::env;
+use std::fs;
+use std::os;
 
 use bimpl::doc::Doc;
 use bimpl::serialize::get_doc_from_file;
@@ -8,11 +10,21 @@ use bimpl::serialize::get_doc_from_file;
 fn main() {
     let cur_dir = env::current_dir().unwrap();
     let cur_dir_str = cur_dir.to_str().unwrap();
+    // "/home/eiko/prog/git/boxes/examples/lvrow"
 
-    let file_name =format!("{}/models/examples/complex_vlayout.json", cur_dir_str);
-
+    let file_name = if cur_dir_str.ends_with("lvrow") {
+        format!("{}/../../tmp/test_output.json", cur_dir_str)
+    } else {
+        format!("{}/tmp/test_output.json", cur_dir_str)
+    };
+    // let file_name = if cur_dir_str.ends_with("lvrow") {
+    //     format!("{}/../../models/examples/simple_vlayout.json", cur_dir_str)
+    // } else {
+    //     format!("{}/models/examples/complex_vlayout.json", cur_dir_str)
+    // };
+    assert!(fs::metadata(&file_name).is_ok());
     let doc: Doc = get_doc_from_file(&file_name);
-    println!("{:?}", doc);
+    println!("{}", file_name);
 }
 
 #[cfg(test)]
