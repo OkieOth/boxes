@@ -1,6 +1,5 @@
 use serde::{Deserialize, Serialize};
-use std::fmt;
-use std::fmt::{Debug, Formatter};
+use std::fmt::Debug;
 
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -43,8 +42,6 @@ pub enum Layout {
 #[cfg(test)]
 mod tests {
     use std::io::Error;
-
-    use serde::forward_to_deserialize_any;
 
     use super::*;
     use crate::doc::Doc;

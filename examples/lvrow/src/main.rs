@@ -1,29 +1,44 @@
 use std::env;
 use std::fs;
-use std::os;
 
 use bimpl::doc::Doc;
 use bimpl::serialize::get_doc_from_file;
-
+use bimpl::layouts::Layout;
 
 // this is an comment
 fn main() {
     let cur_dir = env::current_dir().unwrap();
     let cur_dir_str = cur_dir.to_str().unwrap();
-    // "/home/eiko/prog/git/boxes/examples/lvrow"
 
     let file_name = if cur_dir_str.ends_with("lvrow") {
-        format!("{}/../../tmp/test_output.json", cur_dir_str)
+        format!("{}/../../models/examples/simple_vlayout.json", cur_dir_str)
     } else {
-        format!("{}/tmp/test_output.json", cur_dir_str)
+        format!("{}/models/examples/simple_vlayout.json", cur_dir_str)
     };
-    // let file_name = if cur_dir_str.ends_with("lvrow") {
-    //     format!("{}/../../models/examples/simple_vlayout.json", cur_dir_str)
-    // } else {
-    //     format!("{}/models/examples/complex_vlayout.json", cur_dir_str)
-    // };
     assert!(fs::metadata(&file_name).is_ok());
     let doc: Doc = get_doc_from_file(&file_name);
+    let l = doc.layout;
+    match l {
+        Layout::Vertical(v) => {
+            v.iter().for_each(|cl| {
+                if let Layout::Simple(s) = cl {
+                    assert!(s.content.id != "");
+                    assert!(s.content.caption != "");
+                } else {
+                    panic!("expected simple layout, got something different");
+                }
+            }) 
+        },
+        Layout::Horizontal(_h) => {
+            panic!("expected vertical layout, got horizontal layout");
+        },
+        Layout::Grid(_g) => {
+            panic!("expected vertical layout, got grid layout");
+        },
+        Layout::Simple(_s) => {
+            panic!("expected vertical layout, got simple layout");
+        }
+    }
     println!("{}", file_name);
 }
 
@@ -69,7 +84,7 @@ mod tests {
         let c2: Result<MyContent, String> = MyContent::builder()
             .caption("My Caption2".to_string())
             .build();
-        let t = c1.text1();
+        let _t = c1.text1();
         println!("Hello-1: {:?}", c1);
 
         println!("Hello-2: {:?}", c2);
