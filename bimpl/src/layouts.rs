@@ -3,6 +3,7 @@ use std::fmt::Debug;
 
 use crate::doc::DocConfig;
 
+type SplitString = Option<Vec<String>>;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Geometry {
@@ -19,6 +20,21 @@ pub struct SimpleCell {
     pub caption: String,
     pub text1: Option<String>,
     pub text2: Option<String>,
+
+    /// caption split in multiple lines if the text is too long
+    split_caption: SplitString,
+
+    /// text-1 split into multiple lines if the text is too long
+    split_text1: SplitString,
+
+    /// text-2 split into multiple lines if the text is too long
+    split_text2: SplitString,
+}
+
+impl SimpleCell {
+    pub fn split_texts(&mut self, doc_config: DocConfig) {
+        
+    }
 }
 
 
