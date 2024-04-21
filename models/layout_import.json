@@ -13,7 +13,7 @@
                         {
                             "type": "object",
                             "properties": {
-                                "content": {
+                                "simple": {
                                     "$ref": "#/definitions/SimpleLayout"
                                 }
                             }
@@ -21,21 +21,21 @@
                         {
                             "type": "object",
                             "properties": {
-                                "verticalLayout": {
+                                "vertical": {
                                     "$ref": "#/definitions/VerticalLayout"
                                 }
                             }
                         },
                         {
                             "properties": {
-                                "horizontalLayout": {
+                                "horizontal": {
                                     "$ref": "#/definitions/HorizontalLayout"
                                 }
                             }
                         },
                         {
                             "properties": {
-                                "gridLayout": {
+                                "grid": {
                                     "$ref": "#/definitions/GridLayout"
                                 }
                             }

@@ -1,14 +1,8 @@
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
 
+use crate::doc::DocConfig;
 
-#[derive(Debug, Deserialize, Serialize)]
-pub struct Content {
-    pub id: String,
-    pub caption: String,
-    pub text1: Option<String>,
-    pub text2: Option<String>,
-}
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Geometry {
@@ -21,8 +15,12 @@ pub struct Geometry {
 #[derive(Debug, Deserialize, Serialize)]
 pub struct SimpleCell {
     pub geometry: Option<Geometry>,
-    pub content: Content,
+    pub id: String,
+    pub caption: String,
+    pub text1: Option<String>,
+    pub text2: Option<String>,
 }
+
 
 #[derive(Debug, Deserialize, Serialize)]
 pub enum Layout {
@@ -50,34 +48,29 @@ mod tests {
     fn deserialize_test() {
         let s1 = Layout::Simple(SimpleCell {
             geometry: None,
-            content: Content {
-                id: "id1".to_string(),
-                caption: "Box 1".to_string(),
-                text1: Some("This is an additional text".to_string()),
-                text2: Some("Here is a second text, that is a little bit larger than the first one".to_string()),
-            }
+            id: "id1".to_string(),
+            caption: "Box 1".to_string(),
+            text1: Some("This is an additional text".to_string()),
+            text2: Some("Here is a second text, that is a little bit larger than the first one".to_string()),
         });
         let s2 = Layout::Simple(SimpleCell {
             geometry: None,
-            content: Content {
-                id: "id2".to_string(),
-                caption: "Box 1".to_string(),
-                text1: Some("comment v2".to_string()),
-                text2: None,
-            }
+            id: "id2".to_string(),
+            caption: "Box 1".to_string(),
+            text1: Some("comment v2".to_string()),
+            text2: None,
         });
         let s3 = Layout::Simple(SimpleCell {
             geometry: None,
-            content: Content {
-                id: "id3".to_string(),
-                caption: "Box 1".to_string(),
-                text1: None,
-                text2: None,
-            }
+            id: "id3".to_string(),
+            caption: "Box 1".to_string(),
+            text1: None,
+            text2: None,
         });
         let vert = Layout::Vertical(vec![s1, s2, s3]);
         let d = Doc {
-            layout: vert
+            layout: vert,
+            config: None,
         };
 
         let json_string = serde_json::to_string(&d).unwrap();

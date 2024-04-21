@@ -35,8 +35,8 @@ mod tests {
             Layout::Vertical(v) => {
                 v.iter().for_each(|cl| {
                     if let Layout::Simple(s) = cl {
-                        assert!(s.content.id != "");
-                        assert!(s.content.caption != "");
+                        assert!(s.id != "");
+                        assert!(s.caption != "");
                     } else {
                         panic!("expected simple layout, got something different");
                     }
