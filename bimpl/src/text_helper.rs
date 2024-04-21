@@ -1,7 +1,10 @@
 use std::env;
 use std::fs;
 use rusttype::{point, Font, Scale};
+use serde::Deserialize;
+use serde::Serialize;
 
+#[derive(Debug, Deserialize, Serialize)]
 pub enum FontGroup {
     Sans,
     SansItalic,

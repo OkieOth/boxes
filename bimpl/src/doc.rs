@@ -1,11 +1,16 @@
+use std::default;
+
 use crate::layouts;
 use serde::{Deserialize, Serialize};
 
+use crate::text_helper::FontGroup;
 
-#[derive(Deserialize, Serialize, Debug)]
+
+#[derive(Deserialize, Serialize, Debug, Default)]
 pub enum TextAlignment {
     Left,
     Right,
+    #[default]
     Center,
 }
 
@@ -13,8 +18,19 @@ pub enum TextAlignment {
 pub struct TextConfig {
     pub margin_top: u32,
     pub size: u32,
-    pub font: String,
+    pub font: FontGroup,
     pub alignment: TextAlignment,
+}
+
+impl Default for TextConfig {
+    fn default() -> Self {
+        TextConfig {
+            margin_top: 10,
+            size: 12,
+            font: FontGroup::Sans,
+            alignment: TextAlignment::default(),
+        }
+    }
 }
 
 
@@ -37,6 +53,19 @@ pub struct DocConfig {
 
     /// text config for text 2
     pub font_text2: TextConfig,
+}
+
+impl Default for DocConfig {
+    fn default() -> Self {
+        DocConfig {
+            default_max_box_with: 200,
+            text_margin: 10,
+            line_space: 1.5,
+            font_caption: TextConfig::default(),
+            font_text1: TextConfig::default(),
+            font_text2: TextConfig::default(),
+        }
+    }
 }
 
 #[derive(Deserialize, Serialize, Debug)]
