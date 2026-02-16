@@ -472,6 +472,8 @@ type ConnectionLine struct {
     IsStart bool  `yaml:"isStart"`
 
     IsEnd bool  `yaml:"isEnd"`
+
+    InverseDirection bool  `yaml:"inverseDirection"`
 }
 
 
@@ -491,6 +493,7 @@ func CopyConnectionLine(src *ConnectionLine) *ConnectionLine {
     ret.Format = types.CopyLineDef(src.Format)
     ret.IsStart = src.IsStart
     ret.IsEnd = src.IsEnd
+    ret.InverseDirection = src.InverseDirection
 
     return &ret
 }

@@ -155,23 +155,27 @@ func (doc *BoxesDocument) connectContImpl(layoutCont []LayoutElement) {
 // The function guarantees that the lines always to top/down or left to right.
 // That simplifies the code for separating overlapping lines
 func (doc *BoxesDocument) createConnection(x1, y1, x2, y2 int) ConnectionLine {
+	inverseDirection := false
 	if x1 == x2 {
 		// vertical line
 		if y1 > y2 {
 			// bottom/up line
+			inverseDirection = true
 			y1, y2 = y2, y1
 		}
 	} else {
 		if x1 > x2 {
 			// right to left
+			inverseDirection = true
 			x1, x2 = x2, x1
 		}
 	}
 	line := ConnectionLine{
-		StartX: x1,
-		StartY: y1,
-		EndX:   x2,
-		EndY:   y2,
+		StartX:           x1,
+		StartY:           y1,
+		EndX:             x2,
+		EndY:             y2,
+		InverseDirection: inverseDirection,
 	}
 	return line
 }
@@ -328,7 +332,7 @@ func (doc *BoxesDocument) connectImpl(layout *LayoutElement) {
 				//fmt.Printf("Found path: src=%s, dest=%s, dist=%d\n", srcId, destId, dist)
 				doc.createAConnectionPath(path, &c, srcId, destId)
 			} else {
-				fmt.Printf("Couldn't calculate path: src=%s, dest=%s\n", srcId, destId)
+				fmt.Printf("Couldn't calculate path: src=%s, dest=>%s<\n", srcId, destId)
 			}
 		}
 	}

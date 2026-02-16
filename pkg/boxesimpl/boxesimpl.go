@@ -196,21 +196,11 @@ func copyTruncatedTags(layout *boxes.Layout, truncatedObjects map[string]Truncat
 	// find comments from truncated objects to the annotate current object
 	for _, v := range truncatedObjects {
 		if v.newId == layout.Id {
-			if layout.Caption == "TMS-Analytics" {
-				fmt.Println("DEBUG-1: layout.caption:", layout.Caption, "id:", layout.Id)
-			}
 			if len(v.truncated.Tags) > 0 {
 				for i := range v.truncated.Tags {
 					tag := v.truncated.Tags[i]
-					if layout.Caption == "TMS-Analytics" {
-						fmt.Println("DEBUG-2: tag:", tag)
-					}
 					if !slices.Contains(layout.Tags, tag) {
-						fmt.Println("DEBUG-3: copy tag: layout.id:", layout.Id, "tag:", tag)
 						layout.Tags = append(layout.Tags, tag)
-					}
-					if layout.Caption == "TMS-Analytics" {
-						fmt.Println("DEBUG-4: layout.tags:", layout.Tags)
 					}
 				}
 			}
@@ -220,6 +210,14 @@ func copyTruncatedTags(layout *boxes.Layout, truncatedObjects map[string]Truncat
 
 func copyTruncatedConnections(layout *boxes.Layout, truncatedObjects map[string]TruncatedInfo) {
 	// copy all needed connections from truncated objects to the current object
+	// Seems to have no impact
+	// for i := range layout.Connections {
+	// 	c := layout.Connections[i]
+	// 	if truncated, ok := truncatedObjects[c.DestId]; ok {
+	// 		c.Dest = fmt.Sprintf("CHANGED-1: %s", c.DestId)
+	// 		c.DestId = truncated.newId
+	// 	}
+	// }
 	for _, v := range truncatedObjects {
 		if v.newId == layout.Id {
 			// copy all truncated connections
@@ -234,6 +232,7 @@ func copyTruncatedConnections(layout *boxes.Layout, truncatedObjects map[string]
 				}
 				if !connectionExistsByDestId(layout.Connections, destIdToUse) {
 					if destIdToUse != layout.Id {
+						c.Dest = fmt.Sprintf("CHANGED-2: %s", c.DestId)
 						c.DestId = destIdToUse
 						(*layout).Connections = append(layout.Connections, c)
 					}

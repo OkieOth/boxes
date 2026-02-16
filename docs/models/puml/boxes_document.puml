@@ -115,6 +115,7 @@ class "**ConnectionLine**" as ConnectionLine {
         LineDef format
         BooleanType isStart
         BooleanType isEnd
+        BooleanType inverseDirection
 }
 
  
@@ -430,6 +431,7 @@ BoxFormat  *--  FillDef
 
 
 ConnectionLine  *--  LineDef
+
 
 
 

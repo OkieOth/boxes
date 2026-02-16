@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"maps"
 	"slices"
+	"strings"
 
 	"github.com/okieoth/draw.chart.things/pkg/types"
 )
@@ -87,16 +88,30 @@ func (b *Boxes) mixInCommentsImpl(l *Layout, additional map[string]types.Comment
 	b.mixInCommentImplCont(l.Vertical, additional)
 }
 
+func (b *Boxes) initIdForMixinsInCase(mixin []Layout) bool {
+	ret := false
+	for i := range mixin {
+		m := &mixin[i]
+		if m.Id == "" {
+			ret = true
+			m.Id = strings.ToLower(m.Caption)
+		}
+	}
+	return ret
+}
+
 func (b *Boxes) mixInLayoutNow(l *Layout, mixin *LayoutMixin) {
 	if mixin == nil {
 		return
 	}
 	if len(mixin.Horizontal) > 0 {
 		// mix in horizontal elements
+		b.initIdForMixinsInCase(mixin.Horizontal)
 		l.Horizontal = append(l.Horizontal, mixin.Horizontal...)
 	}
 	if len(mixin.Vertical) > 0 {
 		// mix in vertical elements
+		b.initIdForMixinsInCase(mixin.Vertical)
 		l.Vertical = append(l.Vertical, mixin.Vertical...)
 	}
 }
