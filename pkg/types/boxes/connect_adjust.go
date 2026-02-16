@@ -193,53 +193,73 @@ func (doc *BoxesDocument) adjustEndLine(line *ConnectionLine) {
 	}
 }
 
-func (doc *BoxesDocument) adjustHorizontalEndLineNow(line *ConnectionLine, boxId string) {
+func (doc *BoxesDocument) adjustHorizontalEndLineNow(line *ConnectionLine, boxId string, dest bool) {
 	box := doc.FindBoxWithId(boxId)
 	if box == nil {
 		return
 	}
-	diffXStart := absInt(box.X - line.StartX)
-	diffXEnd := absInt(box.X - line.EndX)
-	if diffXStart > diffXEnd {
-		// line form left
-		line.EndX = box.X
+
+	if line.InverseDirection {
+		if dest {
+			line.StartX = box.X + box.Width
+		} else {
+			line.EndX = box.X
+		}
 	} else {
-		// line to right
-		line.StartX = box.X + box.Width
+		if dest {
+			line.EndX = box.X
+		} else {
+			line.StartX = box.X + box.Width
+		}
 	}
 }
 
 func (doc *BoxesDocument) adjustHorizontalEndLine(line *ConnectionLine) {
 	if line.DestLayoutId != nil {
-		doc.adjustHorizontalEndLineNow(line, *line.DestLayoutId)
+		doc.adjustHorizontalEndLineNow(line, *line.DestLayoutId, true)
 	}
 	if line.SrcLayoutId != nil {
-		doc.adjustHorizontalEndLineNow(line, *line.SrcLayoutId)
+		doc.adjustHorizontalEndLineNow(line, *line.SrcLayoutId, false)
 	}
 }
 
-func (doc *BoxesDocument) adjustVerticalEndLineNow(line *ConnectionLine, boxId string) {
+func (doc *BoxesDocument) adjustVerticalEndLineNow(line *ConnectionLine, boxId string, dest bool) {
 	box := doc.FindBoxWithId(boxId)
 	if box == nil {
 		return
 	}
-	diffYStart := absInt(box.Y - line.EndY)
-	diffYEnd := absInt((box.Y + box.Height) - line.EndY)
-	if diffYStart < diffYEnd {
-		// line down
-		line.EndY = box.Y
+
+	if line.InverseDirection {
+		if dest {
+			line.StartY = box.Y + box.Height
+		} else {
+			line.EndY = box.Y
+		}
 	} else {
-		// line up
-		line.StartY = box.Y + box.Height
+		if dest {
+			line.EndY = box.Y
+		} else {
+			line.StartY = box.Y + box.Height
+		}
 	}
+
+	// diffYStart := absInt(box.Y - line.EndY)
+	// diffYEnd := absInt((box.Y + box.Height) - line.EndY)
+	// if diffYStart < diffYEnd {
+	// 	// line down
+	// 	line.EndY = box.Y
+	// } else {
+	// 	// line up
+	// 	line.StartY = box.Y + box.Height
+	// }
 }
 
 func (doc *BoxesDocument) adjustVerticalEndLine(line *ConnectionLine) {
 	if line.DestLayoutId != nil {
-		doc.adjustVerticalEndLineNow(line, *line.DestLayoutId)
+		doc.adjustVerticalEndLineNow(line, *line.DestLayoutId, true)
 	}
 	if line.SrcLayoutId != nil {
-		doc.adjustVerticalEndLineNow(line, *line.SrcLayoutId)
+		doc.adjustVerticalEndLineNow(line, *line.SrcLayoutId, false)
 	}
 }
 

@@ -440,6 +440,9 @@
         },
         "isEnd": {
           "type": "boolean"
+        },
+        "inverseDirection": {
+          "type": "boolean"
         }
       },
       "required": [
@@ -450,7 +453,8 @@
         "connectionIndex",
         "lineIndex",
         "isStart",
-        "isEnd"
+        "isEnd",
+        "inverseDirection"
       ]
     },
     "ImageContainer": {
