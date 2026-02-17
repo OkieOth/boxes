@@ -1,18 +1,36 @@
 /* Fixed top-centered menu */
-#menu {
+#menu-wrapper {
     position: fixed;
     top: 8px;
     left: 50%;
     transform: translateX(-50%);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: stretch;
+}
+#menu {
     background: rgba(255, 255, 255, 0.9);
     border: 1px solid #ccc;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     padding: 6px 10px;
-    z-index: 1000;
-    display: flex;
+    display: inline-flex;
+    flex-wrap: nowrap;
     gap: 8px;
     align-items: center;
+    max-width: calc(100vw - 32px);
+    width: max-content;
+    overflow-x: auto;
+    white-space: nowrap;
+}
+#toolbar-version-label {
+    display: flex;
+    justify-content: flex-end;
+    font-size: 8px;
+    color: #7d7d7d;
+    padding-right: 10px;
 }
 /* Page layout: keep space under fixed menu */
 body {

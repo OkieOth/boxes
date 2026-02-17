@@ -8,6 +8,10 @@
         <script>
             window.defaultDepth = 2;
         </script>
+        <script>
+            window.uiVersion = "v1";
+            window.renderingVersion = "v0.9.0";
+        </script>
 
         <script src="./js/htmx_1.9.12.min.js"></script>
         <script src="./js/wasm_exec.js"></script>
@@ -21,156 +25,167 @@
     </head>
     <body>
         <!-- Fixed menu (stays put during pan/zoom) -->
-        <div id="menu">
-            <button title="Zoom +" hx-on:click="window.svgControls.zoom(1.2)">
-                <i class="fa-solid fa-magnifying-glass-plus"></i>
-            </button>
-            <button title="Zoom -" hx-on:click="window.svgControls.zoom(1/1.2)">
-                <i class="fa-solid fa-magnifying-glass-minus"></i>
-            </button>
-            <button
-                title="Reset viewport"
-                hx-on:click="window.svgControls.reset()"
-            >
-                <i class="fa-solid fa-rotate-left"></i>
-            </button>
-            <button
-                title="Save current view"
-                hx-on:click="window.svgControls.save()"
-            >
-                <i class="fa-solid fa-floppy-disk"></i>
-            </button>
-            <!-- Updated buttons with IDs and classes -->
-            <button
-                id="btn-minimap"
-                class="tool-btn"
-                hx-on:click="window.svgControls.toggleMinimap()"
-                title="Toggle Minimap"
-            >
-                <i class="fa-solid fa-map"></i>
-            </button>
-            <button
-                id="btn-collector"
-                class="tool-btn"
-                hx-on:click="window.svgControls.toggleCollector()"
-                title="Toggle Expanded Box"
-            >
-                <i class="fa-solid fa-arrows-up-down"></i>
-            </button>
-            <button
-                id="btn-selected-panel"
-                class="tool-btn"
-                hx-on:click="window.svgControls.toggleSelectedCollector()"
-                title="Toggle Selected Mixins"
-            >
-                <i class="fa-solid fa-layer-group"></i>
-            </button>
-            <!-- Blacklist tool toggle -->
-            <button
-                id="btn-blacklist"
-                class="tool-btn"
-                hx-on:click="window.svgControls.toggleBlacklist()"
-                title="Blacklist Mode (Hide Objects)"
-            >
-                <i class="fa-solid fa-ban"></i>
-            </button>
-            <!-- Pan tool toggle -->
-            <button
-                id="btn-pan"
-                class="tool-btn"
-                hx-on:click="window.svgControls.togglePanTool()"
-                title="Toggle Pan Tool"
-            >
-                <i class="fa-solid fa-arrows-up-down-left-right"></i>
-            </button>
-            <!-- Debug tool toggle -->
-            <button
-                id="btn-debug"
-                class="tool-btn"
-                hx-on:click="window.svgControls.toggleDebug()"
-                title="Toggle Debug View"
-            >
-                <i class="fa-solid fa-bug"></i>
-            </button>
-            <!-- Combo box as last toolbar element -->
-            <div
-                id="toolbar-combobox"
-                class="toolbar-combobox"
-                style="margin-left: 8px"
-            >
-                <div class="toolbar-combo-field">
-                    <input
-                        id="toolbar-combo-input"
-                        class="toolbar-combo-input"
-                        type="text"
-                        placeholder="Filter mixins..."
-                        autocomplete="off"
-                        role="combobox"
-                        aria-haspopup="listbox"
-                        aria-expanded="false"
-                        aria-controls="toolbar-combo-dropdown"
-                    />
-                    <button
-                        type="button"
-                        id="toolbar-combo-toggle"
-                        class="tool-btn toolbar-combo-toggle"
-                        aria-label="Show mixin options"
-                    >
-                        <i class="fa-solid fa-chevron-down"></i>
-                    </button>
-                </div>
-                <div
-                    id="toolbar-combo-dropdown"
-                    class="toolbar-combo-dropdown hidden"
-                    role="listbox"
-                    aria-label="Available mixins"
-                ></div>
-                <select
-                    id="toolbar-combo"
-                    class="toolbar-combo-select"
-                    style="display: none"
+        <div id="menu-wrapper">
+            <div id="menu">
+                <button
+                    title="Zoom +"
+                    hx-on:click="window.svgControls.zoom(1.2)"
                 >
-                    <option value="" selected>Default</option>
-                    <option value="conn1.yaml">Additional Connections 1</option>
-                    <option value="conn2.yaml">Additional Connections 2</option>
-                </select>
+                    <i class="fa-solid fa-magnifying-glass-plus"></i>
+                </button>
+                <button
+                    title="Zoom -"
+                    hx-on:click="window.svgControls.zoom(1/1.2)"
+                >
+                    <i class="fa-solid fa-magnifying-glass-minus"></i>
+                </button>
+                <button
+                    title="Reset viewport"
+                    hx-on:click="window.svgControls.reset()"
+                >
+                    <i class="fa-solid fa-rotate-left"></i>
+                </button>
+                <button
+                    title="Save current view"
+                    hx-on:click="window.svgControls.save()"
+                >
+                    <i class="fa-solid fa-floppy-disk"></i>
+                </button>
+                <!-- Updated buttons with IDs and classes -->
+                <button
+                    id="btn-minimap"
+                    class="tool-btn"
+                    hx-on:click="window.svgControls.toggleMinimap()"
+                    title="Toggle Minimap"
+                >
+                    <i class="fa-solid fa-map"></i>
+                </button>
+                <button
+                    id="btn-collector"
+                    class="tool-btn"
+                    hx-on:click="window.svgControls.toggleCollector()"
+                    title="Toggle Expanded Box"
+                >
+                    <i class="fa-solid fa-arrows-up-down"></i>
+                </button>
+                <button
+                    id="btn-selected-panel"
+                    class="tool-btn"
+                    hx-on:click="window.svgControls.toggleSelectedCollector()"
+                    title="Toggle Selected Mixins"
+                >
+                    <i class="fa-solid fa-layer-group"></i>
+                </button>
+                <!-- Blacklist tool toggle -->
+                <button
+                    id="btn-blacklist"
+                    class="tool-btn"
+                    hx-on:click="window.svgControls.toggleBlacklist()"
+                    title="Blacklist Mode (Hide Objects)"
+                >
+                    <i class="fa-solid fa-ban"></i>
+                </button>
+                <!-- Pan tool toggle -->
+                <button
+                    id="btn-pan"
+                    class="tool-btn"
+                    hx-on:click="window.svgControls.togglePanTool()"
+                    title="Toggle Pan Tool"
+                >
+                    <i class="fa-solid fa-arrows-up-down-left-right"></i>
+                </button>
+                <!-- Debug tool toggle -->
+                <button
+                    id="btn-debug"
+                    class="tool-btn"
+                    hx-on:click="window.svgControls.toggleDebug()"
+                    title="Toggle Debug View"
+                >
+                    <i class="fa-solid fa-bug"></i>
+                </button>
+                <!-- Combo box as last toolbar element -->
+                <div
+                    id="toolbar-combobox"
+                    class="toolbar-combobox"
+                    style="margin-left: 8px"
+                >
+                    <div class="toolbar-combo-field">
+                        <input
+                            id="toolbar-combo-input"
+                            class="toolbar-combo-input"
+                            type="text"
+                            placeholder="Filter mixins..."
+                            autocomplete="off"
+                            role="combobox"
+                            aria-haspopup="listbox"
+                            aria-expanded="false"
+                            aria-controls="toolbar-combo-dropdown"
+                        />
+                        <button
+                            type="button"
+                            id="toolbar-combo-toggle"
+                            class="tool-btn toolbar-combo-toggle"
+                            aria-label="Show mixin options"
+                        >
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </button>
+                    </div>
+                    <div
+                        id="toolbar-combo-dropdown"
+                        class="toolbar-combo-dropdown hidden"
+                        role="listbox"
+                        aria-label="Available mixins"
+                    ></div>
+                    <select
+                        id="toolbar-combo"
+                        class="toolbar-combo-select"
+                        style="display: none"
+                    >
+                        <option value="" selected>Default</option>
+                        <option value="conn1.yaml">Additional Connections 1</option>
+                        <option value="conn2.yaml">Additional Connections 2</option>
+                    </select>
+                </div>
+                <!-- Manage uploads button -->
+                <button
+                    id="btn-manage-uploads"
+                    class="tool-btn"
+                    title="Manage Uploaded Mixins"
+                    style="margin-left: 8px"
+                >
+                    <i class="fa-solid fa-folder-open"></i>
+                </button>
+                <!-- Hide Comments toggle button -->
+                <button
+                    id="btn-hide-comments"
+                    class="tool-btn"
+                    title="Toggle Hide Comments"
+                    style="margin-left: 8px"
+                >
+                    <i class="fa-solid fa-comment-slash"></i>
+                </button>
+                <!-- Permalink button -->
+                <button
+                    id="btn-permalink"
+                    class="tool-btn"
+                    title="Create Permalink"
+                    style="margin-left: 8px"
+                >
+                    <i class="fa-solid fa-link"></i>
+                </button>
+                <!-- Expand All button -->
+                <button
+                    id="btn-expand-all"
+                    class="tool-btn"
+                    title="Expand All (Show All Non-Blacklisted)"
+                    style="margin-left: 8px"
+                >
+                    <i class="fa-solid fa-expand"></i>
+                </button>
             </div>
-            <!-- Manage uploads button -->
-            <button
-                id="btn-manage-uploads"
-                class="tool-btn"
-                title="Manage Uploaded Mixins"
-                style="margin-left: 8px"
-            >
-                <i class="fa-solid fa-folder-open"></i>
-            </button>
-            <!-- Hide Comments toggle button -->
-            <button
-                id="btn-hide-comments"
-                class="tool-btn"
-                title="Toggle Hide Comments"
-                style="margin-left: 8px"
-            >
-                <i class="fa-solid fa-comment-slash"></i>
-            </button>
-            <!-- Permalink button -->
-            <button
-                id="btn-permalink"
-                class="tool-btn"
-                title="Create Permalink"
-                style="margin-left: 8px"
-            >
-                <i class="fa-solid fa-link"></i>
-            </button>
-            <!-- Expand All button -->
-            <button
-                id="btn-expand-all"
-                class="tool-btn"
-                title="Expand All (Show All Non-Blacklisted)"
-                style="margin-left: 8px"
-            >
-                <i class="fa-solid fa-expand"></i>
-            </button>
+            <div id="menu-version">
+                <span id="toolbar-version-label" aria-live="polite"></span>
+            </div>
         </div>
 
         <!-- Minimap -->
@@ -328,6 +343,17 @@
             window.handleInputQueryParam();
             window.loadYamlInput();
             window.loadSVGFromWasm();
+
+            (function updateToolbarVersion() {
+                const versionLabel = document.getElementById(
+                    "toolbar-version-label",
+                );
+                if (!versionLabel) return;
+                const uiVersion = window.uiVersion || "n/a";
+                const renderingVersion =
+                    window.renderingVersion || "n/a";
+                versionLabel.textContent = `Version: ${uiVersion} (rendering: ${renderingVersion})`;
+            })();
 
             // Expand All logic
             (function () {
