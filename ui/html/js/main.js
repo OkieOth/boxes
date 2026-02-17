@@ -1414,10 +1414,6 @@ function initPage() {
                 state.ty += dy;
                 applyTransform();
             },
-            reset() {
-                state = { scale: 1, tx: 0, ty: 0 };
-                applyTransform();
-            },
             save() {
                 const svg = getSvg();
                 if (!svg) return;
