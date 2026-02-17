@@ -324,26 +324,35 @@ func initLayoutElement(l *boxes.Layout, doc *boxes.BoxesDocument, b *boxes.Boxes
 		Image:             initImage(l, b.Images),
 		Vertical:          initLayoutElemContainer(l.Vertical, doc, b),
 		Horizontal:        initLayoutElemContainer(l.Horizontal, doc, b),
-		Format:            adjustFormatBasedOnVariations(l, b, f),
+		Format:            adjustFormatBasedOnVariations(l, b, f, doc),
 		DontBlockConPaths: l.DontBlockConPaths,
 		DataLink:          l.DataLink,
 		Connections:       initConnections(l.Connections, doc.Formats),
 	}
 }
 
-func adjustFormatBasedOnVariations(l *boxes.Layout, b *boxes.Boxes, f *boxes.BoxFormat) *boxes.BoxFormat {
+func adjustFormatBasedOnVariations(l *boxes.Layout, b *boxes.Boxes, f *boxes.BoxFormat, doc *boxes.BoxesDocument) *boxes.BoxFormat {
 	if b.FormatVariations != nil && b.FormatVariations.HasTag != nil {
 		// mix in format adjustment
 		var maxPriority *int
 		var format2Use *boxes.Format
 		for _, t := range l.Tags {
-
 			if adjustment, ok := b.FormatVariations.HasTag[t]; ok {
 				// needed adjustment found
 				if maxPriority == nil || adjustment.Priority > *maxPriority {
 					maxPriority = &adjustment.Priority
-					format2Use = &adjustment.Format
-
+					if adjustment.FormatRef != nil {
+						if f, ok := doc.Formats[*adjustment.FormatRef]; ok {
+							bf := boxes.Format{
+								Line:        f.Line,
+								Fill:        f.Fill,
+								FontCaption: &f.FontCaption,
+							}
+							format2Use = &bf
+						}
+					} else {
+						format2Use = &adjustment.Format
+					}
 				}
 			}
 		}

@@ -93,6 +93,7 @@ class "**FormatVariations**" as FormatVariations {
 
 
 class "**FormatVariation**" as FormatVariation {
+        StringType formatRef
         Format format
         IntegerType priority
 }
@@ -294,6 +295,7 @@ FormatVariations  *--  FormatVariation
 
     
     
+
 FormatVariation  *--  Format
 
 

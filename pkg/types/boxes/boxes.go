@@ -526,6 +526,9 @@ func CopyLayoutMixin(src *LayoutMixin) *LayoutMixin {
 
 type FormatVariation struct {
 
+    // fill this in case the format is specified outside
+    FormatRef *string  `yaml:"formatRef,omitempty"`
+
     Format Format  `yaml:"format"`
 
     // number to define the order if a layout has for instance multiple matching tags
@@ -538,6 +541,7 @@ func CopyFormatVariation(src *FormatVariation) *FormatVariation {
         return nil
     }
     var ret FormatVariation
+    ret.FormatRef = src.FormatRef
     ret.Format = *CopyFormat(&src.Format)
     ret.Priority = src.Priority
 

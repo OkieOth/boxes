@@ -1,4 +1,8 @@
 title: Simple Diamond
+legend:
+  entries:
+    - text: From Main Layout
+      format: default
 formats:
   default:
     line:
