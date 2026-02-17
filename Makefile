@@ -17,8 +17,8 @@ build-docker-ui:
 
 build-wasm:
 	GOOS=js GOARCH=wasm go build -o ui/wasm/boxes_$(VERSION).wasm wasm/main.go
-	sed -i -e 's-window.renderingVersion = "v*";-window.renderingVersion = "v$(VERSION)";-' ui/html/index.html
-	sed -i -e 's-"/wasm/boxes_*.wasm"-"/wasm/boxes_$(VERSION).wasm"-' ui/html/js/main.js
+	sed -i -e 's-window\.renderingVersion = \".*\";-window.renderingVersion = "v$(VERSION)";-' ui/html/index.html
+	sed -i -e 's-\"/wasm/boxes_.*\.wasm\"-"/wasm/boxes_$(VERSION).wasm"-' ui/html/js/main.js
 
 docker-push:
 	docker push ghcr.io/okieoth/draw.chart.things:$(VERSION)
