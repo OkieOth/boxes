@@ -258,6 +258,8 @@ let blacklist = [];
 
 // NEW: global additional mixins for persistence
 let mixins = [];
+let collectorPanelVisible = false;
+let collectorVisibilityGuardAttached = false;
 
 // --- Editable toolbar combobox state ---
 const toolbarComboState = {
@@ -916,6 +918,8 @@ function installCreateSvgExtSpinnerWrapper() {
 function initPage() {
     window.addEventListener("resize", positionBlacklistCollector);
     window.addEventListener("DOMContentLoaded", positionBlacklistCollector);
+    setCollectorPanelVisibility(false);
+    initCollectorVisibilityGuard();
     // Attach dummy handler for toolbar combo box
     document.addEventListener("DOMContentLoaded", function () {
         const selectedPanel = document.getElementById("selected-collector");
@@ -1235,14 +1239,6 @@ function initPage() {
                 });
             }
 
-            // Ensure collector is visible if hidden
-            const collector = document.getElementById("collector");
-            if (collector && collector.classList.contains("hidden")) {
-                collector.classList.remove("hidden");
-                collector.setAttribute("aria-hidden", "false");
-                updateToolButtons();
-            }
-
             // Simple highlight: toggle a data-selected flag and adjust stroke
             const selected = el.getAttribute("data-selected") === "true";
             el.setAttribute("data-selected", selected ? "false" : "true");
@@ -1467,14 +1463,7 @@ function initPage() {
                 updateToolButtons();
             },
             toggleCollector() {
-                const box = document.getElementById("collector");
-                if (!box) return;
-                const hidden = box.classList.toggle("hidden");
-                box.setAttribute("aria-hidden", hidden ? "true" : "false");
-                updateToolButtons();
-                // NEW: when showing, refit badges (sizes are measurable again)
-                if (!hidden) requestAnimationFrame(refitAllBadges);
-                positionBlacklistCollector();
+                setCollectorPanelVisibility(!collectorPanelVisible);
             },
             toggleSelectedCollector() {
                 const panel = document.getElementById("selected-collector");
@@ -2541,6 +2530,36 @@ function findAncestorBadgesOf(childHid) {
     });
 }
 
+function setCollectorPanelVisibility(visible) {
+    collectorPanelVisible = !!visible;
+    const box = document.getElementById("collector");
+    if (!box) return;
+    const shouldHide = !collectorPanelVisible;
+    box.classList.toggle("hidden", shouldHide);
+    box.setAttribute("aria-hidden", shouldHide ? "true" : "false");
+    if (!shouldHide) {
+        requestAnimationFrame(refitAllBadges);
+    }
+    positionBlacklistCollector();
+    updateToolButtons();
+}
+
+function initCollectorVisibilityGuard() {
+    if (collectorVisibilityGuardAttached) return;
+    const box = document.getElementById("collector");
+    if (!box) return;
+    const observer = new MutationObserver(() => {
+        if (!collectorPanelVisible && !box.classList.contains("hidden")) {
+            box.classList.add("hidden");
+            box.setAttribute("aria-hidden", "true");
+            positionBlacklistCollector();
+            updateToolButtons();
+        }
+    });
+    observer.observe(box, { attributes: true, attributeFilter: ["class"] });
+    collectorVisibilityGuardAttached = true;
+}
+
 // Pan/zoom via CSS transform on an HTML wrapper (#svg-stage) to avoid SVG viewport clipping.
 // Ensure left-side panels (selected, expanded, blacklist) stack without overlapping
 function positionBlacklistCollector() {
@@ -2839,7 +2858,9 @@ function updateToolButtons() {
     // Collector is active when visible (not hidden)
     const collector = document.getElementById("collector");
     const collectorVisible =
-        collector && !collector.classList.contains("hidden");
+        collectorPanelVisible &&
+        collector &&
+        !collector.classList.contains("hidden");
     if (btnCollector)
         btnCollector.classList.toggle("active", !!collectorVisible);
     const selectedPanel = document.getElementById("selected-collector");
