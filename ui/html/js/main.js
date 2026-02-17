@@ -460,6 +460,9 @@ function renderToolbarComboDropdown() {
     });
 
     updateToolbarComboActiveOption();
+    if (toolbarComboState.isOpen) {
+        positionToolbarComboDropdown();
+    }
 }
 
 function updateToolbarComboActiveOption() {
@@ -491,6 +494,69 @@ function ensureToolbarComboOptionVisible(row) {
     }
 }
 
+function getToolbarComboAnchorElement() {
+    const { root } = getToolbarComboElements();
+    if (!root) return null;
+    const input = root.querySelector(".toolbar-combo-input");
+    if (input) return input;
+    return root.querySelector(".toolbar-combo-field") || root;
+}
+
+function positionToolbarComboDropdown() {
+    if (!toolbarComboState.isOpen) return;
+    const { dropdown } = getToolbarComboElements();
+    const anchor = getToolbarComboAnchorElement();
+    if (!dropdown || !anchor) return;
+    const rect = anchor.getBoundingClientRect();
+    const viewportWidth = document.documentElement.clientWidth || window.innerWidth || 0;
+    const viewportHeight = document.documentElement.clientHeight || window.innerHeight || 0;
+    const margin = 8;
+    let width = rect.width;
+    if (!Number.isFinite(width) || width <= 0) {
+        width = 240;
+    }
+    let left = rect.left;
+    if (left < margin) {
+        left = margin;
+    }
+    const availableWidth = viewportWidth - margin - left;
+    if (availableWidth > 0) {
+        width = Math.min(width, availableWidth);
+    }
+    let top = rect.bottom + 6;
+    dropdown.style.width = `${Math.round(width)}px`;
+    dropdown.style.left = `${Math.round(left)}px`;
+    dropdown.style.top = `${Math.round(top)}px`;
+    dropdown.dataset.placement = "below";
+    requestAnimationFrame(() => {
+        if (!toolbarComboState.isOpen) return;
+        const dropdownHeight = dropdown.offsetHeight;
+        if (!dropdownHeight) return;
+        if (top + dropdownHeight > viewportHeight - margin && rect.top - 6 - dropdownHeight >= margin) {
+            const aboveTop = Math.max(rect.top - 6 - dropdownHeight, margin);
+            dropdown.style.top = `${Math.round(aboveTop)}px`;
+            dropdown.dataset.placement = "above";
+        }
+    });
+}
+
+function handleToolbarComboReposition() {
+    if (toolbarComboState.isOpen) {
+        positionToolbarComboDropdown();
+    }
+}
+
+function setupToolbarComboRepositionListeners() {
+    if (window.__toolbarComboRepositionBound) return;
+    window.addEventListener("resize", handleToolbarComboReposition);
+    window.addEventListener("scroll", handleToolbarComboReposition, true);
+    const menuEl = document.getElementById("menu");
+    if (menuEl) {
+        menuEl.addEventListener("scroll", handleToolbarComboReposition);
+    }
+    window.__toolbarComboRepositionBound = true;
+}
+
 function openToolbarComboDropdown(options = {}) {
     const { dropdown, root, input, select } = getToolbarComboElements();
     if (!dropdown || !root || !input || !select) return;
@@ -503,6 +569,7 @@ function openToolbarComboDropdown(options = {}) {
     root.classList.add("open");
     input.setAttribute("aria-expanded", "true");
     renderToolbarComboDropdown();
+    positionToolbarComboDropdown();
 }
 
 function closeToolbarComboDropdown(resetFilter = true) {
@@ -511,6 +578,7 @@ function closeToolbarComboDropdown(resetFilter = true) {
     toolbarComboState.isOpen = false;
     toolbarComboState.highlightedIndex = -1;
     dropdown.classList.add("hidden");
+    dropdown.dataset.placement = "";
     root.classList.remove("open");
     input.setAttribute("aria-expanded", "false");
     if (resetFilter) {
@@ -600,6 +668,7 @@ function initToolbarComboUI() {
     resetToolbarComboInput();
     renderToolbarComboDropdown();
     updateToolbarComboSelectedList();
+    setupToolbarComboRepositionListeners();
 
     if (input) {
         input.addEventListener("focus", () => {
@@ -849,6 +918,11 @@ function initPage() {
     window.addEventListener("DOMContentLoaded", positionBlacklistCollector);
     // Attach dummy handler for toolbar combo box
     document.addEventListener("DOMContentLoaded", function () {
+        const selectedPanel = document.getElementById("selected-collector");
+        if (selectedPanel) {
+            selectedPanel.classList.remove("hidden");
+            selectedPanel.setAttribute("aria-hidden", "false");
+        }
         initToolbarComboUI();
         initSelectedCollectorInteractions();
         const { select: combo, root: comboRoot } = getToolbarComboElements();
@@ -1600,7 +1674,7 @@ async function loadSVGFromWasm() {
     // Fetch boxes.wasm with streaming fallback
     let resp;
     try {
-        resp = await fetch(window.getBasePath() + "/wasm/boxes_0.10.1.wasm", {
+        resp = await fetch(window.getBasePath() + "/wasm/boxes_0.10.0.wasm", {
             cache: "no-cache",
         });
         if (!resp.ok) throw new Error("HTTP " + resp.status);

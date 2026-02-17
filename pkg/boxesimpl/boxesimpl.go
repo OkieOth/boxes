@@ -199,6 +199,9 @@ func copyTruncatedTags(layout *boxes.Layout, truncatedObjects map[string]Truncat
 			if len(v.truncated.Tags) > 0 {
 				for i := range v.truncated.Tags {
 					tag := v.truncated.Tags[i]
+					if strings.HasPrefix(tag, "_") {
+						continue
+					}
 					if !slices.Contains(layout.Tags, tag) {
 						layout.Tags = append(layout.Tags, tag)
 					}

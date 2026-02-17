@@ -10,7 +10,7 @@
         </script>
         <script>
             window.uiVersion = "v1";
-            window.renderingVersion = "v0.10.1";
+            window.renderingVersion = "v0.10.0";
         </script>
 
         <script src="./js/htmx_1.9.12.min.js"></script>
@@ -27,6 +27,14 @@
         <!-- Fixed menu (stays put during pan/zoom) -->
         <div id="menu-wrapper">
             <div id="menu">
+                <button
+                    id="btn-selected-panel"
+                    class="tool-btn"
+                    hx-on:click="window.svgControls.toggleSelectedCollector()"
+                    title="Toggle Selected Mixins"
+                >
+                    <i class="fa-solid fa-layer-group"></i>
+                </button>
                 <button
                     title="Zoom +"
                     hx-on:click="window.svgControls.zoom(1.2)"
@@ -68,14 +76,6 @@
                 >
                     <i class="fa-solid fa-arrows-up-down"></i>
                 </button>
-                <button
-                    id="btn-selected-panel"
-                    class="tool-btn"
-                    hx-on:click="window.svgControls.toggleSelectedCollector()"
-                    title="Toggle Selected Mixins"
-                >
-                    <i class="fa-solid fa-layer-group"></i>
-                </button>
                 <!-- Blacklist tool toggle -->
                 <button
                     id="btn-blacklist"
@@ -103,49 +103,6 @@
                 >
                     <i class="fa-solid fa-bug"></i>
                 </button>
-                <!-- Combo box as last toolbar element -->
-                <div
-                    id="toolbar-combobox"
-                    class="toolbar-combobox"
-                    style="margin-left: 8px"
-                >
-                    <div class="toolbar-combo-field">
-                        <input
-                            id="toolbar-combo-input"
-                            class="toolbar-combo-input"
-                            type="text"
-                            placeholder="Filter mixins..."
-                            autocomplete="off"
-                            role="combobox"
-                            aria-haspopup="listbox"
-                            aria-expanded="false"
-                            aria-controls="toolbar-combo-dropdown"
-                        />
-                        <button
-                            type="button"
-                            id="toolbar-combo-toggle"
-                            class="tool-btn toolbar-combo-toggle"
-                            aria-label="Show mixin options"
-                        >
-                            <i class="fa-solid fa-chevron-down"></i>
-                        </button>
-                    </div>
-                    <div
-                        id="toolbar-combo-dropdown"
-                        class="toolbar-combo-dropdown hidden"
-                        role="listbox"
-                        aria-label="Available mixins"
-                    ></div>
-                    <select
-                        id="toolbar-combo"
-                        class="toolbar-combo-select"
-                        style="display: none"
-                    >
-                        <option value="" selected>Default</option>
-                        <option value="conn1.yaml">Additional Connections 1</option>
-                        <option value="conn2.yaml">Additional Connections 2</option>
-                    </select>
-                </div>
                 <!-- Manage uploads button -->
                 <button
                     id="btn-manage-uploads"
@@ -226,6 +183,46 @@
             aria-hidden="false"
         >
             <div class="title">Selected Mixins</div>
+            <div class="selected-mixin-controls">
+                <div id="toolbar-combobox" class="toolbar-combobox">
+                    <div class="toolbar-combo-field">
+                        <input
+                            id="toolbar-combo-input"
+                            class="toolbar-combo-input"
+                            type="text"
+                            placeholder="Filter mixins..."
+                            autocomplete="off"
+                            role="combobox"
+                            aria-haspopup="listbox"
+                            aria-expanded="false"
+                            aria-controls="toolbar-combo-dropdown"
+                        />
+                        <button
+                            type="button"
+                            id="toolbar-combo-toggle"
+                            class="tool-btn toolbar-combo-toggle"
+                            aria-label="Show mixin options"
+                        >
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </button>
+                    </div>
+                    <div
+                        id="toolbar-combo-dropdown"
+                        class="toolbar-combo-dropdown hidden"
+                        role="listbox"
+                        aria-label="Available mixins"
+                    ></div>
+                    <select
+                        id="toolbar-combo"
+                        class="toolbar-combo-select"
+                        style="display: none"
+                    >
+                        <option value="" selected>Default</option>
+                        <option value="conn1.yaml">Additional Connections 1</option>
+                        <option value="conn2.yaml">Additional Connections 2</option>
+                    </select>
+                </div>
+            </div>
             <div id="selected-mixins-list"></div>
         </div>
 
