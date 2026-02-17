@@ -238,9 +238,14 @@ button.tool-btn.active {
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     padding: 10px;
-    z-index: 998;
     display: flex;
     flex-direction: column;
+}
+#selected-collector {
+    z-index: 999; /* keep selection panel above expanded items */
+}
+#collector {
+    z-index: 998;
 }
 #selected-collector.hidden,
 #collector.hidden {
