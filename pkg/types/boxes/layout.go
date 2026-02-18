@@ -1,8 +1,6 @@
 package boxes
 
 import (
-	"fmt"
-
 	"github.com/okieoth/draw.chart.things/pkg/types"
 )
 
@@ -266,9 +264,6 @@ func (l *LayoutElement) InitDimensions(c types.TextDimensionCalculator) {
 	var cW, cH, t1W, t1H, t2W, t2H, textWidth, textHeight int
 	//var yCaptionOffset, yText1Offset, yText2Offset, yInnerOffset int
 	var yInnerOffset int
-	if l.Caption == "Right Element" {
-		fmt.Println("DEBUG")
-	}
 	padding := types.GlobalPadding
 	if l.Format != nil && l.Format.Padding > 0 {
 		padding = l.Format.Padding

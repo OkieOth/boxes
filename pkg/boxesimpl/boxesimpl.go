@@ -13,9 +13,6 @@ import (
 	"github.com/okieoth/draw.chart.things/pkg/types/boxes"
 )
 
-// used in filter situations in cases where no ID are provided
-var globalId int
-
 func LoadBoxesFromFile(inputFile string) (*boxes.Boxes, error) {
 	layout, err := types.LoadInputFromFile[boxes.Boxes](inputFile)
 	if err != nil {
@@ -113,17 +110,12 @@ func addTruncated(src map[string]TruncatedInfo, dest *map[string]TruncatedInfo) 
 	}
 }
 
-func getNewId() string {
-	globalId++
-	return fmt.Sprintf("xxx_%d", globalId)
-}
-
 func truncBoxes(b boxes.Layout, currentDepth, maxDepth int, expanded, blacklisted []string) (boxes.Layout, map[string]TruncatedInfo) {
 	truncatedBoxes := make(map[string]TruncatedInfo, 0)
 	if (currentDepth >= maxDepth) && (!b.Expand) && (!isRelatedToId(b, expanded)) {
 		// possible removed connections to this object
 		if b.Id == "" {
-			b.Id = getNewId()
+			b.Id = boxes.GetNewId()
 		}
 		collectTruncatedFromCont(b.Horizontal, b.Id, &truncatedBoxes)
 		collectTruncatedFromCont(b.Vertical, b.Id, &truncatedBoxes)
@@ -137,7 +129,7 @@ func truncBoxes(b boxes.Layout, currentDepth, maxDepth int, expanded, blackliste
 				if blacklisted != nil && id != "" && slices.Contains(blacklisted, id) {
 					// possible removed connections to this object
 					if b.Id == "" {
-						b.Id = getNewId()
+						b.Id = boxes.GetNewId()
 					}
 					collectTruncated(b.Horizontal[i], b.Id, &truncatedBoxes)
 					continue
@@ -155,7 +147,7 @@ func truncBoxes(b boxes.Layout, currentDepth, maxDepth int, expanded, blackliste
 				if blacklisted != nil && id != "" && slices.Contains(blacklisted, id) {
 					// possible removed connections to this object
 					if b.Id == "" {
-						b.Id = getNewId()
+						b.Id = boxes.GetNewId()
 					}
 					collectTruncated(b.Vertical[i], b.Id, &truncatedBoxes)
 					continue

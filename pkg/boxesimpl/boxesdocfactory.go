@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"slices"
-	"strings"
 
 	"github.com/okieoth/draw.chart.things/pkg/types"
 	"github.com/okieoth/draw.chart.things/pkg/types/boxes"
@@ -302,7 +301,7 @@ func initLayoutElement(l *boxes.Layout, doc *boxes.BoxesDocument, b *boxes.Boxes
 	}
 	if l.Id == "" {
 		if l.Caption != "" {
-			l.Id = strings.ToLower(l.Caption)
+			l.Id = boxes.GetNewId()
 		}
 	}
 	var text1, text2 string
