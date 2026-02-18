@@ -129,6 +129,7 @@ note top: container to extend the layouts\nof a given layout element\nvia mixins
 
 
 class "**FormatVariation**" as FormatVariation {
+        StringType formatRef
         Format format
         IntegerType priority
 }
@@ -350,6 +351,7 @@ LayoutMixin "0" *-- "n" Layout
 
     
     
+
 FormatVariation  *--  Format
 
 

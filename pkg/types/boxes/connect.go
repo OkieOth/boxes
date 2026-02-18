@@ -329,7 +329,6 @@ func (doc *BoxesDocument) connectImpl(layout *LayoutElement) {
 			c := layout.Connections[i]
 			srcId, destId := layout.Id, c.DestId
 			if path, _, ok := doc.DijkstraPath(srcId, destId); ok {
-				//fmt.Printf("Found path: src=%s, dest=%s, dist=%d\n", srcId, destId, dist)
 				doc.createAConnectionPath(path, &c, srcId, destId)
 			} else {
 				fmt.Printf("Couldn't calculate path: src=%s, dest=>%s<\n", srcId, destId)

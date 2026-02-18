@@ -46,9 +46,9 @@ func TestDrawBoxesFromFile(t *testing.T) {
 	tests := []struct {
 		inputFile string
 	}{
-		// {
-		// 	inputFile:  "../../resources/examples_boxes/simple_box.yaml",
-		// },
+		{
+			inputFile: "../../resources/examples_boxes/simple_box.yaml",
+		},
 		{
 			inputFile: "../../resources/examples_boxes/simple_diamond.yaml",
 		}}
@@ -240,12 +240,12 @@ func TestDrawBoxesForUiComments(t *testing.T) {
 		depth        int
 		hideComments bool
 	}{
-		// {
-		// 	inputFile:    "../../resources/examples_boxes/boxes_random.yaml",
-		// 	outputFile:   "../../temp/boxes_random_with_notes.svg",
-		// 	depth:        2,
-		// 	hideComments: false,
-		// },
+		{
+			inputFile:    "../../resources/examples_boxes/boxes_random.yaml",
+			outputFile:   "../../temp/boxes_random_with_notes.svg",
+			depth:        2,
+			hideComments: false,
+		},
 		{
 			inputFile:    "../../resources/examples_boxes/boxes_random.yaml",
 			outputFile:   "../../temp/boxes_random_no_notes.svg",

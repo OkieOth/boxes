@@ -308,7 +308,7 @@ func (doc *BoxesDocument) DrawLegend(drawing types.Drawing, c types.TextDimensio
 				Color: &lineC,
 			}
 			currentY += (2 * types.GlobalPadding)
-			drawing.DrawLine(currentX, currentY-5, currentX+doc.Boxes.Width, currentY, lineFormat)
+			drawing.DrawLine(currentX, currentY-10, currentX+doc.Boxes.Width, currentY-10, lineFormat)
 			for i := range doc.Legend.Entries {
 				e := doc.Legend.Entries[i]
 				if e.Format == "" {

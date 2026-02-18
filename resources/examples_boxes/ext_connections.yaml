@@ -1,3 +1,9 @@
+legend:
+  entries:
+    - text: Ext Connections
+      format: ext1
+    - text: Another entry
+      format: ext1
 connections:
   r4_1:
     connections:
@@ -12,3 +18,9 @@ formats:
     line:
       width: 2
       color: pink
+  ext1:
+    line:
+      width: 1
+      color: black
+    fill:
+      color: blue

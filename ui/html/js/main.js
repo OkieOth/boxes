@@ -258,6 +258,8 @@ let blacklist = [];
 
 // NEW: global additional mixins for persistence
 let mixins = [];
+let collectorPanelVisible = false;
+let collectorVisibilityGuardAttached = false;
 
 // --- Editable toolbar combobox state ---
 const toolbarComboState = {
@@ -460,6 +462,9 @@ function renderToolbarComboDropdown() {
     });
 
     updateToolbarComboActiveOption();
+    if (toolbarComboState.isOpen) {
+        positionToolbarComboDropdown();
+    }
 }
 
 function updateToolbarComboActiveOption() {
@@ -491,6 +496,69 @@ function ensureToolbarComboOptionVisible(row) {
     }
 }
 
+function getToolbarComboAnchorElement() {
+    const { root } = getToolbarComboElements();
+    if (!root) return null;
+    const input = root.querySelector(".toolbar-combo-input");
+    if (input) return input;
+    return root.querySelector(".toolbar-combo-field") || root;
+}
+
+function positionToolbarComboDropdown() {
+    if (!toolbarComboState.isOpen) return;
+    const { dropdown } = getToolbarComboElements();
+    const anchor = getToolbarComboAnchorElement();
+    if (!dropdown || !anchor) return;
+    const rect = anchor.getBoundingClientRect();
+    const viewportWidth = document.documentElement.clientWidth || window.innerWidth || 0;
+    const viewportHeight = document.documentElement.clientHeight || window.innerHeight || 0;
+    const margin = 8;
+    let width = rect.width;
+    if (!Number.isFinite(width) || width <= 0) {
+        width = 240;
+    }
+    let left = rect.left;
+    if (left < margin) {
+        left = margin;
+    }
+    const availableWidth = viewportWidth - margin - left;
+    if (availableWidth > 0) {
+        width = Math.min(width, availableWidth);
+    }
+    let top = rect.bottom + 6;
+    dropdown.style.width = `${Math.round(width)}px`;
+    dropdown.style.left = `${Math.round(left)}px`;
+    dropdown.style.top = `${Math.round(top)}px`;
+    dropdown.dataset.placement = "below";
+    requestAnimationFrame(() => {
+        if (!toolbarComboState.isOpen) return;
+        const dropdownHeight = dropdown.offsetHeight;
+        if (!dropdownHeight) return;
+        if (top + dropdownHeight > viewportHeight - margin && rect.top - 6 - dropdownHeight >= margin) {
+            const aboveTop = Math.max(rect.top - 6 - dropdownHeight, margin);
+            dropdown.style.top = `${Math.round(aboveTop)}px`;
+            dropdown.dataset.placement = "above";
+        }
+    });
+}
+
+function handleToolbarComboReposition() {
+    if (toolbarComboState.isOpen) {
+        positionToolbarComboDropdown();
+    }
+}
+
+function setupToolbarComboRepositionListeners() {
+    if (window.__toolbarComboRepositionBound) return;
+    window.addEventListener("resize", handleToolbarComboReposition);
+    window.addEventListener("scroll", handleToolbarComboReposition, true);
+    const menuEl = document.getElementById("menu");
+    if (menuEl) {
+        menuEl.addEventListener("scroll", handleToolbarComboReposition);
+    }
+    window.__toolbarComboRepositionBound = true;
+}
+
 function openToolbarComboDropdown(options = {}) {
     const { dropdown, root, input, select } = getToolbarComboElements();
     if (!dropdown || !root || !input || !select) return;
@@ -503,6 +571,7 @@ function openToolbarComboDropdown(options = {}) {
     root.classList.add("open");
     input.setAttribute("aria-expanded", "true");
     renderToolbarComboDropdown();
+    positionToolbarComboDropdown();
 }
 
 function closeToolbarComboDropdown(resetFilter = true) {
@@ -511,6 +580,7 @@ function closeToolbarComboDropdown(resetFilter = true) {
     toolbarComboState.isOpen = false;
     toolbarComboState.highlightedIndex = -1;
     dropdown.classList.add("hidden");
+    dropdown.dataset.placement = "";
     root.classList.remove("open");
     input.setAttribute("aria-expanded", "false");
     if (resetFilter) {
@@ -600,6 +670,7 @@ function initToolbarComboUI() {
     resetToolbarComboInput();
     renderToolbarComboDropdown();
     updateToolbarComboSelectedList();
+    setupToolbarComboRepositionListeners();
 
     if (input) {
         input.addEventListener("focus", () => {
@@ -847,8 +918,15 @@ function installCreateSvgExtSpinnerWrapper() {
 function initPage() {
     window.addEventListener("resize", positionBlacklistCollector);
     window.addEventListener("DOMContentLoaded", positionBlacklistCollector);
+    setCollectorPanelVisibility(false);
+    initCollectorVisibilityGuard();
     // Attach dummy handler for toolbar combo box
     document.addEventListener("DOMContentLoaded", function () {
+        const selectedPanel = document.getElementById("selected-collector");
+        if (selectedPanel) {
+            selectedPanel.classList.remove("hidden");
+            selectedPanel.setAttribute("aria-hidden", "false");
+        }
         initToolbarComboUI();
         initSelectedCollectorInteractions();
         const { select: combo, root: comboRoot } = getToolbarComboElements();
@@ -1161,14 +1239,6 @@ function initPage() {
                 });
             }
 
-            // Ensure collector is visible if hidden
-            const collector = document.getElementById("collector");
-            if (collector && collector.classList.contains("hidden")) {
-                collector.classList.remove("hidden");
-                collector.setAttribute("aria-hidden", "false");
-                updateToolButtons();
-            }
-
             // Simple highlight: toggle a data-selected flag and adjust stroke
             const selected = el.getAttribute("data-selected") === "true";
             el.setAttribute("data-selected", selected ? "false" : "true");
@@ -1340,10 +1410,6 @@ function initPage() {
                 state.ty += dy;
                 applyTransform();
             },
-            reset() {
-                state = { scale: 1, tx: 0, ty: 0 };
-                applyTransform();
-            },
             save() {
                 const svg = getSvg();
                 if (!svg) return;
@@ -1397,14 +1463,7 @@ function initPage() {
                 updateToolButtons();
             },
             toggleCollector() {
-                const box = document.getElementById("collector");
-                if (!box) return;
-                const hidden = box.classList.toggle("hidden");
-                box.setAttribute("aria-hidden", hidden ? "true" : "false");
-                updateToolButtons();
-                // NEW: when showing, refit badges (sizes are measurable again)
-                if (!hidden) requestAnimationFrame(refitAllBadges);
-                positionBlacklistCollector();
+                setCollectorPanelVisibility(!collectorPanelVisible);
             },
             toggleSelectedCollector() {
                 const panel = document.getElementById("selected-collector");
@@ -1600,7 +1659,7 @@ async function loadSVGFromWasm() {
     // Fetch boxes.wasm with streaming fallback
     let resp;
     try {
-        resp = await fetch(window.getBasePath() + "/wasm/boxes.wasm", {
+        resp = await fetch(window.getBasePath() + "/wasm/boxes_0.10.0.wasm", {
             cache: "no-cache",
         });
         if (!resp.ok) throw new Error("HTTP " + resp.status);
@@ -2471,6 +2530,36 @@ function findAncestorBadgesOf(childHid) {
     });
 }
 
+function setCollectorPanelVisibility(visible) {
+    collectorPanelVisible = !!visible;
+    const box = document.getElementById("collector");
+    if (!box) return;
+    const shouldHide = !collectorPanelVisible;
+    box.classList.toggle("hidden", shouldHide);
+    box.setAttribute("aria-hidden", shouldHide ? "true" : "false");
+    if (!shouldHide) {
+        requestAnimationFrame(refitAllBadges);
+    }
+    positionBlacklistCollector();
+    updateToolButtons();
+}
+
+function initCollectorVisibilityGuard() {
+    if (collectorVisibilityGuardAttached) return;
+    const box = document.getElementById("collector");
+    if (!box) return;
+    const observer = new MutationObserver(() => {
+        if (!collectorPanelVisible && !box.classList.contains("hidden")) {
+            box.classList.add("hidden");
+            box.setAttribute("aria-hidden", "true");
+            positionBlacklistCollector();
+            updateToolButtons();
+        }
+    });
+    observer.observe(box, { attributes: true, attributeFilter: ["class"] });
+    collectorVisibilityGuardAttached = true;
+}
+
 // Pan/zoom via CSS transform on an HTML wrapper (#svg-stage) to avoid SVG viewport clipping.
 // Ensure left-side panels (selected, expanded, blacklist) stack without overlapping
 function positionBlacklistCollector() {
@@ -2769,7 +2858,9 @@ function updateToolButtons() {
     // Collector is active when visible (not hidden)
     const collector = document.getElementById("collector");
     const collectorVisible =
-        collector && !collector.classList.contains("hidden");
+        collectorPanelVisible &&
+        collector &&
+        !collector.classList.contains("hidden");
     if (btnCollector)
         btnCollector.classList.toggle("active", !!collectorVisible);
     const selectedPanel = document.getElementById("selected-collector");

@@ -1,3 +1,9 @@
+# v0.10.0
+## Boxes
+* sticky tags that are not copied in truncated layouts
+* enable format references in format variations
+* UI and WASM versions display in the UI
+
 # v0.9.0
 ## Boxes
 * format adjustments based on layout tags

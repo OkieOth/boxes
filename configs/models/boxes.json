@@ -334,6 +334,10 @@
     "FormatVariation": {
       "type": "object",
       "properties": {
+        "formatRef": {
+          "description": "fill this in case the format is specified outside",
+          "type": "string"
+        },
         "format": {
           "$ref": "#/definitions/Format"
         },

@@ -17,7 +17,7 @@ func TestLoadExternalFormats(t *testing.T) {
 	require.Nil(t, err)
 	require.NotNil(t, additionalFormats)
 
-	require.Len(t, additionalFormats.Formats, 0)
+	require.Len(t, additionalFormats.Formats, 1)
 	require.Len(t, additionalFormats.Images, 1)
 
 	img, ok := additionalFormats.Images["smilie_01_43"]

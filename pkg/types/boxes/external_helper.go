@@ -4,10 +4,17 @@ import (
 	"fmt"
 	"maps"
 	"slices"
-	"strings"
 
 	"github.com/okieoth/draw.chart.things/pkg/types"
 )
+
+// used in filter situations in cases where no ID are provided
+var GlobalId int
+
+func GetNewId() string {
+	GlobalId++
+	return fmt.Sprintf("id_xxx_%d", GlobalId)
+}
 
 func hasConnectionById(connections []Connection, destId string) bool {
 	return slices.ContainsFunc(connections, func(c Connection) bool {
@@ -36,13 +43,13 @@ func (b *Boxes) mixInConnectionsImpl(l *Layout, additional map[string]Connection
 				}
 			}
 		}
-		if l.Caption != "" {
-			if cc, ok := additional[l.Caption]; ok {
-				for _, c := range cc.Connections {
-					if !hasConnectionByCapt(l.Connections, c.Dest) {
-						c.DestId = b.FindBoxWithCaption(c.Dest)
-						l.Connections = append(l.Connections, c)
-					}
+	}
+	if l.Caption != "" {
+		if cc, ok := additional[l.Caption]; ok {
+			for _, c := range cc.Connections {
+				if !hasConnectionByCapt(l.Connections, c.Dest) {
+					c.DestId = b.FindBoxWithCaption(c.Dest)
+					l.Connections = append(l.Connections, c)
 				}
 			}
 		}
@@ -94,7 +101,7 @@ func (b *Boxes) initIdForMixinsInCase(mixin []Layout) bool {
 		m := &mixin[i]
 		if m.Id == "" {
 			ret = true
-			m.Id = strings.ToLower(m.Caption)
+			m.Id = GetNewId()
 		}
 	}
 	return ret

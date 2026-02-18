@@ -1,3 +1,14 @@
+legend:
+  entries:
+    - text: I am from ext_format
+      format: ext2
+formats:
+  ext2:
+    line:
+      width: 1
+      color: purple
+    fill:
+      color: pink
 images:
   smilie_01_43:
     width: 16
