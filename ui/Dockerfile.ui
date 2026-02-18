@@ -7,6 +7,7 @@ RUN go mod download
 
 RUN mkdir temp
 
+COPY Makefile ./
 COPY cmd ./cmd
 COPY pkg ./pkg
 COPY wasm ./wasm
@@ -15,7 +16,7 @@ COPY resources ./resources
 
 RUN go test -v ./...
 
-RUN GOOS=js GOARCH=wasm go build -o ui/wasm/boxes.wasm wasm/main.go
+RUN make build-wasm
 
 FROM nginx:stable-alpine
 
