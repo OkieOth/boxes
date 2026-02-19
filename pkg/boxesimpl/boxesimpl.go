@@ -283,7 +283,40 @@ func FilterBoxes(layout boxes.Boxes, defaultDepth int, expanded, blacklisted []s
 	b, truncatedObjects := truncBoxes(layout.Boxes, 0, defaultDepth, expanded, blacklisted)
 	adjustTruncated(&b, truncatedObjects)
 	filteredBoxes.Boxes = b
+	adjustOverlaysWithTruncated(filteredBoxes, truncatedObjects)
 	return *filteredBoxes
+}
+
+func adjustOverlaysWithTruncated(filteredBoxes *boxes.Boxes, truncatedObjects map[string]TruncatedInfo) {
+	for i := range filteredBoxes.Overlays {
+		o := &filteredBoxes.Overlays[i]
+		newOverlays := make(map[string]float64, 0)
+		for k, v := range o.Layouts {
+			foundId := getTruncatedObject(k, truncatedObjects)
+			if foundId == "" {
+				// the layout elem still exist ...
+				if existing, ok := newOverlays[k]; ok {
+					v += existing
+				}
+				newOverlays[k] = v
+			} else {
+				if existing, ok := newOverlays[foundId]; ok {
+					v += existing
+				}
+				newOverlays[foundId] = v
+			}
+		}
+		o.Layouts = newOverlays
+	}
+}
+
+func getTruncatedObject(text string, truncatedObjects map[string]TruncatedInfo) string {
+	for _, v := range truncatedObjects {
+		if v.truncated.Id == text || v.truncated.Caption == text {
+			return v.newId
+		}
+	}
+	return ""
 }
 
 func DrawBoxesFilteredExt(

@@ -153,6 +153,7 @@ class "**DocOverlay**" as DocOverlay {
         NumberType refValue
         NumberType centerXOffset
         NumberType centerYOffset
+        BooleanType printValue
         Map<OverlayEntry> layouts
         OverlayRadiusDef radiusDefs
         OverlayFormatDef formats
@@ -456,6 +457,7 @@ CommentContainer  *--  CommentFormat
 
 
     
+
 
 
 

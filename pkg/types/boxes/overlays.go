@@ -61,14 +61,16 @@ func (doc *BoxesDocument) initOverlayForLayout(l *LayoutElement, overlay *DocOve
 }
 
 func (doc *BoxesDocument) initOverlayXY(l *LayoutElement, overlay *DocOverlay, overlayEntry *OverlayEntry) {
-	overlayEntry.X = l.X + (l.Width / 2)
-	overlayEntry.Y = l.Y + (l.Height / 2)
+	halfWidth := (l.Width / 2)
+	halfHeight := (l.Height / 2)
+	overlayEntry.X = l.X + halfWidth
+	overlayEntry.Y = l.Y + halfHeight
 	if overlay.CenterXOffset != 0 {
-		diff := float64((l.CenterX - l.X)) * overlay.CenterXOffset
+		diff := float64(halfWidth) * overlay.CenterXOffset
 		overlayEntry.X += int(diff)
 	}
 	if overlay.CenterYOffset != 0 {
-		diff := float64((l.CenterY - l.Y)) * overlay.CenterYOffset
+		diff := float64(halfHeight) * overlay.CenterYOffset
 		overlayEntry.Y += int(diff)
 	}
 }
@@ -99,8 +101,6 @@ func (doc *BoxesDocument) initOverlayFormat(overlay *DocOverlay, overlayEntry *O
 	if overlay.Formats.Default != "" {
 		f, ok := doc.Formats[overlay.Formats.Default]
 		if !ok {
-			f = doc.getDefaultOverlayFormat()
-		} else {
 			f = doc.getDefaultOverlayFormat()
 		}
 		format = f

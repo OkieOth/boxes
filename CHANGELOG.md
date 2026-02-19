@@ -1,3 +1,7 @@
+# v0.11.0
+## Boxes
+* imroved overlay handling
+
 # v0.10.0
 ## Boxes
 * sticky tags that are not copied in truncated layouts
