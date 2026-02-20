@@ -1,3 +1,8 @@
+# v0.12.0
+## Boxes
+* imroved connection routing
+* UI got an own comment panel to improve the comment display
+
 # v0.11.0
 ## Boxes
 * imroved overlay handling

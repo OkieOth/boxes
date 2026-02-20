@@ -453,6 +453,9 @@ func (l *LayoutElement) adjustToRaster(value int) int {
 
 func (l *LayoutElement) Center() {
 	l.CenterX = l.X + (l.Width / 2)
+	if l.WidthTextBox != nil {
+		*l.XTextBox = l.X + ((l.Width - *l.WidthTextBox) / 2)
+	}
 	l.CenterY = l.Y + (l.Height / 2)
 	l.centerHorizontalElems()
 	l.centerVerticalElems()

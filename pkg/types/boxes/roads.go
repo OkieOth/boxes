@@ -8,7 +8,7 @@ import (
 
 // traces the document and finds all reasonable "roads" to connect
 func (doc *BoxesDocument) InitRoads() {
-	doc.initRoadsImpl(&doc.Boxes, DefRoadType_All)
+	doc.initRoadsImpl(&doc.Boxes, DefRoadType_All, true, true)
 	// sort roads
 	sort.Slice(doc.VerticalRoads, func(i, j int) bool {
 		return doc.VerticalRoads[i].StartX < doc.VerticalRoads[j].StartX
@@ -77,7 +77,7 @@ func (doc *BoxesDocument) addHorizontalRoad(line ConnectionLine) {
 }
 
 func (doc *BoxesDocument) pointHasCollision(x, y int, startElem *LayoutElement, isForHorizontalLine bool) bool {
-	switch doc.checkColl(x, y, &doc.Boxes, startElem, nil, isForHorizontalLine) {
+	switch doc.checkColl(x, y, &doc.Boxes, startElem, isForHorizontalLine) {
 	case CollisionType_WithElem:
 		return true
 	case CollisionType_WithSurroundings:
@@ -92,12 +92,13 @@ func (doc *BoxesDocument) roadUp(line *ConnectionLine, startElem *LayoutElement)
 		line.EndY = 0
 		return
 	}
-	switch doc.checkColl(line.EndX, line.EndY, &doc.Boxes, startElem, nil, false) {
+	switch doc.checkColl(line.EndX, line.EndY, &doc.Boxes, startElem, false) {
 	case CollisionType_WithElem:
-		line.EndY += 2 * types.RasterSize
+		line.EndY += types.RasterSize
 		return
 	case CollisionType_WithSurroundings:
-		line.EndY += types.RasterSize
+		line.EndY -= types.RasterSize
+		doc.roadUp(line, startElem)
 		return
 	default:
 		line.EndY -= types.RasterSize
@@ -110,12 +111,13 @@ func (doc *BoxesDocument) roadDown(line *ConnectionLine, startElem *LayoutElemen
 		line.EndY = doc.Height
 		return
 	}
-	switch doc.checkColl(line.EndX, line.EndY, &doc.Boxes, startElem, nil, false) {
+	switch doc.checkColl(line.EndX, line.EndY, &doc.Boxes, startElem, false) {
 	case CollisionType_WithElem:
-		line.EndY -= 2 * types.RasterSize
+		line.EndY -= types.RasterSize
 		return
 	case CollisionType_WithSurroundings:
-		line.EndY -= types.RasterSize
+		line.EndY += types.RasterSize
+		doc.roadDown(line, startElem)
 		return
 	default:
 		line.EndY += types.RasterSize
@@ -128,12 +130,12 @@ func (doc *BoxesDocument) roadLeft(line *ConnectionLine, startElem *LayoutElemen
 		line.EndX = 0
 		return
 	}
-	switch doc.checkColl(line.EndX, line.EndY, &doc.Boxes, startElem, nil, true) {
+	switch doc.checkColl(line.EndX, line.EndY, &doc.Boxes, startElem, true) {
 	case CollisionType_WithElem:
-		line.EndX += 2 * types.RasterSize
+		line.EndX += types.RasterSize
 		return
 	case CollisionType_WithSurroundings:
-		line.EndX += types.RasterSize // bug???
+		line.EndX -= types.RasterSize // bug???
 		return
 	default:
 		line.EndX -= types.RasterSize
@@ -146,12 +148,12 @@ func (doc *BoxesDocument) roadRight(line *ConnectionLine, startElem *LayoutEleme
 		line.EndX = doc.Width
 		return
 	}
-	switch doc.checkColl(line.EndX, line.EndY, &doc.Boxes, startElem, nil, true) {
+	switch doc.checkColl(line.EndX, line.EndY, &doc.Boxes, startElem, true) {
 	case CollisionType_WithElem:
-		line.EndX -= 2 * types.RasterSize
+		line.EndX -= types.RasterSize
 		return
 	case CollisionType_WithSurroundings:
-		line.EndX -= types.RasterSize
+		line.EndX += types.RasterSize
 		return
 	default:
 		line.EndX += types.RasterSize
@@ -202,7 +204,7 @@ const (
 	DefRoadType_None
 )
 
-func (doc *BoxesDocument) initRoadsImpl(elem *LayoutElement, defRoadType DefRoadType) {
+func (doc *BoxesDocument) initRoadsImpl(elem *LayoutElement, defRoadType DefRoadType, needsRight, needsBottom bool) {
 	if elem.Caption == "" && elem.Text1 == "" && elem.Text2 == "" {
 		defRoadType = DefRoadType_None
 	}
@@ -236,7 +238,7 @@ func (doc *BoxesDocument) initRoadsImpl(elem *LayoutElement, defRoadType DefRoad
 		}
 		defRoadType = DefRoadType_All
 	}
-	if defRoadType == DefRoadType_All {
+	if needsRight { // DEBUG, TODO: defRoadType == DefRoadType_All {
 		// draw the line parallel to the right border, till the first collision, up and down
 		if !doc.pointHasCollision(elem.X+elem.Width+stepSize, elem.CenterY, elem, false) {
 			upRoad := newConnectionLine(elem.X+elem.Width+stepSize, elem.CenterY, elem.X+elem.Width+stepSize, elem.Y-stepSize)
@@ -258,6 +260,7 @@ func (doc *BoxesDocument) initRoadsImpl(elem *LayoutElement, defRoadType DefRoad
 			doc.addVerticalRoad(l)
 		}
 	}
+
 	if defRoadType == DefRoadType_All {
 		// draw the line parallel to the top border, till the first collision, left and right
 		if !doc.pointHasCollision(elem.CenterX, elem.Y-stepSize, elem, true) {
@@ -269,7 +272,7 @@ func (doc *BoxesDocument) initRoadsImpl(elem *LayoutElement, defRoadType DefRoad
 			doc.addHorizontalRoad(l)
 		}
 	}
-	if defRoadType == DefRoadType_Vertical || defRoadType == DefRoadType_All {
+	if needsBottom { // DEBUG, TODO: if defRoadType == DefRoadType_Vertical || defRoadType == DefRoadType_All {
 		// draw the line parallel to the bottom border, till the first collision, left and right
 		if !doc.pointHasCollision(elem.CenterX, elem.Y+elem.Height+stepSize, elem, true) {
 			leftRoad := newConnectionLine(elem.CenterX, elem.Y+elem.Height+stepSize, elem.X-stepSize, elem.Y+elem.Height+stepSize)
@@ -281,15 +284,19 @@ func (doc *BoxesDocument) initRoadsImpl(elem *LayoutElement, defRoadType DefRoad
 		}
 	}
 	if elem.Vertical != nil {
-		for i := range len(elem.Vertical.Elems) {
+		length := len(elem.Vertical.Elems)
+		lastIndex := length - 1
+		for i := range length {
 			defRoadType := DefRoadType_All
-			doc.initRoadsImpl(&elem.Vertical.Elems[i], defRoadType)
+			doc.initRoadsImpl(&elem.Vertical.Elems[i], defRoadType, true, i == lastIndex)
 		}
 	}
 	if elem.Horizontal != nil {
+		length := len(elem.Horizontal.Elems)
+		lastIndex := length - 1
 		for i := range len(elem.Horizontal.Elems) {
 			defRoadType := DefRoadType_All
-			doc.initRoadsImpl(&elem.Horizontal.Elems[i], defRoadType)
+			doc.initRoadsImpl(&elem.Horizontal.Elems[i], defRoadType, i == lastIndex, true)
 		}
 	}
 }
