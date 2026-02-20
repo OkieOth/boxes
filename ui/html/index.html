@@ -10,7 +10,7 @@
         </script>
         <script>
             window.uiVersion = "v1";
-            window.renderingVersion = "v0.11.0";
+            window.renderingVersion = "v0.12.0";
         </script>
 
         <script src="./js/htmx_1.9.12.min.js"></script>
@@ -114,6 +114,16 @@
                     style="margin-left: 8px"
                 >
                     <i class="fa-solid fa-comment-slash"></i>
+                </button>
+                <!-- Comment legend panel toggle -->
+                <button
+                    id="btn-comment-legend"
+                    class="tool-btn"
+                    title="Toggle Comment Legend Panel"
+                    style="margin-left: 8px"
+                    hx-on:click="window.svgControls.toggleCommentLegendPanel()"
+                >
+                    <i class="fa-solid fa-comment-dots"></i>
                 </button>
                 <!-- Permalink button -->
                 <button
@@ -239,6 +249,17 @@
         >
             <div class="title">Blacklisted Items</div>
             <div id="blacklist-list"></div>
+        </div>
+
+        <!-- Comment legend floating panel (right side) -->
+        <div
+            id="comment-legend-panel"
+            class="hidden"
+            aria-live="polite"
+            aria-hidden="true"
+        >
+            <div class="title">Comment Legend</div>
+            <div id="comment-legend-list" class="comment-legend-list"></div>
         </div>
 
         <div id="canvas">
@@ -521,7 +542,7 @@
                     });
                     const commentNodes = svg.querySelectorAll("circle, text");
                     commentNodes.forEach((node) => {
-                        if (!getGroupClass(node.classList)) return;
+                        if (!getGroupClass(node)) return;
                         const isHighlighted = node.classList.contains("highlight-group");
                         if (shouldDim && !isHighlighted) {
                             node.classList.add("connection-comment-dimmed");
@@ -531,8 +552,30 @@
                     });
                 }
 
-                function getGroupClass(classList) {
-                    for (const c of classList) {
+                function getGroupClass(classListOrElement) {
+                    if (!classListOrElement) return null;
+                    const classes = [];
+                    if (classListOrElement instanceof DOMTokenList) {
+                        classes.push(...classListOrElement);
+                    } else if (classListOrElement.classList) {
+                        classes.push(...classListOrElement.classList);
+                    }
+                    const raw =
+                        (classListOrElement.getAttribute &&
+                            classListOrElement.getAttribute("class")) ||
+                        (classListOrElement.className &&
+                            typeof classListOrElement.className.baseVal === "string"
+                            ? classListOrElement.className.baseVal
+                            : typeof classListOrElement.className === "string"
+                              ? classListOrElement.className
+                              : "");
+                    if (raw) {
+                        raw
+                            .split(/\s+/)
+                            .filter(Boolean)
+                            .forEach((c) => classes.push(c));
+                    }
+                    for (const c of classes) {
                         if (/^conLine_\d+$/.test(c)) return c;
                     }
                     return null;
@@ -564,6 +607,7 @@
                 function addHighlight(groupClass) {
                     const svg = canvas.querySelector("svg");
                     if (!svg || !groupClass) return;
+                    if (activeGroupHighlights.has(groupClass)) return;
                     const lines = svg.querySelectorAll(
                         `line.connection.${groupClass}`,
                     );
@@ -582,11 +626,15 @@
                     }
                     activeGroupHighlights.add(groupClass);
                     updateNonHighlightedConnections();
+                    if (typeof window.highlightCommentLegendByGroupClass === "function") {
+                        window.highlightCommentLegendByGroupClass(groupClass);
+                    }
                 }
 
                 function removeHighlight(groupClass) {
                     const svg = canvas.querySelector("svg");
                     if (!svg || !groupClass) return;
+                    if (!activeGroupHighlights.has(groupClass)) return;
                     const lines = svg.querySelectorAll(
                         `line.connection.${groupClass}.highlight-group`,
                     );
@@ -609,6 +657,9 @@
                     }
                     activeGroupHighlights.delete(groupClass);
                     updateNonHighlightedConnections();
+                    if (typeof window.unhighlightCommentLegendByGroupClass === "function") {
+                        window.unhighlightCommentLegendByGroupClass(groupClass);
+                    }
                 }
 
                 function isHighlightableTarget(el) {
@@ -625,14 +676,14 @@
                 canvas.addEventListener("mouseover", function (e) {
                     const t = e.target;
                     if (!isHighlightableTarget(t)) return;
-                    const grp = getGroupClass(t.classList);
+                    const grp = getGroupClass(t);
                     if (grp) addHighlight(grp);
                 });
 
                 canvas.addEventListener("mouseout", function (e) {
                     const t = e.target;
                     if (!isHighlightableTarget(t)) return;
-                    const grp = getGroupClass(t.classList);
+                    const grp = getGroupClass(t);
                     const rt = e.relatedTarget;
                     const movingWithinGroup =
                         rt &&
@@ -648,6 +699,13 @@
                     activeGroupHighlights.clear();
                     updateNonHighlightedConnections();
                 });
+
+                window.highlightConnectionGroup = function (groupClass) {
+                    addHighlight(groupClass);
+                };
+                window.unhighlightConnectionGroup = function (groupClass) {
+                    removeHighlight(groupClass);
+                };
             })();
 
             // Hide Comments toggle: button logs current state to console and notifies stub

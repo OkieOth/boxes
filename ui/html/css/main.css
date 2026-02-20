@@ -365,6 +365,76 @@ button.tool-btn.active {
     max-width: 100%;
 }
 
+/* Comment legend floating panel */
+#comment-legend-panel {
+    position: fixed;
+    top: 56px;
+    right: 12px;
+    bottom: 160px;
+    width: 280px;
+    display: flex;
+    flex-direction: column;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 12px;
+    z-index: 1001;
+}
+#comment-legend-panel.hidden {
+    display: none;
+}
+#comment-legend-panel .title {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 8px;
+    color: #333;
+}
+.comment-legend-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+}
+.comment-legend-item {
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 8px;
+    padding: 8px 10px;
+    background: #f7fbff;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.comment-legend-item-active {
+    border-color: #0a84ff;
+    box-shadow: 0 0 0 2px rgba(10, 132, 255, 0.15);
+}
+.comment-legend-marker {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: #0a3d62;
+}
+.comment-legend-label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.comment-legend-body {
+    font-size: 13px;
+    color: #333;
+    line-height: 1.3;
+}
+.comment-legend-empty {
+    font-size: 12px;
+    color: #666;
+    font-style: italic;
+}
+
 /* Spinner overlay */
 #spinner {
     position: fixed;

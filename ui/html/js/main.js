@@ -260,6 +260,12 @@ let blacklist = [];
 let mixins = [];
 let collectorPanelVisible = false;
 let collectorVisibilityGuardAttached = false;
+let commentLegendPanelVisible = false;
+const commentLegendState = {
+    byNodeId: new Map(),
+    byGroupClass: new Map(),
+    itemActiveCount: new Map(),
+};
 
 // --- Editable toolbar combobox state ---
 const toolbarComboState = {
@@ -919,6 +925,7 @@ function initPage() {
     window.addEventListener("resize", positionBlacklistCollector);
     window.addEventListener("DOMContentLoaded", positionBlacklistCollector);
     setCollectorPanelVisibility(false);
+    setCommentLegendPanelVisibility(false);
     initCollectorVisibilityGuard();
     // Attach dummy handler for toolbar combo box
     document.addEventListener("DOMContentLoaded", function () {
@@ -1465,6 +1472,9 @@ function initPage() {
             toggleCollector() {
                 setCollectorPanelVisibility(!collectorPanelVisible);
             },
+            toggleCommentLegendPanel() {
+                setCommentLegendPanelVisibility(!commentLegendPanelVisible);
+            },
             toggleSelectedCollector() {
                 const panel = document.getElementById("selected-collector");
                 if (!panel) return;
@@ -1534,6 +1544,7 @@ function initPage() {
                     // Also attach handlers for elements that should open external links
                     attachAdditionalLinkHandlers();
                 }
+                updateCommentLegendPanel();
             }
         });
 
@@ -1659,7 +1670,7 @@ async function loadSVGFromWasm() {
     // Fetch boxes.wasm with streaming fallback
     let resp;
     try {
-        resp = await fetch(window.getBasePath() + "/wasm/boxes_0.11.0.wasm", {
+        resp = await fetch(window.getBasePath() + "/wasm/boxes_0.12.0.wasm", {
             cache: "no-cache",
         });
         if (!resp.ok) throw new Error("HTTP " + resp.status);
@@ -2297,6 +2308,255 @@ function pickTextColor(bg) {
     return brightness > 140 ? "#000" : "#fff";
 }
 
+function resetCommentLegendState() {
+    commentLegendState.byNodeId.clear();
+    commentLegendState.byGroupClass.clear();
+    commentLegendState.itemActiveCount.forEach((_, el) => {
+        if (el && el.classList) {
+            el.classList.remove("comment-legend-item-active");
+        }
+    });
+    commentLegendState.itemActiveCount.clear();
+}
+
+function registerCommentLegendEntry(entry, element) {
+    if (!entry || !element) return;
+    const sourceIds = Array.isArray(entry.sourceIds) ? entry.sourceIds : [];
+    sourceIds.forEach((id) => {
+        if (!id) return;
+        commentLegendState.byNodeId.set(id, element);
+    });
+    const groups = Array.isArray(entry.groupClasses) ? entry.groupClasses : [];
+    groups.forEach((cls) => {
+        if (!cls) return;
+        if (!commentLegendState.byGroupClass.has(cls)) {
+            commentLegendState.byGroupClass.set(cls, new Set());
+        }
+        commentLegendState.byGroupClass.get(cls).add(element);
+    });
+}
+
+function attachCommentLegendHover(element, entry) {
+    if (!element || !entry) return;
+    const groups = Array.isArray(entry.groupClasses)
+        ? entry.groupClasses.filter(Boolean)
+        : [];
+    if (!groups.length) return;
+    const handleEnter = () => {
+        groups.forEach((grp) => {
+            if (typeof window.highlightConnectionGroup === "function") {
+                window.highlightConnectionGroup(grp);
+            }
+        });
+    };
+    const handleLeave = () => {
+        groups.forEach((grp) => {
+            if (typeof window.unhighlightConnectionGroup === "function") {
+                window.unhighlightConnectionGroup(grp);
+            }
+        });
+    };
+    element.addEventListener("mouseenter", handleEnter);
+    element.addEventListener("mouseleave", handleLeave);
+}
+
+function incrementLegendHighlight(el) {
+    if (!el) return;
+    const prev = commentLegendState.itemActiveCount.get(el) || 0;
+    if (prev === 0) {
+        el.classList.add("comment-legend-item-active");
+    }
+    commentLegendState.itemActiveCount.set(el, prev + 1);
+}
+
+function decrementLegendHighlight(el) {
+    if (!el) return;
+    const prev = commentLegendState.itemActiveCount.get(el) || 0;
+    if (prev <= 1) {
+        el.classList.remove("comment-legend-item-active");
+        commentLegendState.itemActiveCount.delete(el);
+    } else {
+        commentLegendState.itemActiveCount.set(el, prev - 1);
+    }
+}
+
+function highlightCommentLegendByGroupClass(groupClass) {
+    if (!groupClass) return;
+    const items = commentLegendState.byGroupClass.get(groupClass);
+    if (!items || !items.size) return;
+    items.forEach((el) => incrementLegendHighlight(el));
+}
+
+function unhighlightCommentLegendByGroupClass(groupClass) {
+    if (!groupClass) return;
+    const items = commentLegendState.byGroupClass.get(groupClass);
+    if (!items || !items.size) return;
+    items.forEach((el) => decrementLegendHighlight(el));
+}
+
+function hasCommentClass(el) {
+    if (!el) return false;
+    if (el.classList && el.classList.length) {
+        for (const cls of el.classList) {
+            if (String(cls || "").toLowerCase().includes("comment")) {
+                return true;
+            }
+        }
+    }
+    const rawClass =
+        (typeof el.className === "string"
+            ? el.className
+            : el.className && typeof el.className.baseVal === "string"
+              ? el.className.baseVal
+              : el.getAttribute && el.getAttribute("class")) || "";
+    return rawClass
+        .split(/\s+/)
+        .filter(Boolean)
+        .some((cls) => cls.toLowerCase().includes("comment"));
+}
+
+function isSvgTextElement(el) {
+    return !!el && typeof el.tagName === "string" && el.tagName.toLowerCase() === "text";
+}
+
+function getTrimmedSvgText(el) {
+    if (!el) return "";
+    return (el.textContent || "").replace(/\s+/g, " ").trim();
+}
+
+function findNextLegendSibling(list, startIndex, predicate, processed, maxDistance) {
+    if (!Array.isArray(list)) return null;
+    let steps = 0;
+    for (let i = startIndex; i < list.length; i++) {
+        if (typeof maxDistance === "number" && maxDistance >= 0 && steps > maxDistance) {
+            break;
+        }
+        const candidate = list[i];
+        if (!candidate) continue;
+        if (processed && processed.has(candidate)) continue;
+        if (predicate(candidate)) {
+            return { node: candidate, index: i };
+        }
+        steps++;
+    }
+    return null;
+}
+
+function resolveLegendTripletFromList(circle, list, processed, maxDistance) {
+    if (!circle || !Array.isArray(list) || !list.length) return null;
+    const idx = list.indexOf(circle);
+    if (idx === -1) return null;
+    const marker = findNextLegendSibling(
+        list,
+        idx + 1,
+        (el) => isSvgTextElement(el) && hasCommentClass(el),
+        processed,
+        maxDistance
+    );
+    if (!marker) return null;
+    const description = findNextLegendSibling(
+        list,
+        marker.index + 1,
+        (el) => isSvgTextElement(el),
+        processed,
+        maxDistance
+    );
+    if (!description) return null;
+    return { marker: marker.node, description: description.node };
+}
+
+// Locate sequential comment legend triplets inside the rendered SVG.
+function collectCommentLegendEntries() {
+    const svg = getSvg();
+    if (!svg) return [];
+    const entries = [];
+    const processed = new WeakSet();
+    const orderedNodes = Array.from(svg.querySelectorAll("circle, text"));
+    const circles = svg.querySelectorAll("circle");
+    circles.forEach((circle) => {
+        if (!circle || processed.has(circle) || !hasCommentClass(circle)) return;
+        const parentList = circle.parentElement
+            ? Array.from(circle.parentElement.children || [])
+            : [];
+        const triplet =
+            resolveLegendTripletFromList(circle, parentList, processed) ||
+            resolveLegendTripletFromList(circle, orderedNodes, processed, 12);
+        if (!triplet) return;
+        processed.add(circle);
+        processed.add(triplet.marker);
+        processed.add(triplet.description);
+        const strokeColor = circle.getAttribute("stroke");
+        const fallbackColor =
+            strokeColor && typeof strokeColor === "string" && strokeColor.toLowerCase() !== "none"
+                ? strokeColor
+                : "#6c7a89";
+        const groupClassSet = new Set();
+        [circle, triplet.marker, triplet.description].forEach((node) => {
+            if (!node || !node.classList) return;
+            node.classList.forEach((cls) => {
+                if (/^conLine_\d+$/.test(cls)) {
+                    groupClassSet.add(cls);
+                }
+            });
+        });
+        const groupClasses = Array.from(groupClassSet);
+        const sourceIds = [circle.id, triplet.marker.id, triplet.description.id].filter(Boolean);
+        entries.push({
+            id:
+                circle.id ||
+                triplet.description.id ||
+                triplet.marker.id ||
+                `comment-${entries.length}`,
+            markerLabel: getTrimmedSvgText(triplet.marker) || "Comment",
+            body: getTrimmedSvgText(triplet.description) || "",
+            color: getEffectiveFill(circle) || fallbackColor,
+            sourceIds,
+            groupClasses,
+        });
+    });
+    return entries;
+}
+
+function createCommentLegendItem(entry) {
+    const item = document.createElement("div");
+    item.className = "comment-legend-item";
+    item.dataset.commentLegendId = entry.id;
+    const markerRow = document.createElement("div");
+    markerRow.className = "comment-legend-marker";
+    const label = document.createElement("span");
+    label.className = "comment-legend-label";
+    label.textContent = entry.markerLabel || "Comment";
+    markerRow.appendChild(label);
+    const body = document.createElement("div");
+    body.className = "comment-legend-body";
+    body.textContent = entry.body || "";
+    item.appendChild(markerRow);
+    item.appendChild(body);
+    return item;
+}
+
+function updateCommentLegendPanel() {
+    const list = document.getElementById("comment-legend-list");
+    const panel = document.getElementById("comment-legend-panel");
+    if (!list || !panel) return;
+    resetCommentLegendState();
+    const entries = collectCommentLegendEntries();
+    list.innerHTML = "";
+    if (!entries.length) {
+        const empty = document.createElement("div");
+        empty.className = "comment-legend-empty";
+        empty.textContent = "No comment legend entries.";
+        list.appendChild(empty);
+        return;
+    }
+    entries.forEach((entry) => {
+        const item = createCommentLegendItem(entry);
+        list.appendChild(item);
+        registerCommentLegendEntry(entry, item);
+        attachCommentLegendHover(item, entry);
+    });
+}
+
 // NEW: extract text content of the clicked box as a string array
 function getTextContentArray(el) {
     const texts = [];
@@ -2528,6 +2788,19 @@ function findAncestorBadgesOf(childHid) {
             b.dataset.hid || (b.dataset.id ? getBoxPrefix(b.dataset.id) : "");
         return hid && isDescendantHid(childHid, hid); // badge.hid is an ancestor if child startsWith parent + "_"
     });
+}
+
+function setCommentLegendPanelVisibility(visible) {
+    commentLegendPanelVisible = !!visible;
+    const panel = document.getElementById("comment-legend-panel");
+    if (!panel) return;
+    const shouldHide = !commentLegendPanelVisible;
+    panel.classList.toggle("hidden", shouldHide);
+    panel.setAttribute("aria-hidden", shouldHide ? "true" : "false");
+    if (!shouldHide) {
+        updateCommentLegendPanel();
+    }
+    updateToolButtons();
 }
 
 function setCollectorPanelVisibility(visible) {
@@ -2852,6 +3125,7 @@ function updateToolButtons() {
     const btnBlacklist = document.getElementById("btn-blacklist");
     const btnDebug = document.getElementById("btn-debug");
     const btnHideComments = document.getElementById("btn-hide-comments");
+    const btnCommentLegend = document.getElementById("btn-comment-legend");
     if (btnPan)
         btnPan.classList.toggle("active", panToolActive || spacePressed);
     if (btnMinimap) btnMinimap.classList.toggle("active", minimapVisible);
@@ -2875,6 +3149,9 @@ function updateToolButtons() {
     if (btnHideComments) {
         const enabled = !!window.hideCommentsEnabled;
         btnHideComments.classList.toggle("active", enabled);
+    }
+    if (btnCommentLegend) {
+        btnCommentLegend.classList.toggle("active", !!commentLegendPanelVisible);
     }
 }
 
