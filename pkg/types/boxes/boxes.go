@@ -358,6 +358,9 @@ type Overlay struct {
     // in case of multiple overlays existing, this allows to define a percentage offset from the center-y of the related layout object
     CenterYOffset float64  `yaml:"centerYOffset"`
 
+    // if set to true, then the value is printed in the overlay
+    PrintValue bool  `yaml:"printValue"`
+
     // dictionary of layout elements, that contain this overlay. The dictionary stores the value for this specific object
     Layouts map[string]float64  `yaml:"layouts,omitempty"`
 
@@ -384,6 +387,7 @@ func CopyOverlay(src *Overlay) *Overlay {
     ret.RefRadius = src.RefRadius
     ret.CenterXOffset = src.CenterXOffset
     ret.CenterYOffset = src.CenterYOffset
+    ret.PrintValue = src.PrintValue
     ret.Layouts = make(map[string]float64, 0)
     for k, v := range src.Layouts {
         ret.Layouts[k] = v

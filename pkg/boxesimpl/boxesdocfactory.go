@@ -434,6 +434,7 @@ func initOverlays(b *boxes.Boxes, doc *boxes.BoxesDocument) error {
 			newOverlay.RefValue = o.RefValue
 			newOverlay.CenterXOffset = o.CenterXOffset
 			newOverlay.CenterYOffset = o.CenterYOffset
+			newOverlay.PrintValue = o.PrintValue
 			if o.Formats != nil {
 				newOverlay.Formats = o.Formats
 				slices.SortFunc(newOverlay.Formats.Gradations, func(c1, c2 boxes.OverlayGradation) int {

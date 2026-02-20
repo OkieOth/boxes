@@ -106,6 +106,7 @@ class "**Overlay**" as Overlay {
         NumberType refRadius
         NumberType centerXOffset
         NumberType centerYOffset
+        BooleanType printValue
         Map<NumberType> layouts
         OverlayRadiusDef radiusDefs
         OverlayFormatDef formats
@@ -300,6 +301,7 @@ FormatVariation  *--  Format
 
 
     
+
 
 
 

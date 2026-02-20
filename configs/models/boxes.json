@@ -373,6 +373,10 @@
           "description": "in case of multiple overlays existing, this allows to define a percentage offset from the center-y of the related layout object",
           "type": "number"
         },
+        "printValue": {
+          "description": "if set to true, then the value is printed in the overlay",
+          "type": "boolean"
+        },
         "layouts": {
           "description": "dictionary of layout elements, that contain this overlay. The dictionary stores the value for this specific object",
           "type": "object",
@@ -394,7 +398,8 @@
         "refValue",
         "layouts",
         "centerXOffset",
-        "centerYOffset"
+        "centerYOffset",
+        "printValue"
       ]
     },
     "OverlayRadiusDef": {
