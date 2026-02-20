@@ -1,3 +1,7 @@
+# v0.12.0
+## Boxes
+* imroved connection routing
+
 # v0.11.0
 ## Boxes
 * imroved overlay handling
