@@ -261,11 +261,14 @@ let mixins = [];
 let collectorPanelVisible = false;
 let collectorVisibilityGuardAttached = false;
 let commentLegendPanelVisible = false;
+let connectionAnimationEnabled = false;
 const commentLegendState = {
     byNodeId: new Map(),
     byGroupClass: new Map(),
     itemActiveCount: new Map(),
 };
+const SVG_NS = "http://www.w3.org/2000/svg";
+window.connectionAnimationEnabled = connectionAnimationEnabled;
 
 // --- Editable toolbar combobox state ---
 const toolbarComboState = {
@@ -1496,6 +1499,16 @@ function initPage() {
                 updateToolButtons();
                 reloadSvgFromBadges();
             },
+            toggleConnectionAnimation() {
+                connectionAnimationEnabled = !connectionAnimationEnabled;
+                window.connectionAnimationEnabled = connectionAnimationEnabled;
+                if (connectionAnimationEnabled) {
+                    installConnectionRunners();
+                } else {
+                    clearConnectionRunners();
+                }
+                updateToolButtons();
+            },
         };
 
         // After SVG loads, wrap and initialize sizes
@@ -1545,6 +1558,7 @@ function initPage() {
                     attachAdditionalLinkHandlers();
                 }
                 updateCommentLegendPanel();
+                installConnectionRunners();
             }
         });
 
@@ -2306,6 +2320,180 @@ function pickTextColor(bg) {
     // Perceived brightness
     const brightness = (r * 299 + g * 587 + b * 114) / 1000;
     return brightness > 140 ? "#000" : "#fff";
+}
+
+function getStrokeWidth(el) {
+    if (!el || !(el instanceof Element)) return 1;
+    const attr = parseFloat(el.getAttribute && el.getAttribute("stroke-width"));
+    if (Number.isFinite(attr) && attr > 0) return attr;
+    try {
+        const cs = getComputedStyle(el);
+        const parsed = parseFloat(cs && cs.strokeWidth);
+        if (Number.isFinite(parsed) && parsed > 0) return parsed;
+    } catch {}
+    return 1;
+}
+
+function getConnectionPathData(conn) {
+    if (!conn || !conn.tagName) return "";
+    const tag = conn.tagName.toLowerCase();
+    if (tag === "path") {
+        return conn.getAttribute("d") || "";
+    }
+    if (tag === "line") {
+        const x1 = conn.getAttribute("x1") || "0";
+        const y1 = conn.getAttribute("y1") || "0";
+        const x2 = conn.getAttribute("x2") || "0";
+        const y2 = conn.getAttribute("y2") || "0";
+        return `M ${x1} ${y1} L ${x2} ${y2}`;
+    }
+    if (tag === "polyline") {
+        return polylinePointsToPath(conn.getAttribute("points"));
+    }
+    return "";
+}
+
+function polylinePointsToPath(pointsAttr) {
+    if (!pointsAttr) return "";
+    const tokens = pointsAttr
+        .trim()
+        .split(/[\s,]+/)
+        .filter(Boolean);
+    if (tokens.length < 4) return "";
+    const pairs = [];
+    for (let i = 0; i < tokens.length - 1; i += 2) {
+        const x = tokens[i];
+        const y = tokens[i + 1];
+        if (typeof y === "undefined") break;
+        pairs.push([x, y]);
+    }
+    if (!pairs.length) return "";
+    let d = `M ${pairs[0][0]} ${pairs[0][1]}`;
+    for (let i = 1; i < pairs.length; i++) {
+        d += ` L ${pairs[i][0]} ${pairs[i][1]}`;
+    }
+    return d;
+}
+
+function getConnectionAnimationDuration(conn) {
+    const length = getConnectionLength(conn);
+    if (!Number.isFinite(length) || length <= 0) return 1.2;
+    const speed = 140; // pixels per second (slower for calmer motion)
+    const minDuration = 0.8;
+    const maxDuration = 5.5;
+    const raw = length / speed;
+    return Math.min(Math.max(raw, minDuration), maxDuration);
+}
+
+function getConnectionLength(conn) {
+    if (!conn) return NaN;
+    if (typeof conn.getTotalLength === "function") {
+        try {
+            const len = conn.getTotalLength();
+            if (Number.isFinite(len)) return len;
+        } catch {}
+    }
+    if (conn.tagName && conn.tagName.toLowerCase() === "line") {
+        const x1 = parseFloat(conn.getAttribute("x1"));
+        const y1 = parseFloat(conn.getAttribute("y1"));
+        const x2 = parseFloat(conn.getAttribute("x2"));
+        const y2 = parseFloat(conn.getAttribute("y2"));
+        if ([x1, y1, x2, y2].every(Number.isFinite)) {
+            return Math.hypot(x2 - x1, y2 - y1);
+        }
+    }
+    return NaN;
+}
+
+function getStrokeColor(el) {
+    if (!el || !(el instanceof Element)) return null;
+    const attr = el.getAttribute && el.getAttribute("stroke");
+    if (attr && attr.toLowerCase() !== "none") return attr;
+    try {
+        const cs = getComputedStyle(el);
+        if (
+            cs &&
+            cs.stroke &&
+            cs.stroke !== "none" &&
+            cs.stroke !== "rgba(0, 0, 0, 0)"
+        ) {
+            return cs.stroke;
+        }
+    } catch {
+        /* ignore */
+    }
+    return null;
+}
+
+function clearConnectionRunners(targetSvg) {
+    const svg = targetSvg || getSvg();
+    if (!svg) return;
+    svg.querySelectorAll(".connection-runner-dot").forEach((runner) => runner.remove());
+}
+
+function installConnectionRunners() {
+    const svg = getSvg();
+    if (!svg) return;
+
+    clearConnectionRunners(svg);
+
+    if (!connectionAnimationEnabled) return;
+
+    const reduceMotion =
+        typeof window !== "undefined" &&
+        typeof window.matchMedia === "function" &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduceMotion) {
+        return;
+    }
+
+    const connections = svg.querySelectorAll(
+        "line.connection, path.connection, polyline.connection"
+    );
+    connections.forEach((conn) => {
+        if (!conn.parentNode) return;
+        const pathData = getConnectionPathData(conn);
+        if (!pathData) return;
+
+        const runner = document.createElementNS(SVG_NS, "circle");
+        runner.classList.add("connection-runner-dot");
+        (conn.classList ? Array.from(conn.classList) : []).forEach((cls) => {
+            if (cls) runner.classList.add(cls);
+        });
+
+        const stroke = getStrokeColor(conn) || "#0a84ff";
+        runner.setAttribute("fill", stroke);
+        runner.setAttribute("stroke", "none");
+
+        const radius = Math.max(getStrokeWidth(conn), 1);
+        runner.setAttribute("r", radius);
+        runner.setAttribute("opacity", "0.95");
+        runner.setAttribute("pointer-events", "none");
+
+        if (conn.id) runner.dataset.connectionId = conn.id;
+
+        const duration = getConnectionAnimationDuration(conn);
+        runner.dataset.runnerDuration = `${duration}`;
+
+        const motion = document.createElementNS(SVG_NS, "animateMotion");
+        motion.setAttribute("dur", `${duration.toFixed(2)}s`);
+        motion.setAttribute("repeatCount", "indefinite");
+        motion.setAttribute("path", pathData);
+        motion.setAttribute("rotate", "auto");
+        if (Math.random() > 0.5) {
+            motion.setAttribute("begin", `${(-Math.random() * duration).toFixed(2)}s`);
+        }
+        runner.appendChild(motion);
+
+        const parent = conn.parentNode;
+        if (!parent) return;
+        const next = conn.nextSibling;
+        if (next) {
+            parent.insertBefore(runner, next);
+        } else {
+            parent.appendChild(runner);
+        }
+    });
 }
 
 function resetCommentLegendState() {
@@ -3126,6 +3314,7 @@ function updateToolButtons() {
     const btnDebug = document.getElementById("btn-debug");
     const btnHideComments = document.getElementById("btn-hide-comments");
     const btnCommentLegend = document.getElementById("btn-comment-legend");
+    const btnConnectionAnim = document.getElementById("btn-connection-anim");
     if (btnPan)
         btnPan.classList.toggle("active", panToolActive || spacePressed);
     if (btnMinimap) btnMinimap.classList.toggle("active", minimapVisible);
@@ -3152,6 +3341,9 @@ function updateToolButtons() {
     }
     if (btnCommentLegend) {
         btnCommentLegend.classList.toggle("active", !!commentLegendPanelVisible);
+    }
+    if (btnConnectionAnim) {
+        btnConnectionAnim.classList.toggle("active", !!connectionAnimationEnabled);
     }
 }
 
