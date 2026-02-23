@@ -115,6 +115,16 @@
                 >
                     <i class="fa-solid fa-comment-slash"></i>
                 </button>
+                <!-- Connection animation toggle -->
+                <button
+                    id="btn-connection-anim"
+                    class="tool-btn"
+                    title="Toggle Connection Animation"
+                    style="margin-left: 8px"
+                    hx-on:click="window.svgControls.toggleConnectionAnimation()"
+                >
+                    <i class="fa-solid fa-wave-square"></i>
+                </button>
                 <!-- Comment legend panel toggle -->
                 <button
                     id="btn-comment-legend"
@@ -542,12 +552,27 @@
                     });
                     const commentNodes = svg.querySelectorAll("circle, text");
                     commentNodes.forEach((node) => {
+                        if (
+                            node.classList &&
+                            node.classList.contains("connection-runner-dot")
+                        ) {
+                            return;
+                        }
                         if (!getGroupClass(node)) return;
                         const isHighlighted = node.classList.contains("highlight-group");
                         if (shouldDim && !isHighlighted) {
                             node.classList.add("connection-comment-dimmed");
                         } else {
                             node.classList.remove("connection-comment-dimmed");
+                        }
+                    });
+                    const runnerDots = svg.querySelectorAll(".connection-runner-dot");
+                    runnerDots.forEach((dot) => {
+                        const isHighlighted = dot.classList.contains("highlight-group");
+                        if (shouldDim && !isHighlighted) {
+                            dot.classList.add("runner-dimmed");
+                        } else {
+                            dot.classList.remove("runner-dimmed");
                         }
                     });
                 }
@@ -624,6 +649,10 @@
                         text.classList.add("highlight-group");
                         bringToFront(text);
                     }
+                    const runners = svg.querySelectorAll(`.connection-runner-dot.${groupClass}`);
+                    for (const dot of runners) {
+                        dot.classList.add("highlight-group");
+                    }
                     activeGroupHighlights.add(groupClass);
                     updateNonHighlightedConnections();
                     if (typeof window.highlightCommentLegendByGroupClass === "function") {
@@ -654,6 +683,12 @@
                     for (const text of texts) {
                         text.classList.remove("highlight-group");
                         restoreZOrder(text);
+                    }
+                    const runners = svg.querySelectorAll(
+                        `.connection-runner-dot.${groupClass}.highlight-group`,
+                    );
+                    for (const dot of runners) {
+                        dot.classList.remove("highlight-group");
                     }
                     activeGroupHighlights.delete(groupClass);
                     updateNonHighlightedConnections();

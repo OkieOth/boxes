@@ -496,3 +496,20 @@ circle.connection-comment-dimmed {
     fill: #ddd !important;
     color: #ddd !important;
 }
+
+.connection-runner-dot {
+    pointer-events: none;
+    opacity: 0.85;
+    filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.2));
+    transition: opacity 120ms ease;
+}
+
+.connection-runner-dot.runner-dimmed {
+    opacity: 0.15;
+    filter: none;
+}
+
+.connection-runner-dot.highlight-group {
+    opacity: 1;
+    filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.35));
+}

@@ -235,15 +235,23 @@ func (d *BoxesDocument) DrawMovedConnectionLines(drawingImpl types.Drawing) {
 		offset := int(*lineFormat.Width / 2)
 		x1, y1, x2, y2 := d.adjustLineToWidth(l.StartX, l.StartY, l.EndX, l.EndY, offset, l.IsStart, l.IsEnd)
 		classNames := fmt.Sprintf("connection conLine_%d", l.ConnectionIndex)
+		if l.InverseDirection {
+			x1, x2 = x2, x1
+		}
 		drawingImpl.DrawLineWithClass(x1, y1, x2, y2, lineFormat, classNames)
 	}
-	for _, l := range d.VerticalLines {
+	for i := range d.VerticalLines {
+		l := d.VerticalLines[i]
 		lineFormat := format
 		if l.Format != nil {
 			lineFormat = *l.Format
 		}
 		classNames := fmt.Sprintf("connection conLine_%d", l.ConnectionIndex)
-		drawingImpl.DrawLineWithClass(l.StartX, l.StartY, l.EndX, l.EndY, lineFormat, classNames)
+		x1, y1, x2, y2 := l.StartX, l.StartY, l.EndX, l.EndY
+		if l.InverseDirection {
+			y1, y2 = y2, y1
+		}
+		drawingImpl.DrawLineWithClass(x1, y1, x2, y2, lineFormat, classNames)
 	}
 }
 
