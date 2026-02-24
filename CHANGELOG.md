@@ -1,3 +1,10 @@
+# v0.14.0
+* add function to taylor the display for all connection involved objects
+* fix legend bug, so that double entries are avoided
+
+# v0.13.0
+* introduced a annimation for connections X-D
+
 # v0.12.0
 ## Boxes
 * imroved connection routing
