@@ -1493,12 +1493,6 @@ function initPage() {
                 applyTransform(); // updates cursor class
                 updateToolButtons();
             },
-            // Toggle debug mode and refresh SVG
-            toggleDebug() {
-                window.debug = !window.debug;
-                updateToolButtons();
-                reloadSvgFromBadges();
-            },
             toggleConnectionAnimation() {
                 connectionAnimationEnabled = !connectionAnimationEnabled;
                 window.connectionAnimationEnabled = connectionAnimationEnabled;
@@ -1810,10 +1804,20 @@ function handleInputQueryParam() {
         // NEW: parse 'debug' query param and store as global boolean
         const rawDebug = params.get("debug");
         const truthy = ["true", "1", "yes", "on"];
-        const val =
-            rawDebug != null
-                ? truthy.includes(String(rawDebug).toLowerCase())
-                : false;
+        const falsy = ["false", "0", "no", "off"];
+        let val = false;
+        if (rawDebug != null) {
+            const normalized = String(rawDebug).toLowerCase();
+            if (!normalized) {
+                val = true;
+            } else if (falsy.includes(normalized)) {
+                val = false;
+            } else if (truthy.includes(normalized)) {
+                val = true;
+            } else {
+                val = true;
+            }
+        }
         window.debug = val;
 
         // --- NEW: Parse combo, expandedIds, blacklistedIds ---
@@ -3311,7 +3315,6 @@ function updateToolButtons() {
     const btnCollector = document.getElementById("btn-collector");
     const btnSelectedPanel = document.getElementById("btn-selected-panel");
     const btnBlacklist = document.getElementById("btn-blacklist");
-    const btnDebug = document.getElementById("btn-debug");
     const btnHideComments = document.getElementById("btn-hide-comments");
     const btnCommentLegend = document.getElementById("btn-comment-legend");
     const btnConnectionAnim = document.getElementById("btn-connection-anim");
@@ -3333,7 +3336,6 @@ function updateToolButtons() {
         btnSelectedPanel.classList.toggle("active", !!selectedVisible);
     // Blacklist is active when blacklistMode is true
     if (btnBlacklist) btnBlacklist.classList.toggle("active", blacklistMode);
-    if (btnDebug) btnDebug.classList.toggle("active", !!window.debug);
     // Reflect Hide Comments toggle
     if (btnHideComments) {
         const enabled = !!window.hideCommentsEnabled;
