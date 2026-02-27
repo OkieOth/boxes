@@ -64,6 +64,33 @@ func createSvgExt(boxesYaml string, mixins []string, defaultDepth int, expanded,
 	return ret.SVG
 }
 
+func createSvgForConnected(boxesYaml string, mixins []string, debug bool) string {
+	var b boxes.Boxes
+	fmt.Printf("createSvgForConnected: debug=%v\n", debug)
+
+	if err := y.Unmarshal([]byte(boxesYaml), &b); err != nil {
+		fmt.Printf("error while unmarshalling boxes layout: %v", err)
+		return unknownSvg
+	}
+	if b.Version != nil {
+		b.Title += fmt.Sprintf(" [%s]", *b.Version)
+	}
+	boxMixins := make([]boxes.BoxesFileMixings, 0)
+	for i, c := range mixins {
+		var m boxes.BoxesFileMixings
+		if err := y.Unmarshal([]byte(c), &m); err != nil {
+			fmt.Printf("error while unmarshalling external connections (%d): %v\n", i, err)
+		}
+		boxMixins = append(boxMixins, m)
+	}
+
+	ret := boxesimpl.DrawBoxesRelatedToConnections(b, boxMixins, debug)
+	if ret.ErrorMsg != "" {
+		return unknownSvg
+	}
+	return ret.SVG
+}
+
 func getArrayFromJsValue(args []js.Value, index int) ([]string, error) {
 	jsArray := args[index]
 	if jsArray.Type() != js.TypeObject {
@@ -123,10 +150,24 @@ func createSvgExtWrapper(this js.Value, args []js.Value) interface{} {
 	return createSvgExt(input, mixins, depth, expanded, blacklisted, hideComments, debug)
 }
 
+func createSvgForConnectedWrapper(this js.Value, args []js.Value) interface{} {
+	if len(args) < 3 {
+		return "error: expected (string, string[], bool)"
+	}
+	input := args[0].String()
+	mixins, err := getArrayFromJsValue(args, 1)
+	if err != nil {
+		return "error: mixins need to be an array"
+	}
+	debug := args[2].Bool()
+	return createSvgForConnected(input, mixins, debug)
+}
+
 func main() {
 	// Expose the function to JS as `getSvg`
 	js.Global().Set("createSvg", js.FuncOf(createSvgWrapper))
 	js.Global().Set("createSvgExt", js.FuncOf(createSvgExtWrapper))
+	js.Global().Set("createSvgForConnected", js.FuncOf(createSvgForConnectedWrapper))
 
 	// Keep Go running
 	select {}
