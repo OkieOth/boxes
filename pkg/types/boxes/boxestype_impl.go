@@ -213,8 +213,61 @@ func (d *BoxesDocument) DrawConnections(drawingImpl types.Drawing) error {
 	// 	}
 	// }
 	// DEBUG - end
+
+	// this helps in the UI to highlight related connections
+	d.AdjustConnectionIndexForCommentsWithSameLabel()
 	d.DrawMovedConnectionLines(drawingImpl)
 	return nil
+}
+
+func (d *BoxesDocument) AdjustConnectionIndexForCommentsWithSameLabel() {
+	labelFindings := make(map[string][]int)
+	for i := range d.Connections {
+		c := d.Connections[i]
+		if c.Comment != nil && c.Comment.Label != nil {
+			l := *c.Comment.Label
+			var newFindings []int
+			if alreadyFound, ok := labelFindings[l]; ok {
+				newFindings = append(alreadyFound, c.ConnectionIndex)
+			} else {
+				newFindings = []int{c.ConnectionIndex}
+			}
+			labelFindings[l] = newFindings
+		}
+	}
+	for _, v := range labelFindings {
+		if len(v) > 1 {
+			newConnectionIndex, indexesToReplace := v[0], v[1:]
+			d.replaceConnectionIds(newConnectionIndex, indexesToReplace)
+		}
+	}
+}
+
+func (d *BoxesDocument) replaceConnectionIdsNow(newConnectionIndex int, indexesToReplace []int, conLines *[]ConnectionLine) {
+	for i := range *conLines {
+		l := &(*conLines)[i]
+		if slices.Contains(indexesToReplace, l.ConnectionIndex) {
+			l.ConnectionIndex = newConnectionIndex
+		}
+	}
+}
+
+func (d *BoxesDocument) replaceConnectionIdsInComments(newConnectionIndex int, indexesToReplace []int) {
+	for i := range d.Comments {
+		c := &d.Comments[i]
+		if c.ConnectionIndex != nil {
+			if slices.Contains(indexesToReplace, *c.ConnectionIndex) {
+				*c.ConnectionIndex = newConnectionIndex
+			}
+
+		}
+	}
+}
+
+func (d *BoxesDocument) replaceConnectionIds(newConnectionIndex int, indexesToReplace []int) {
+	d.replaceConnectionIdsNow(newConnectionIndex, indexesToReplace, &d.HorizontalLines)
+	d.replaceConnectionIdsNow(newConnectionIndex, indexesToReplace, &d.VerticalLines)
+	d.replaceConnectionIdsInComments(newConnectionIndex, indexesToReplace)
 }
 
 func (d *BoxesDocument) DrawMovedConnectionLines(drawingImpl types.Drawing) {

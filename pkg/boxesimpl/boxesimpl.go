@@ -331,6 +331,58 @@ func DrawBoxesFilteredExt(
 	return DrawBoxesFiltered(layout, defaultDepth, expanded, blacklisted, debug)
 }
 
+func searchForExpanded(layout *boxes.Layout, expanded *[]string) {
+	if layout.Id != "" && len(layout.Connections) > 0 {
+		if !slices.Contains(*expanded, layout.Id) {
+			*expanded = append(*expanded, layout.Id)
+		}
+		for i := range layout.Connections {
+			c := layout.Connections[i]
+			if c.DestId != "" && (!slices.Contains(*expanded, c.DestId)) {
+				*expanded = append(*expanded, c.DestId)
+			}
+		}
+	}
+	searchForExpandedCont(layout.Horizontal, expanded)
+	searchForExpandedCont(layout.Vertical, expanded)
+}
+
+func searchForExpandedCont(cont []boxes.Layout, expanded *[]string) {
+	for i := range cont {
+		searchForExpanded(&cont[i], expanded)
+	}
+}
+
+func searchForBlacklisted(layout *boxes.Layout, expanded []string, blacklisted *[]string) {
+	if !isRelatedToId(*layout, expanded) {
+		*blacklisted = append(*blacklisted, layout.Id)
+	} else {
+		searchForBlacklistedCont(layout.Horizontal, expanded, blacklisted)
+		searchForBlacklistedCont(layout.Vertical, expanded, blacklisted)
+	}
+}
+
+func searchForBlacklistedCont(cont []boxes.Layout, expanded []string, blacklisted *[]string) {
+	for i := range cont {
+		searchForBlacklisted(&cont[i], expanded, blacklisted)
+	}
+}
+
+func DrawBoxesRelatedToConnections(
+	layout boxes.Boxes,
+	mixins []boxes.BoxesFileMixings,
+	debug bool) UIReturn {
+	for _, m := range mixins {
+		layout.MixinThings(m)
+	}
+	// find all IDs that have connections
+	expanded := make([]string, 0)
+	blacklisted := make([]string, 0)
+	searchForExpanded(&layout.Boxes, &expanded)
+	searchForBlacklisted(&layout.Boxes, expanded, &blacklisted)
+	return DrawBoxesFiltered(layout, 2, expanded, blacklisted, debug)
+}
+
 func DrawBoxesFiltered(layout boxes.Boxes, defaultDepth int, expanded, blacklisted []string, debug bool) UIReturn {
 	return DrawBoxesFilteredComments(layout, defaultDepth, expanded, blacklisted, false, debug)
 }
