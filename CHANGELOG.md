@@ -1,4 +1,5 @@
 # v0.14.0
+* toolbar in the UI can be almost hidden
 * add function to taylor the display for all connection involved objects
 * fix legend bug, so that double entries are avoided
 
