@@ -1020,6 +1020,10 @@ function initPage() {
         const doneBtn = document.getElementById("uploads-done");
         const clearAllBtn = document.getElementById("uploads-clear-all");
         const connectedBtn = document.getElementById("btn-connected");
+        const clearExpandedLink = document.getElementById("link-clear-expanded");
+        const clearBlacklistLink = document.getElementById("link-clear-blacklist");
+        const toolbarHandle = document.getElementById("toolbar-collapse-handle");
+        const menuWrapper = document.getElementById("menu-wrapper");
 
         function refreshComboAfterStorageChange(removedId) {
             const sel = document.getElementById("toolbar-combo");
@@ -1145,6 +1149,46 @@ function initPage() {
                 const savedBadgeState = collectBadgeIds("badge-list");
                 const savedBlacklistState = collectBadgeIds("blacklist-list");
                 regenerateSvgWithConnectedOnce(savedBadgeState, savedBlacklistState);
+            });
+        }
+        if (toolbarHandle && menuWrapper) {
+            const toggleToolbar = () => {
+                const collapsed = menuWrapper.classList.toggle("toolbar-collapsed");
+                toolbarHandle.title = collapsed ? "Expand Toolbar" : "Collapse Toolbar";
+                toolbarHandle.setAttribute(
+                    "aria-label",
+                    collapsed ? "Expand Toolbar" : "Collapse Toolbar"
+                );
+            };
+            toolbarHandle.addEventListener("click", toggleToolbar);
+            toolbarHandle.addEventListener("keydown", (evt) => {
+                if (evt.key === "Enter" || evt.key === " ") {
+                    evt.preventDefault();
+                    toggleToolbar();
+                }
+            });
+        }
+        if (clearExpandedLink) {
+            clearExpandedLink.addEventListener("click", (evt) => {
+                evt.preventDefault();
+                const list = document.getElementById("badge-list");
+                if (list) list.innerHTML = "";
+                if (typeof reloadSvgFromBadges === "function") {
+                    reloadSvgFromBadges();
+                }
+                positionBlacklistCollector();
+            });
+        }
+        if (clearBlacklistLink) {
+            clearBlacklistLink.addEventListener("click", (evt) => {
+                evt.preventDefault();
+                blacklist = [];
+                window.blacklist = [];
+                updateBlacklistUI();
+                if (typeof reloadSvgFromBadges === "function") {
+                    reloadSvgFromBadges();
+                }
+                positionBlacklistCollector();
             });
         }
         // Dismiss on ESC and outside click
