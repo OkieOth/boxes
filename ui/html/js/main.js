@@ -174,7 +174,7 @@ async function loadYamlForComboValue(value) {
 }
 
 async function regenerateSvgWithState(expandedIds, blacklistIds) {
-    if (typeof createSvgExt !== "function") {
+    if (!getActiveCreateSvgFunction()) {
         return;
     }
     const canvas = document.getElementById("canvas");
@@ -192,18 +192,14 @@ async function regenerateSvgWithState(expandedIds, blacklistIds) {
         window.hideCommentsEnabled
     );
     try {
-        let svgStr = createSvgExt(
+        let svgStr = await callCreateSvgWithMode(
             arg,
-            mixins,
-            window.defaultDepth,
             expandedIds,
-            blacklistIds,
-            window.hideCommentsEnabled,
-            window.debug
+            blacklistIds
         );
         svgStr = svgStr && typeof svgStr.then === "function" ? await svgStr : svgStr;
         if (typeof svgStr !== "string" || !svgStr.trim().startsWith("<svg")) {
-            console.error("createSvgExt did not return a valid SVG string.");
+            console.error("createSvg did not return a valid SVG string.");
             console.error(svgStr);
             return;
         }
@@ -212,7 +208,42 @@ async function regenerateSvgWithState(expandedIds, blacklistIds) {
         canvas.dispatchEvent(evtSwap);
         restoreBadgeCollectorFromIds(expandedIds);
     } catch (err) {
-        console.error("Error updating SVG via createSvgExt:", err);
+        console.error("Error updating SVG via createSvg:", err);
+    }
+}
+
+async function regenerateSvgWithConnectedOnce(expandedIds, blacklistIds) {
+    if (typeof window.createSvgForConnected !== "function") {
+        return;
+    }
+    const canvas = document.getElementById("canvas");
+    if (!canvas) return;
+    const arg =
+        typeof window.input === "string" && window.input.length > 0
+            ? window.input
+            : "";
+    console.log(
+        "Refreshing SVG (connected): ",
+        expandedIds,
+        "blacklist ids: ",
+        blacklistIds,
+        "comments hidden: ",
+        window.hideCommentsEnabled
+    );
+    try {
+        let svgStr = window.createSvgForConnected(arg, mixins, window.debug);
+        svgStr = svgStr && typeof svgStr.then === "function" ? await svgStr : svgStr;
+        if (typeof svgStr !== "string" || !svgStr.trim().startsWith("<svg")) {
+            console.error("createSvg did not return a valid SVG string.");
+            console.error(svgStr);
+            return;
+        }
+        canvas.innerHTML = svgStr;
+        const evtSwap = new Event("htmx:afterSwap", { bubbles: true });
+        canvas.dispatchEvent(evtSwap);
+        restoreBadgeCollectorFromIds(expandedIds);
+    } catch (err) {
+        console.error("Error updating SVG via createSvg:", err);
     }
 }
 
@@ -231,7 +262,7 @@ async function applySelectedMixins() {
     }
     mixins = contents;
     window.currentYamlFile = selectedValues.length ? selectedValues.join(",") : undefined;
-    if (typeof createSvgExt !== "function") {
+    if (!getActiveCreateSvgFunction()) {
         return;
     }
     const savedBadgeState = collectBadgeIds("badge-list");
@@ -899,10 +930,11 @@ window.hideSpinner = function () {
     el.setAttribute("aria-hidden", "true");
 };
 
-function installCreateSvgExtSpinnerWrapper() {
-    if (typeof window.createSvgExt !== "function") return;
-    if (window.createSvgExt.__wrappedWithSpinner) return;
-    const raw = window.createSvgExt;
+function installCreateSvgSpinnerWrapper(fnName) {
+    const fn = window[fnName];
+    if (typeof fn !== "function") return;
+    if (fn.__wrappedWithSpinner) return;
+    const raw = fn;
     const wrapped = async function (...args) {
         try {
             if (typeof window.showSpinner === "function") window.showSpinner();
@@ -921,7 +953,25 @@ function installCreateSvgExtSpinnerWrapper() {
     };
     wrapped.__wrappedWithSpinner = true;
     wrapped.__original = raw;
-    window.createSvgExt = wrapped;
+    window[fnName] = wrapped;
+}
+
+function getActiveCreateSvgFunction() {
+    return typeof window.createSvgExt === "function" ? window.createSvgExt : null;
+}
+
+async function callCreateSvgWithMode(arg, filterTexts, blacklistIds, depthOverride) {
+    const fn = getActiveCreateSvgFunction();
+    if (!fn) return null;
+    return fn(
+        arg,
+        mixins,
+        Number.isFinite(depthOverride) ? depthOverride : window.defaultDepth,
+        filterTexts || [],
+        blacklistIds || [],
+        window.hideCommentsEnabled,
+        window.debug
+    );
 }
 
 function initPage() {
@@ -969,6 +1019,7 @@ function initPage() {
         const closeBtn = document.getElementById("uploads-close-btn");
         const doneBtn = document.getElementById("uploads-done");
         const clearAllBtn = document.getElementById("uploads-clear-all");
+        const connectedBtn = document.getElementById("btn-connected");
 
         function refreshComboAfterStorageChange(removedId) {
             const sel = document.getElementById("toolbar-combo");
@@ -1085,6 +1136,17 @@ function initPage() {
             populateUploadsPopup();
             refreshComboAfterStorageChange(null);
         });
+        if (connectedBtn) {
+            connectedBtn.addEventListener("click", () => {
+                if (typeof window.createSvgForConnected !== "function") {
+                    alert("Connected render is not available yet.");
+                    return;
+                }
+                const savedBadgeState = collectBadgeIds("badge-list");
+                const savedBlacklistState = collectBadgeIds("blacklist-list");
+                regenerateSvgWithConnectedOnce(savedBadgeState, savedBlacklistState);
+            });
+        }
         // Dismiss on ESC and outside click
         if (popup) {
             popup.addEventListener("keydown", function (e) {
@@ -1346,14 +1408,10 @@ function initPage() {
                         "comments hidden: ",
                         window.hideCommentsEnabled
                     );
-                    let svgStr = createSvgExt(
+                    let svgStr = await callCreateSvgWithMode(
                         arg,
-                        mixins, // additional mixins to hone the layout input
-                        window.defaultDepth,
                         filterTexts,
-                        blacklistIds,
-                        window.hideCommentsEnabled,
-                        window.debug
+                        blacklistIds
                     );
                     svgStr =
                         svgStr && typeof svgStr.then === "function"
@@ -1714,28 +1772,32 @@ async function loadSVGFromWasm() {
         return;
     }
 
-    // Start the runtime, then wait for createSvgExt to appear.
+    // Start the runtime, then wait for renderer functions to appear.
     go.run(instance).catch((e) => console.warn("go.run finished/failed:", e));
 
-    // Wait until createSvgExt is exposed by the Go code (poll with timeout)
+    // Wait until createSvgExt or createSvgForConnected is exposed by the Go code (poll with timeout)
     const timeoutMs = 5000;
     const start = Date.now();
-    while (typeof window.createSvgExt !== "function") {
+    while (
+        typeof window.createSvgExt !== "function" &&
+        typeof window.createSvgForConnected !== "function"
+    ) {
         if (Date.now() - start > timeoutMs) {
             console.error(
-                'createSvgExt is not exposed by boxes.wasm within timeout. Ensure js.Global().Set("createSvgExt", fn).'
+                'createSvgExt/createSvgForConnected not exposed by boxes.wasm within timeout. Ensure js.Global().Set("createSvgExt", fn) or js.Global().Set("createSvgForConnected", fn).'
             );
             return;
         }
         await new Promise((r) => setTimeout(r, 50));
     }
 
-    // Install spinner wrapper once createSvgExt is available
-    installCreateSvgExtSpinnerWrapper();
+    // Install spinner wrapper once renderers are available
+    installCreateSvgSpinnerWrapper("createSvgExt");
+    installCreateSvgSpinnerWrapper("createSvgForConnected");
 
     let svgStr;
     try {
-        // Wait for YAML load if available, then pass it to createSvgExt
+        // Wait for YAML load if available, then pass it to the active renderer
         if (
             window.inputLoaded &&
             typeof window.inputLoaded.then === "function"
@@ -1759,23 +1821,19 @@ async function loadSVGFromWasm() {
             "comments hidden: ",
             window.hideCommentsEnabled
         );
-        const res = window.createSvgExt(
+        const res = await callCreateSvgWithMode(
             initialArg,
-            mixins, // additional mixins to hone the layout input
-            window.defaultDepth,
             filterTexts,
-            blacklistIds,
-            window.hideCommentsEnabled,
-            window.debug
+            blacklistIds
         );
         svgStr = res && typeof res.then === "function" ? await res : res;
     } catch (e) {
-        console.error("Error calling createSvgExt:", e);
+        console.error("Error calling createSvg:", e);
         return;
     }
 
     if (typeof svgStr !== "string" || !svgStr.trim().startsWith("<svg")) {
-        console.error("createSvgExt did not return a valid SVG string.");
+        console.error("createSvg did not return a valid SVG string.");
         console.error(svgStr);
         return;
     }
@@ -2161,7 +2219,7 @@ function reloadSvgFromBadges(forceAllExpanded = false) {
 
 async function reloadSvgFromBadgesImpl(forceAllExpanded) {
     try {
-        if (typeof createSvgExt !== "function") return;
+        if (!getActiveCreateSvgFunction()) return;
         const canvas = document.getElementById("canvas");
         if (!canvas) return;
 
@@ -2197,14 +2255,11 @@ async function reloadSvgFromBadgesImpl(forceAllExpanded) {
             "comments hidden: ",
             window.hideCommentsEnabled
         );
-        let svgStr = window.createSvgExt(
+        let svgStr = await callCreateSvgWithMode(
             arg,
-            mixins,
-            maxDepth,
             expandedIds,
             blacklistIds,
-            window.hideCommentsEnabled,
-            window.debug
+            maxDepth
         );
         svgStr = svgStr && typeof svgStr.then === "function" ? await svgStr : svgStr;
         if (typeof svgStr !== "string" || !svgStr.trim().startsWith("<svg")) return;
@@ -2836,14 +2891,10 @@ function observeCaptionAndRefresh(el) {
                     "comments hidden: ",
                     window.hideCommentsEnabled
                 );
-                let svgStr = createSvgExt(
+                let svgStr = await callCreateSvgWithMode(
                     arg,
-                    mixins, // additional mixins to hone the layout input
-                    window.defaultDepth,
                     filterTexts,
-                    blacklistIds,
-                    window.hideCommentsEnabled,
-                    window.debug
+                    blacklistIds
                 );
 
                 svgStr =
