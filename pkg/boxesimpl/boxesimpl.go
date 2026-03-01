@@ -65,6 +65,13 @@ type UIReturn struct {
 	ErrorMsg string
 }
 
+type UIReturn2 struct {
+	SVG         string
+	Expanded    []string
+	Blacklisted []string
+	ErrorMsg    string
+}
+
 func isRelatedToId(b boxes.Layout, filter []string) bool {
 	if slices.Contains(filter, b.Id) {
 		return true
@@ -371,7 +378,7 @@ func searchForBlacklistedCont(cont []boxes.Layout, expanded []string, blackliste
 func DrawBoxesRelatedToConnections(
 	layout boxes.Boxes,
 	mixins []boxes.BoxesFileMixings,
-	debug bool) UIReturn {
+	debug bool) UIReturn2 {
 	for _, m := range mixins {
 		layout.MixinThings(m)
 	}
@@ -380,7 +387,15 @@ func DrawBoxesRelatedToConnections(
 	blacklisted := make([]string, 0)
 	searchForExpanded(&layout.Boxes, &expanded)
 	searchForBlacklisted(&layout.Boxes, expanded, &blacklisted)
-	return DrawBoxesFiltered(layout, 2, expanded, blacklisted, debug)
+	var ret2 UIReturn2
+	ret1 := DrawBoxesFiltered(layout, 2, expanded, blacklisted, debug)
+	ret2.SVG = ret1.SVG
+	ret2.ErrorMsg = ret1.ErrorMsg
+	if ret1.ErrorMsg == "" {
+		ret2.Blacklisted = blacklisted
+		ret2.Expanded = expanded
+	}
+	return ret2
 }
 
 func DrawBoxesFiltered(layout boxes.Boxes, defaultDepth int, expanded, blacklisted []string, debug bool) UIReturn {

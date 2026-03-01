@@ -173,6 +173,48 @@ async function loadYamlForComboValue(value) {
     }
 }
 
+function normalizeCreateSvgResult(result, fallbackExpanded, fallbackBlacklisted) {
+    let svgStr = "";
+    let expanded = fallbackExpanded;
+    let blacklisted = fallbackBlacklisted;
+
+    if (result && typeof result === "object") {
+        if (typeof result.SVG === "string") {
+            svgStr = result.SVG;
+        } else if (typeof result.svg === "string") {
+            svgStr = result.svg;
+        }
+
+        if (Array.isArray(result.Expanded)) {
+            expanded = result.Expanded;
+        } else if (Array.isArray(result.expanded)) {
+            expanded = result.expanded;
+        }
+
+        if (Array.isArray(result.Blacklisted)) {
+            blacklisted = result.Blacklisted;
+        } else if (Array.isArray(result.blacklisted)) {
+            blacklisted = result.blacklisted;
+        }
+    } else if (typeof result === "string") {
+        svgStr = result;
+    }
+
+    return { svgStr, expanded, blacklisted };
+}
+
+function applyExpandedAndBlacklistState(expandedIds, blacklistIds) {
+    restoreBadgeCollectorFromIds(expandedIds || []);
+    if (Array.isArray(blacklistIds)) {
+        blacklist = blacklistIds.slice();
+        window.blacklist = blacklist;
+    } else {
+        blacklist = [];
+        window.blacklist = blacklist;
+    }
+    updateBlacklistUI();
+}
+
 async function regenerateSvgWithState(expandedIds, blacklistIds) {
     if (!getActiveCreateSvgFunction()) {
         return;
@@ -192,21 +234,32 @@ async function regenerateSvgWithState(expandedIds, blacklistIds) {
         window.hideCommentsEnabled
     );
     try {
-        let svgStr = await callCreateSvgWithMode(
+        let result = await callCreateSvgWithMode(
             arg,
             expandedIds,
             blacklistIds
         );
-        svgStr = svgStr && typeof svgStr.then === "function" ? await svgStr : svgStr;
-        if (typeof svgStr !== "string" || !svgStr.trim().startsWith("<svg")) {
+        result = result && typeof result.then === "function" ? await result : result;
+        const normalized = normalizeCreateSvgResult(
+            result,
+            expandedIds,
+            blacklistIds
+        );
+        if (
+            typeof normalized.svgStr !== "string" ||
+            !normalized.svgStr.trim().startsWith("<svg")
+        ) {
             console.error("createSvg did not return a valid SVG string.");
-            console.error(svgStr);
+            console.error(result);
             return;
         }
-        canvas.innerHTML = svgStr;
+        canvas.innerHTML = normalized.svgStr;
         const evtSwap = new Event("htmx:afterSwap", { bubbles: true });
         canvas.dispatchEvent(evtSwap);
-        restoreBadgeCollectorFromIds(expandedIds);
+        applyExpandedAndBlacklistState(
+            normalized.expanded,
+            normalized.blacklisted
+        );
     } catch (err) {
         console.error("Error updating SVG via createSvg:", err);
     }
@@ -231,17 +284,28 @@ async function regenerateSvgWithConnectedOnce(expandedIds, blacklistIds) {
         window.hideCommentsEnabled
     );
     try {
-        let svgStr = window.createSvgForConnected(arg, mixins, window.debug);
-        svgStr = svgStr && typeof svgStr.then === "function" ? await svgStr : svgStr;
-        if (typeof svgStr !== "string" || !svgStr.trim().startsWith("<svg")) {
+        let result = window.createSvgForConnected(arg, mixins, window.debug);
+        result = result && typeof result.then === "function" ? await result : result;
+        const normalized = normalizeCreateSvgResult(
+            result,
+            expandedIds,
+            blacklistIds
+        );
+        if (
+            typeof normalized.svgStr !== "string" ||
+            !normalized.svgStr.trim().startsWith("<svg")
+        ) {
             console.error("createSvg did not return a valid SVG string.");
-            console.error(svgStr);
+            console.error(result);
             return;
         }
-        canvas.innerHTML = svgStr;
+        canvas.innerHTML = normalized.svgStr;
         const evtSwap = new Event("htmx:afterSwap", { bubbles: true });
         canvas.dispatchEvent(evtSwap);
-        restoreBadgeCollectorFromIds(expandedIds);
+        applyExpandedAndBlacklistState(
+            normalized.expanded,
+            normalized.blacklisted
+        );
     } catch (err) {
         console.error("Error updating SVG via createSvg:", err);
     }
@@ -1870,7 +1934,17 @@ async function loadSVGFromWasm() {
             filterTexts,
             blacklistIds
         );
-        svgStr = res && typeof res.then === "function" ? await res : res;
+        const resolved = res && typeof res.then === "function" ? await res : res;
+        const normalized = normalizeCreateSvgResult(
+            resolved,
+            filterTexts,
+            blacklistIds
+        );
+        svgStr = normalized.svgStr;
+        applyExpandedAndBlacklistState(
+            normalized.expanded,
+            normalized.blacklisted
+        );
     } catch (e) {
         console.error("Error calling createSvg:", e);
         return;

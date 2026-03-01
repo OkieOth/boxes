@@ -32,6 +32,7 @@ func createSvg(boxesYaml string, defaultDepth int, expanded, blacklisted []strin
 	}
 	ret := boxesimpl.DrawBoxesFilteredComments(boxes, defaultDepth, expanded, blacklisted, hideComments, debug)
 	if ret.ErrorMsg != "" {
+		fmt.Println(ret.ErrorMsg)
 		return unknownSvg
 	}
 	return ret.SVG
@@ -59,33 +60,7 @@ func createSvgExt(boxesYaml string, mixins []string, defaultDepth int, expanded,
 
 	ret := boxesimpl.DrawBoxesFilteredComments(b, defaultDepth, expanded, blacklisted, hideComments, debug)
 	if ret.ErrorMsg != "" {
-		return unknownSvg
-	}
-	return ret.SVG
-}
-
-func createSvgForConnected(boxesYaml string, mixins []string, debug bool) string {
-	var b boxes.Boxes
-	fmt.Printf("createSvgForConnected: debug=%v\n", debug)
-
-	if err := y.Unmarshal([]byte(boxesYaml), &b); err != nil {
-		fmt.Printf("error while unmarshalling boxes layout: %v", err)
-		return unknownSvg
-	}
-	if b.Version != nil {
-		b.Title += fmt.Sprintf(" [%s]", *b.Version)
-	}
-	boxMixins := make([]boxes.BoxesFileMixings, 0)
-	for i, c := range mixins {
-		var m boxes.BoxesFileMixings
-		if err := y.Unmarshal([]byte(c), &m); err != nil {
-			fmt.Printf("error while unmarshalling external connections (%d): %v\n", i, err)
-		}
-		boxMixins = append(boxMixins, m)
-	}
-
-	ret := boxesimpl.DrawBoxesRelatedToConnections(b, boxMixins, debug)
-	if ret.ErrorMsg != "" {
+		fmt.Println(ret.ErrorMsg)
 		return unknownSvg
 	}
 	return ret.SVG
@@ -150,6 +125,59 @@ func createSvgExtWrapper(this js.Value, args []js.Value) interface{} {
 	return createSvgExt(input, mixins, depth, expanded, blacklisted, hideComments, debug)
 }
 
+type NewReturn struct {
+	SVG         string
+	Expanded    []string
+	Blacklisted []string
+}
+
+func returnErrorSvg() NewReturn {
+	return NewReturn{
+		SVG:         unknownSvg,
+		Expanded:    []string{},
+		Blacklisted: []string{},
+	}
+}
+
+func createSvgForConnected(boxesYaml string, mixins []string, debug bool) NewReturn {
+	var b boxes.Boxes
+	fmt.Printf("createSvgForConnected: debug=%v\n", debug)
+
+	if err := y.Unmarshal([]byte(boxesYaml), &b); err != nil {
+		fmt.Printf("error while unmarshalling boxes layout: %v", err)
+		return returnErrorSvg()
+	}
+	if b.Version != nil {
+		b.Title += fmt.Sprintf(" [%s]", *b.Version)
+	}
+	boxMixins := make([]boxes.BoxesFileMixings, 0)
+	for i, c := range mixins {
+		var m boxes.BoxesFileMixings
+		if err := y.Unmarshal([]byte(c), &m); err != nil {
+			fmt.Printf("error while unmarshalling external connections (%d): %v\n", i, err)
+		}
+		boxMixins = append(boxMixins, m)
+	}
+
+	ret := boxesimpl.DrawBoxesRelatedToConnections(b, boxMixins, debug)
+	if ret.ErrorMsg != "" {
+		fmt.Println(ret.ErrorMsg)
+		return returnErrorSvg()
+	}
+	return NewReturn{
+		SVG:         ret.SVG,
+		Expanded:    ret.Expanded,
+		Blacklisted: ret.Blacklisted,
+	}
+}
+func sliceToJSArray(items []string) js.Value {
+	arr := js.Global().Get("Array").New()
+	for _, v := range items {
+		arr.Call("push", v)
+	}
+	return arr
+}
+
 func createSvgForConnectedWrapper(this js.Value, args []js.Value) interface{} {
 	if len(args) < 3 {
 		return "error: expected (string, string[], bool)"
@@ -160,7 +188,16 @@ func createSvgForConnectedWrapper(this js.Value, args []js.Value) interface{} {
 		return "error: mixins need to be an array"
 	}
 	debug := args[2].Bool()
-	return createSvgForConnected(input, mixins, debug)
+	result := createSvgForConnected(input, mixins, debug)
+
+	// Create JS object
+	obj := js.Global().Get("Object").New()
+
+	obj.Set("svg", result.SVG)
+	obj.Set("expanded", sliceToJSArray(result.Expanded))
+	obj.Set("blacklisted", sliceToJSArray(result.Blacklisted))
+
+	return obj
 }
 
 func main() {
