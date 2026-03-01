@@ -10,7 +10,7 @@
         </script>
         <script>
             window.uiVersion = "v1";
-            window.renderingVersion = "v0.12.0";
+            window.renderingVersion = "v0.14.0";
         </script>
 
         <script src="./js/htmx_1.9.12.min.js"></script>
@@ -88,15 +88,6 @@
                 >
                     <i class="fa-solid fa-arrows-up-down-left-right"></i>
                 </button>
-                <!-- Debug tool toggle -->
-                <button
-                    id="btn-debug"
-                    class="tool-btn"
-                    hx-on:click="window.svgControls.toggleDebug()"
-                    title="Toggle Debug View"
-                >
-                    <i class="fa-solid fa-bug"></i>
-                </button>
                 <!-- Manage uploads button -->
                 <button
                     id="btn-manage-uploads"
@@ -124,6 +115,15 @@
                     hx-on:click="window.svgControls.toggleConnectionAnimation()"
                 >
                     <i class="fa-solid fa-wave-square"></i>
+                </button>
+                <!-- Connected render mode toggle -->
+                <button
+                    id="btn-connected"
+                    class="tool-btn"
+                    title="Render Connected"
+                    style="margin-left: 8px"
+                >
+                    <i class="fa-solid fa-diagram-project"></i>
                 </button>
                 <!-- Comment legend panel toggle -->
                 <button
@@ -154,6 +154,7 @@
                     <i class="fa-solid fa-expand"></i>
                 </button>
             </div>
+            <div id="toolbar-collapse-handle" title="Collapse Toolbar" aria-label="Collapse Toolbar" role="button" tabindex="0"></div>
             <div id="menu-version">
                 <span id="toolbar-version-label" aria-live="polite"></span>
             </div>
@@ -246,7 +247,18 @@
             aria-live="polite"
             aria-hidden="true"
         >
-            <div class="title">Expanded Items</div>
+            <div class="panel-header">
+                <div class="title">Expanded Items</div>
+                <a
+                    id="link-clear-expanded"
+                    class="panel-clear-link"
+                    href="#"
+                    title="Clear Expanded Items"
+                    aria-label="Clear Expanded Items"
+                >
+                    🗑
+                </a>
+            </div>
             <div id="badge-list"></div>
         </div>
 
@@ -257,7 +269,18 @@
             aria-live="polite"
             aria-hidden="true"
         >
-            <div class="title">Blacklisted Items</div>
+            <div class="panel-header">
+                <div class="title">Blacklisted Items</div>
+                <a
+                    id="link-clear-blacklist"
+                    class="panel-clear-link"
+                    href="#"
+                    title="Clear Blacklisted Items"
+                    aria-label="Clear Blacklisted Items"
+                >
+                    🗑
+                </a>
+            </div>
             <div id="blacklist-list"></div>
         </div>
 

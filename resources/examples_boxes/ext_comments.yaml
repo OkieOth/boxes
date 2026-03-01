@@ -1,3 +1,9 @@
+legend:
+  entries:
+    - text: From Mixin
+      format: default
+    - text: From Main Layout
+      format: default
 comments:
   r5_3:
     text: I am a comment

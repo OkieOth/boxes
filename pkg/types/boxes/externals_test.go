@@ -113,6 +113,8 @@ func TestLoadExternalComments(t *testing.T) {
 	require.Nil(t, err)
 	require.NotNil(t, b)
 
+	require.Len(t, b.Legend.Entries, 1, "wrong number of initial legend entries")
+
 	c, err := types.LoadInputFromFile[boxes.BoxesFileMixings](inputConnections)
 	require.Nil(t, err)
 	require.NotNil(t, c)
@@ -128,6 +130,8 @@ func TestLoadExternalComments(t *testing.T) {
 	require.Nil(t, b.Boxes.Horizontal[2].Vertical[2].Comment)
 
 	b.MixinThings(*c)
+
+	require.Len(t, b.Legend.Entries, 2, "wrong number of legend entries")
 
 	// r5_3
 	require.Nil(t, b.Boxes.Horizontal[1].Vertical[0].Comment)

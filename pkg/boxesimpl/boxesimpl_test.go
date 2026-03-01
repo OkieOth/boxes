@@ -233,6 +233,32 @@ func TestDrawBoxesForUi(t *testing.T) {
 	}
 }
 
+func TestDrawBoxesRelatedToConnections(t *testing.T) {
+	tests := []struct {
+		inputFile  string
+		outputFile string
+	}{
+		{
+			inputFile:  "../../resources/examples_boxes/boxes_random.yaml",
+			outputFile: "../../temp/boxes_random_shrinked_1.svg",
+		},
+		{
+			inputFile:  "../../resources/examples_boxes/boxes_random.yaml",
+			outputFile: "../../temp/boxes_random_shrinked_2.svg",
+		},
+	}
+	for i, test := range tests {
+		b, err := types.LoadInputFromFile[boxes.Boxes](test.inputFile)
+		require.Nil(t, err, "error while loading input file for test", i)
+		svgReturn := boxesimpl.DrawBoxesRelatedToConnections(*b, []boxes.BoxesFileMixings{}, true)
+		require.Equal(t, "", svgReturn.ErrorMsg, "error generating SVG output for test", i)
+
+		err = os.WriteFile(test.outputFile, []byte(svgReturn.SVG), 0600)
+		require.Nil(t, err, "error while writing output file for test", i)
+		require.FileExists(t, test.outputFile, "can't find created output file", test.outputFile)
+	}
+}
+
 func TestDrawBoxesForUiComments(t *testing.T) {
 	tests := []struct {
 		inputFile    string

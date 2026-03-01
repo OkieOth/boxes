@@ -151,6 +151,24 @@ func (b *Boxes) mixInLayoutsImpl(l *Layout, additional *map[string]LayoutMixin) 
 	b.mixInLayoutsImplCont(l.Vertical, additional)
 }
 
+func (b *Boxes) mixinLegend(legend *Legend) {
+	if legend != nil {
+		if b.Legend == nil {
+			b.Legend = NewLegend()
+			b.Legend.Entries = append(b.Legend.Entries, legend.Entries...)
+		} else {
+			for i := range legend.Entries {
+				e := legend.Entries[i]
+				if !slices.ContainsFunc(b.Legend.Entries, func(c LegendEntry) bool {
+					return c.Text == e.Text && c.Format == e.Format
+				}) {
+					b.Legend.Entries = append(b.Legend.Entries, e)
+				}
+			}
+		}
+	}
+}
+
 func (b *Boxes) MixinThings(additional BoxesFileMixings) {
 	if additional.Title != nil {
 		b.Title += ": " + *additional.Title
@@ -158,14 +176,7 @@ func (b *Boxes) MixinThings(additional BoxesFileMixings) {
 			b.Title += fmt.Sprintf(" [%s]", *additional.Version)
 		}
 	}
-	if additional.Legend != nil {
-		if b.Legend == nil {
-			b.Legend = NewLegend()
-		}
-		if len(additional.Legend.Entries) > 0 {
-			b.Legend.Entries = append(b.Legend.Entries, additional.Legend.Entries...)
-		}
-	}
+	b.mixinLegend(additional.Legend)
 	if len(additional.Formats) > 0 {
 		if b.Formats == nil {
 			b.Formats = make(map[string]Format, 0)

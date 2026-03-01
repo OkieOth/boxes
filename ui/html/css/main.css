@@ -25,6 +25,24 @@
     overflow-x: auto;
     white-space: nowrap;
 }
+#menu-wrapper.toolbar-collapsed #menu {
+    max-height: 0;
+    padding: 0;
+    border-width: 0;
+    box-shadow: none;
+    overflow: hidden;
+}
+#toolbar-collapse-handle {
+    align-self: center;
+    width: 42px;
+    height: 6px;
+    border-radius: 999px;
+    background: #c6c6c6;
+    cursor: pointer;
+}
+#toolbar-collapse-handle:hover {
+    background: #a9a9a9;
+}
 #toolbar-version-label {
     display: flex;
     justify-content: flex-end;
@@ -258,6 +276,30 @@ button.tool-btn.active {
     margin-bottom: 8px;
     color: #333;
 }
+#collector .panel-header,
+#blacklist-collector .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+#collector .panel-header .title,
+#blacklist-collector .panel-header .title {
+    margin-bottom: 0;
+    flex: 1;
+}
+.panel-clear-link {
+    margin-left: auto;
+    text-decoration: none;
+    font-size: 14px;
+    line-height: 1;
+    padding: 2px 4px;
+    color: #333;
+}
+.panel-clear-link:hover {
+    color: #0a84ff;
+}
 #selected-mixins-list,
 #badge-list {
     display: flex;
@@ -323,6 +365,8 @@ button.tool-btn.active {
     left: 12px;
     width: 240px;
     top: 56px;
+    max-height: calc(50vh - 68px) !important;
+    overflow: auto;
     background: rgba(255, 255, 255, 0.95);
     border: 1px solid #ccc;
     border-radius: 8px;
