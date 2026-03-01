@@ -323,6 +323,8 @@ button.tool-btn.active {
     left: 12px;
     width: 240px;
     top: 56px;
+    max-height: calc(50vh - 68px) !important;
+    overflow: auto;
     background: rgba(255, 255, 255, 0.95);
     border: 1px solid #ccc;
     border-radius: 8px;
