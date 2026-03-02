@@ -16,6 +16,70 @@ func (doc *BoxesDocument) InitRoads() {
 	sort.Slice(doc.HorizontalRoads, func(i, j int) bool {
 		return doc.HorizontalRoads[i].StartY < doc.HorizontalRoads[j].StartY
 	})
+
+	// eliminate too close parallel roads
+	doc.removeParallelVerticalRoads()
+	doc.removeParallelHorizontalRoads()
+}
+
+func (doc *BoxesDocument) removeParallelVerticalRoads() {
+	if len(doc.VerticalRoads) > 0 {
+		maxI := len(doc.VerticalRoads) - 1
+		newLines := make([]ConnectionLine, 0)
+		for i := range doc.VerticalRoads {
+			if i == 0 {
+				continue
+			}
+			current := doc.VerticalRoads[i]
+			if i == maxI {
+				newLines = append(newLines, current)
+				continue
+			}
+			last := doc.VerticalRoads[i-1]
+			next := doc.VerticalRoads[i+1]
+			if (last.StartY == current.StartY) && (last.EndY == current.EndY) && ((current.StartX - last.StartX) <= types.RasterSize) {
+				// the previous line can be ignored
+				if (next.StartY == current.StartY) && (next.EndY == current.EndY) && ((next.StartX - current.StartX) <= types.RasterSize) {
+					// even the current line can be ignored ... because the previous the next one is also parallel close enough
+					continue
+				}
+				newLines = append(newLines, current)
+			} else {
+				newLines = append(newLines, last)
+			}
+		}
+		doc.VerticalRoads = newLines
+	}
+}
+
+func (doc *BoxesDocument) removeParallelHorizontalRoads() {
+	if len(doc.HorizontalRoads) > 0 {
+		maxI := len(doc.HorizontalRoads) - 1
+		newLines := make([]ConnectionLine, 0)
+		for i := range doc.HorizontalRoads {
+			if i == 0 {
+				continue
+			}
+			current := doc.HorizontalRoads[i]
+			if i == maxI {
+				newLines = append(newLines, current)
+				continue
+			}
+			last := doc.HorizontalRoads[i-1]
+			next := doc.HorizontalRoads[i+1]
+			if (last.StartX == current.StartX) && (last.EndX == current.EndX) && ((current.StartY - last.StartY) <= types.RasterSize) {
+				// the previous line can be ignored
+				if (next.StartX == current.StartX) && (next.EndX == current.EndX) && ((next.StartY - current.StartY) <= types.RasterSize) {
+					// even the current line can be ignored ... because the previous the next one is also parallel close enough
+					continue
+				}
+				newLines = append(newLines, current)
+			} else {
+				newLines = append(newLines, last)
+			}
+		}
+		doc.HorizontalRoads = newLines
+	}
 }
 
 func (doc *BoxesDocument) addVerticalRoad(line ConnectionLine) {
