@@ -173,6 +173,49 @@ async function loadYamlForComboValue(value) {
     }
 }
 
+let formatMixinContent = "";
+let formatMixinLoaded = false;
+let formatMixinLoadPromise = null;
+
+async function ensureFormatMixinLoaded() {
+    const name =
+        typeof window.formatMixin === "string"
+            ? window.formatMixin.trim()
+            : "";
+    if (!name) {
+        formatMixinLoaded = true;
+        formatMixinContent = "";
+        return;
+    }
+    if (formatMixinLoaded) return;
+    if (formatMixinLoadPromise) return formatMixinLoadPromise;
+    formatMixinLoadPromise = (async () => {
+        try {
+            const resp = await fetch(window.getBasePath() + "/data/" + name, {
+                cache: "no-cache",
+            });
+            if (!resp.ok) throw new Error("HTTP " + resp.status);
+            formatMixinContent = await resp.text();
+        } catch (err) {
+            console.error("Failed to load format mixin", name, err);
+            formatMixinContent = "";
+        } finally {
+            formatMixinLoaded = true;
+            formatMixinLoadPromise = null;
+        }
+    })();
+    return formatMixinLoadPromise;
+}
+
+function getCombinedMixins() {
+    const combined = [];
+    if (formatMixinContent) combined.push(formatMixinContent);
+    if (Array.isArray(mixins) && mixins.length) {
+        combined.push(...mixins);
+    }
+    return combined;
+}
+
 function normalizeCreateSvgResult(result, fallbackExpanded, fallbackBlacklisted) {
     let svgStr = "";
     let expanded = fallbackExpanded;
@@ -284,7 +327,12 @@ async function regenerateSvgWithConnectedOnce(expandedIds, blacklistIds) {
         window.hideCommentsEnabled
     );
     try {
-        let result = window.createSvgForConnected(arg, mixins, window.debug);
+        await ensureFormatMixinLoaded();
+        let result = window.createSvgForConnected(
+            arg,
+            getCombinedMixins(),
+            window.debug
+        );
         result = result && typeof result.then === "function" ? await result : result;
         const normalized = normalizeCreateSvgResult(
             result,
@@ -1027,9 +1075,10 @@ function getActiveCreateSvgFunction() {
 async function callCreateSvgWithMode(arg, filterTexts, blacklistIds, depthOverride) {
     const fn = getActiveCreateSvgFunction();
     if (!fn) return null;
+    await ensureFormatMixinLoaded();
     return fn(
         arg,
-        mixins,
+        getCombinedMixins(),
         Number.isFinite(depthOverride) ? depthOverride : window.defaultDepth,
         filterTexts || [],
         blacklistIds || [],

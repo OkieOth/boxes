@@ -118,6 +118,27 @@ func initBoxFormat(f *boxes.Format) boxes.BoxFormat {
 	}
 }
 
+func copyBoxFormat(f boxes.BoxFormat) boxes.BoxFormat {
+	fill := types.InitFillDef(f.Fill)
+	line := types.InitLineDef(f.Line)
+	return boxes.BoxFormat{
+		Padding:           f.Padding,
+		MinBoxMargin:      f.MinBoxMargin,
+		FontCaption:       f.FontCaption,
+		FontText1:         f.FontText1,
+		FontText2:         f.FontText2,
+		FontComment:       f.FontComment,
+		FontCommentMarker: f.FontCommentMarker,
+		Line:              line,
+		Fill:              fill,
+		FixedWidth:        f.FixedHeight,
+		FixedHeight:       f.FixedHeight,
+		WidthOfParent:     f.WidthOfParent,
+		VerticalTxt:       f.VerticalTxt,
+		CornerRadius:      f.CornerRadius,
+	}
+}
+
 func adjustBoxFormat(f *boxes.BoxFormat, adjustment *boxes.Format) boxes.BoxFormat {
 	var border *types.LineDef
 	var fill *types.FillDef
@@ -274,10 +295,13 @@ func initLayoutElement(l *boxes.Layout, doc *boxes.BoxesDocument, b *boxes.Boxes
 	if l.Format != nil {
 		if val, ok := doc.Formats[*l.Format]; ok {
 			if childHasSameFormat(l.Horizontal, *l.Format) || childHasSameFormat(l.Vertical, *l.Format) {
-				newFormat := val
+				newFormat := copyBoxFormat(val)
 				if newFormat.Fill != nil {
-					o := 0.2
+					o := 0.1
 					newFormat.Fill.Opacity = &o
+					f = &newFormat
+				}
+				if newFormat.Line != nil {
 					f = &newFormat
 				}
 			} else {
