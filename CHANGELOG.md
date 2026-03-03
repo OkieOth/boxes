@@ -1,7 +1,7 @@
 # v0.14.1
 * fix connection issue for to close located roads
 * performance improvements
-* avoid double legend entries with identical labels and texts
+* avoid double legend entries for identical comments
 
 # v0.14.0
 * toolbar in the UI can be almost hidden

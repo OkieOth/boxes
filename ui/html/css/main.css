@@ -176,6 +176,7 @@ button.tool-btn.active {
 /* Ensure SVG doesn't add extra clipping via CSS */
 #canvas svg {
     overflow: visible;
+    background-color: white;
 }
 /* Stage that we transform via CSS to avoid SVG clipping */
 #svg-stage {

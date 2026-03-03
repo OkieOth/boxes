@@ -259,18 +259,30 @@ func initImage(l *boxes.Layout, definedImages map[string]types.ImageDef) *boxes.
 	return &img
 }
 
+func childHasSameFormat(cont []boxes.Layout, format string) bool {
+	if len(cont) > 0 {
+		if cont[0].Format != nil && *cont[0].Format == format {
+			return true
+		}
+	}
+	return false
+}
+
 // func initLayoutElement(l *boxes.Layout, inputFormats map[string]boxes.BoxFormat, connectedIds *[]string, hideTextsForParents bool, definedImages map[string]types.ImageDef) boxes.LayoutElement {
 func initLayoutElement(l *boxes.Layout, doc *boxes.BoxesDocument, b *boxes.Boxes) boxes.LayoutElement {
 	var f *boxes.BoxFormat
-	// for _, tag := range l.Tags {
-	// 	if val, ok := inputFormats[tag]; ok {
-	// 		f = &val
-	// 		break
-	// 	}
-	// }
 	if l.Format != nil {
 		if val, ok := doc.Formats[*l.Format]; ok {
-			f = &val
+			if childHasSameFormat(l.Horizontal, *l.Format) || childHasSameFormat(l.Vertical, *l.Format) {
+				newFormat := val
+				if newFormat.Fill != nil {
+					o := 0.2
+					newFormat.Fill.Opacity = &o
+					f = &newFormat
+				}
+			} else {
+				f = &val
+			}
 		}
 	}
 	if len(l.Connections) > 0 && l.Id != "" {
