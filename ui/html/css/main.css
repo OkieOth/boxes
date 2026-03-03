@@ -176,6 +176,7 @@ button.tool-btn.active {
 /* Ensure SVG doesn't add extra clipping via CSS */
 #canvas svg {
     overflow: visible;
+    background-color: white;
 }
 /* Stage that we transform via CSS to avoid SVG clipping */
 #svg-stage {
@@ -513,6 +514,34 @@ button.tool-btn.active {
 #spinner .spinner-content i {
     font-size: 20px;
     color: #0a84ff;
+}
+
+/* Upload refresh toast */
+#upload-refresh-toast {
+    position: fixed;
+    top: 64px;
+    right: 16px;
+    z-index: 1800;
+    background: #0a3d62;
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 8px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    opacity: 0;
+    transform: translateY(-6px);
+    transition:
+        opacity 160ms ease,
+        transform 160ms ease;
+}
+#upload-refresh-toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+#upload-refresh-toast.hidden {
+    display: none;
 }
 
 /* Highlight for hovered connection line: increase stroke width only */

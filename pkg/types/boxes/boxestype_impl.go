@@ -648,11 +648,16 @@ func (doc *BoxesDocument) drawCommentTextsCustomLabels(drawing types.Drawing, c 
 		}
 	})
 
+	var lastLabel, lastText string
 	for i := range customLabeledComments {
 		c := customLabeledComments[i]
 		if c.Text == "" {
 			continue
 		}
+		if c.Text == lastText && c.Label == lastLabel {
+			continue
+		}
+		lastLabel, lastText = c.Label, c.Text
 		className := "comment"
 		if c.ConnectionIndex != nil {
 			className = fmt.Sprintf("%s connection conLine_%d", className, *c.ConnectionIndex)

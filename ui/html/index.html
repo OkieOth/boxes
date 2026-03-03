@@ -6,11 +6,10 @@
         <title>SVG UI Prototype</title>
         <!-- Initialize default depth before any other scripts -->
         <script>
+            window.formatMixin = "default_formats.yaml";
             window.defaultDepth = 2;
-        </script>
-        <script>
             window.uiVersion = "v1";
-            window.renderingVersion = "v0.14.0";
+            window.renderingVersion = "v0.15.0";
         </script>
 
         <script src="./js/htmx_1.9.12.min.js"></script>
@@ -154,7 +153,13 @@
                     <i class="fa-solid fa-expand"></i>
                 </button>
             </div>
-            <div id="toolbar-collapse-handle" title="Collapse Toolbar" aria-label="Collapse Toolbar" role="button" tabindex="0"></div>
+            <div
+                id="toolbar-collapse-handle"
+                title="Collapse Toolbar"
+                aria-label="Collapse Toolbar"
+                role="button"
+                tabindex="0"
+            ></div>
             <div id="menu-version">
                 <span id="toolbar-version-label" aria-live="polite"></span>
             </div>
@@ -192,11 +197,7 @@
         </div>
 
         <!-- Badge collector box (now left side) -->
-        <div
-            id="selected-collector"
-            aria-live="polite"
-            aria-hidden="false"
-        >
+        <div id="selected-collector" aria-live="polite" aria-hidden="false">
             <div class="title">Selected Mixins</div>
             <div class="selected-mixin-controls">
                 <div id="toolbar-combobox" class="toolbar-combobox">
@@ -233,8 +234,12 @@
                         style="display: none"
                     >
                         <option value="" selected>Default</option>
-                        <option value="conn1.yaml">Additional Connections 1</option>
-                        <option value="conn2.yaml">Additional Connections 2</option>
+                        <option value="conn1.yaml">
+                            Additional Connections 1
+                        </option>
+                        <option value="conn2.yaml">
+                            Additional Connections 2
+                        </option>
                     </select>
                 </div>
             </div>
@@ -310,6 +315,15 @@
             </div>
         </div>
 
+        <!-- Upload refresh toast -->
+        <div
+            id="upload-refresh-toast"
+            class="hidden"
+            role="status"
+            aria-live="polite"
+            aria-hidden="true"
+        ></div>
+
         <!-- Permalink popup -->
         <div
             id="permalink-popup"
@@ -364,17 +378,51 @@
                 display: none;
             "
         >
-            <div style="margin-bottom: 0.75em; font-weight: bold; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+            <div
+                style="
+                    margin-bottom: 0.75em;
+                    font-weight: bold;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 8px;
+                "
+            >
                 <span>Manage Uploaded Mixins</span>
-                <button id="uploads-close-btn" class="tool-btn" title="Close" style="padding: 4px 8px">
+                <button
+                    id="uploads-close-btn"
+                    class="tool-btn"
+                    title="Close"
+                    style="padding: 4px 8px"
+                >
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
-            <div id="uploads-list" style="max-height: 40vh; overflow: auto; border: 1px solid #ddd; padding: 8px; border-radius: 4px;">
+            <div
+                id="uploads-list"
+                style="
+                    max-height: 40vh;
+                    overflow: auto;
+                    border: 1px solid #ddd;
+                    padding: 8px;
+                    border-radius: 4px;
+                "
+            >
                 <!-- populated dynamically -->
             </div>
-            <div style="display: flex; justify-content: space-between; margin-top: 10px; gap: 8px;">
-                <button id="uploads-clear-all" class="tool-btn" title="Remove all">
+            <div
+                style="
+                    display: flex;
+                    justify-content: space-between;
+                    margin-top: 10px;
+                    gap: 8px;
+                "
+            >
+                <button
+                    id="uploads-clear-all"
+                    class="tool-btn"
+                    title="Remove all"
+                >
                     <i class="fa-solid fa-trash"></i> Remove all
                 </button>
                 <button id="uploads-done" class="tool-btn" title="Done">
@@ -395,8 +443,7 @@
                 );
                 if (!versionLabel) return;
                 const uiVersion = window.uiVersion || "n/a";
-                const renderingVersion =
-                    window.renderingVersion || "n/a";
+                const renderingVersion = window.renderingVersion || "n/a";
                 versionLabel.textContent = `Version: ${uiVersion} (rendering: ${renderingVersion})`;
             })();
 
@@ -465,7 +512,10 @@
                     return el ? el.value : "";
                 }
                 function getComboValues() {
-                    if (typeof window.getToolbarComboSelectionValues === "function") {
+                    if (
+                        typeof window.getToolbarComboSelectionValues ===
+                        "function"
+                    ) {
                         const values = window.getToolbarComboSelectionValues();
                         return Array.isArray(values) ? values : [];
                     }
@@ -564,9 +614,11 @@
                     const svg = canvas.querySelector("svg");
                     if (!svg) return;
                     const shouldDim = activeGroupHighlights.size > 0;
-                    const connectionLines = svg.querySelectorAll("line.connection");
+                    const connectionLines =
+                        svg.querySelectorAll("line.connection");
                     connectionLines.forEach((line) => {
-                        const isHighlighted = line.classList.contains("highlight-group");
+                        const isHighlighted =
+                            line.classList.contains("highlight-group");
                         if (shouldDim && !isHighlighted) {
                             line.classList.add("connection-dimmed");
                         } else {
@@ -582,16 +634,20 @@
                             return;
                         }
                         if (!getGroupClass(node)) return;
-                        const isHighlighted = node.classList.contains("highlight-group");
+                        const isHighlighted =
+                            node.classList.contains("highlight-group");
                         if (shouldDim && !isHighlighted) {
                             node.classList.add("connection-comment-dimmed");
                         } else {
                             node.classList.remove("connection-comment-dimmed");
                         }
                     });
-                    const runnerDots = svg.querySelectorAll(".connection-runner-dot");
+                    const runnerDots = svg.querySelectorAll(
+                        ".connection-runner-dot",
+                    );
                     runnerDots.forEach((dot) => {
-                        const isHighlighted = dot.classList.contains("highlight-group");
+                        const isHighlighted =
+                            dot.classList.contains("highlight-group");
                         if (shouldDim && !isHighlighted) {
                             dot.classList.add("runner-dimmed");
                         } else {
@@ -612,14 +668,13 @@
                         (classListOrElement.getAttribute &&
                             classListOrElement.getAttribute("class")) ||
                         (classListOrElement.className &&
-                            typeof classListOrElement.className.baseVal === "string"
+                        typeof classListOrElement.className.baseVal === "string"
                             ? classListOrElement.className.baseVal
                             : typeof classListOrElement.className === "string"
                               ? classListOrElement.className
                               : "");
                     if (raw) {
-                        raw
-                            .split(/\s+/)
+                        raw.split(/\s+/)
                             .filter(Boolean)
                             .forEach((c) => classes.push(c));
                     }
@@ -662,7 +717,9 @@
                     for (const line of lines) {
                         line.classList.add("highlight-group");
                     }
-                    const circles = svg.querySelectorAll(`circle.${groupClass}`);
+                    const circles = svg.querySelectorAll(
+                        `circle.${groupClass}`,
+                    );
                     for (const circle of circles) {
                         circle.classList.add("highlight-group");
                         bringToFront(circle);
@@ -672,13 +729,18 @@
                         text.classList.add("highlight-group");
                         bringToFront(text);
                     }
-                    const runners = svg.querySelectorAll(`.connection-runner-dot.${groupClass}`);
+                    const runners = svg.querySelectorAll(
+                        `.connection-runner-dot.${groupClass}`,
+                    );
                     for (const dot of runners) {
                         dot.classList.add("highlight-group");
                     }
                     activeGroupHighlights.add(groupClass);
                     updateNonHighlightedConnections();
-                    if (typeof window.highlightCommentLegendByGroupClass === "function") {
+                    if (
+                        typeof window.highlightCommentLegendByGroupClass ===
+                        "function"
+                    ) {
                         window.highlightCommentLegendByGroupClass(groupClass);
                     }
                 }
@@ -715,7 +777,10 @@
                     }
                     activeGroupHighlights.delete(groupClass);
                     updateNonHighlightedConnections();
-                    if (typeof window.unhighlightCommentLegendByGroupClass === "function") {
+                    if (
+                        typeof window.unhighlightCommentLegendByGroupClass ===
+                        "function"
+                    ) {
                         window.unhighlightCommentLegendByGroupClass(groupClass);
                     }
                 }
@@ -782,7 +847,9 @@
                     // Notify optional stub for future WASM integration
                     if (typeof window.onHideCommentsChanged === "function") {
                         try {
-                            window.onHideCommentsChanged(window.hideCommentsEnabled);
+                            window.onHideCommentsChanged(
+                                window.hideCommentsEnabled,
+                            );
                         } catch (err) {
                             console.warn("onHideCommentsChanged failed:", err);
                         }

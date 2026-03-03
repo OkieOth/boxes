@@ -96,14 +96,44 @@ async function triggerToolbarComboUpload() {
         ensureUploadOptionsInCombo(select);
         const uploadedVal = `uploaded::${upload.id}`;
         toolbarComboState.contentCache.set(uploadedVal, upload.content);
-        addToolbarComboSelection(uploadedVal);
         toolbarComboState.selectionMeta.set(uploadedVal, {
             ...(toolbarComboState.selectionMeta.get(uploadedVal) || {}),
             label: upload.label,
         });
+        if (toolbarComboState.selectedValues.includes(uploadedVal)) {
+            refreshToolbarComboUI();
+            applySelectedMixins();
+            showUploadRefreshToast(
+                upload.label
+                    ? `Updated: ${upload.label}`
+                    : "Uploaded mixin updated"
+            );
+        } else {
+            addToolbarComboSelection(uploadedVal);
+        }
     } catch (err) {
         console.error("Upload cancelled or failed:", err);
     }
+}
+
+let uploadToastTimer = null;
+function showUploadRefreshToast(message) {
+    const el = document.getElementById("upload-refresh-toast");
+    if (!el) return;
+    el.textContent = message || "Uploaded mixin updated";
+    el.classList.remove("hidden");
+    el.setAttribute("aria-hidden", "false");
+    requestAnimationFrame(() => {
+        el.classList.add("show");
+    });
+    if (uploadToastTimer) clearTimeout(uploadToastTimer);
+    uploadToastTimer = setTimeout(() => {
+        el.classList.remove("show");
+        el.setAttribute("aria-hidden", "true");
+        setTimeout(() => {
+            el.classList.add("hidden");
+        }, 180);
+    }, 1600);
 }
 
 function collectBadgeIds(listId) {
@@ -171,6 +201,49 @@ async function loadYamlForComboValue(value) {
         console.error("Failed to load YAML for", value, err);
         return "";
     }
+}
+
+let formatMixinContent = "";
+let formatMixinLoaded = false;
+let formatMixinLoadPromise = null;
+
+async function ensureFormatMixinLoaded() {
+    const name =
+        typeof window.formatMixin === "string"
+            ? window.formatMixin.trim()
+            : "";
+    if (!name) {
+        formatMixinLoaded = true;
+        formatMixinContent = "";
+        return;
+    }
+    if (formatMixinLoaded) return;
+    if (formatMixinLoadPromise) return formatMixinLoadPromise;
+    formatMixinLoadPromise = (async () => {
+        try {
+            const resp = await fetch(window.getBasePath() + "/data/" + name, {
+                cache: "no-cache",
+            });
+            if (!resp.ok) throw new Error("HTTP " + resp.status);
+            formatMixinContent = await resp.text();
+        } catch (err) {
+            console.error("Failed to load format mixin", name, err);
+            formatMixinContent = "";
+        } finally {
+            formatMixinLoaded = true;
+            formatMixinLoadPromise = null;
+        }
+    })();
+    return formatMixinLoadPromise;
+}
+
+function getCombinedMixins() {
+    const combined = [];
+    if (formatMixinContent) combined.push(formatMixinContent);
+    if (Array.isArray(mixins) && mixins.length) {
+        combined.push(...mixins);
+    }
+    return combined;
 }
 
 function normalizeCreateSvgResult(result, fallbackExpanded, fallbackBlacklisted) {
@@ -284,7 +357,12 @@ async function regenerateSvgWithConnectedOnce(expandedIds, blacklistIds) {
         window.hideCommentsEnabled
     );
     try {
-        let result = window.createSvgForConnected(arg, mixins, window.debug);
+        await ensureFormatMixinLoaded();
+        let result = window.createSvgForConnected(
+            arg,
+            getCombinedMixins(),
+            window.debug
+        );
         result = result && typeof result.then === "function" ? await result : result;
         const normalized = normalizeCreateSvgResult(
             result,
@@ -1027,9 +1105,10 @@ function getActiveCreateSvgFunction() {
 async function callCreateSvgWithMode(arg, filterTexts, blacklistIds, depthOverride) {
     const fn = getActiveCreateSvgFunction();
     if (!fn) return null;
+    await ensureFormatMixinLoaded();
     return fn(
         arg,
-        mixins,
+        getCombinedMixins(),
         Number.isFinite(depthOverride) ? depthOverride : window.defaultDepth,
         filterTexts || [],
         blacklistIds || [],
@@ -1844,7 +1923,7 @@ async function loadSVGFromWasm() {
     // Fetch boxes.wasm with streaming fallback
     let resp;
     try {
-        resp = await fetch(window.getBasePath() + "/wasm/boxes_0.14.0.wasm", {
+        resp = await fetch(window.getBasePath() + "/wasm/boxes_0.15.0.wasm", {
             cache: "no-cache",
         });
         if (!resp.ok) throw new Error("HTTP " + resp.status);

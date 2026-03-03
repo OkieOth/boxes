@@ -1,3 +1,14 @@
+# v0.15.0
+## Boxes
+* UI: split formats to a separate file
+* UI: enable deletion of panel content
+* nested boxes got improve color gradiants
+
+# v0.14.1
+* fix connection issue for to close located roads
+* performance improvements
+* avoid double legend entries for identical comments
+
 # v0.14.0
 * toolbar in the UI can be almost hidden
 * add function to taylor the display for all connection involved objects

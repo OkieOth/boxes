@@ -118,6 +118,27 @@ func initBoxFormat(f *boxes.Format) boxes.BoxFormat {
 	}
 }
 
+func copyBoxFormat(f boxes.BoxFormat) boxes.BoxFormat {
+	fill := types.InitFillDef(f.Fill)
+	line := types.InitLineDef(f.Line)
+	return boxes.BoxFormat{
+		Padding:           f.Padding,
+		MinBoxMargin:      f.MinBoxMargin,
+		FontCaption:       f.FontCaption,
+		FontText1:         f.FontText1,
+		FontText2:         f.FontText2,
+		FontComment:       f.FontComment,
+		FontCommentMarker: f.FontCommentMarker,
+		Line:              line,
+		Fill:              fill,
+		FixedWidth:        f.FixedHeight,
+		FixedHeight:       f.FixedHeight,
+		WidthOfParent:     f.WidthOfParent,
+		VerticalTxt:       f.VerticalTxt,
+		CornerRadius:      f.CornerRadius,
+	}
+}
+
 func adjustBoxFormat(f *boxes.BoxFormat, adjustment *boxes.Format) boxes.BoxFormat {
 	var border *types.LineDef
 	var fill *types.FillDef
@@ -259,18 +280,33 @@ func initImage(l *boxes.Layout, definedImages map[string]types.ImageDef) *boxes.
 	return &img
 }
 
+func childHasSameFormat(cont []boxes.Layout, format string) bool {
+	if len(cont) > 0 {
+		if cont[0].Format != nil && *cont[0].Format == format {
+			return true
+		}
+	}
+	return false
+}
+
 // func initLayoutElement(l *boxes.Layout, inputFormats map[string]boxes.BoxFormat, connectedIds *[]string, hideTextsForParents bool, definedImages map[string]types.ImageDef) boxes.LayoutElement {
 func initLayoutElement(l *boxes.Layout, doc *boxes.BoxesDocument, b *boxes.Boxes) boxes.LayoutElement {
 	var f *boxes.BoxFormat
-	// for _, tag := range l.Tags {
-	// 	if val, ok := inputFormats[tag]; ok {
-	// 		f = &val
-	// 		break
-	// 	}
-	// }
 	if l.Format != nil {
 		if val, ok := doc.Formats[*l.Format]; ok {
-			f = &val
+			if childHasSameFormat(l.Horizontal, *l.Format) || childHasSameFormat(l.Vertical, *l.Format) {
+				newFormat := copyBoxFormat(val)
+				if newFormat.Fill != nil {
+					o := 0.1
+					newFormat.Fill.Opacity = &o
+					f = &newFormat
+				}
+				if newFormat.Line != nil {
+					f = &newFormat
+				}
+			} else {
+				f = &val
+			}
 		}
 	}
 	if len(l.Connections) > 0 && l.Id != "" {
