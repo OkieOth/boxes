@@ -532,7 +532,9 @@ button.tool-btn.active {
     letter-spacing: 0.2px;
     opacity: 0;
     transform: translateY(-6px);
-    transition: opacity 160ms ease, transform 160ms ease;
+    transition:
+        opacity 160ms ease,
+        transform 160ms ease;
 }
 #upload-refresh-toast.show {
     opacity: 1;

@@ -1,3 +1,9 @@
+# v0.15.0
+## Boxes
+* UI: split formats to a separate file
+* UI: enable deletion of panel content
+* nested boxes got improve color gradiants
+
 # v0.14.1
 * fix connection issue for to close located roads
 * performance improvements
