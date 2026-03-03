@@ -96,14 +96,44 @@ async function triggerToolbarComboUpload() {
         ensureUploadOptionsInCombo(select);
         const uploadedVal = `uploaded::${upload.id}`;
         toolbarComboState.contentCache.set(uploadedVal, upload.content);
-        addToolbarComboSelection(uploadedVal);
         toolbarComboState.selectionMeta.set(uploadedVal, {
             ...(toolbarComboState.selectionMeta.get(uploadedVal) || {}),
             label: upload.label,
         });
+        if (toolbarComboState.selectedValues.includes(uploadedVal)) {
+            refreshToolbarComboUI();
+            applySelectedMixins();
+            showUploadRefreshToast(
+                upload.label
+                    ? `Updated: ${upload.label}`
+                    : "Uploaded mixin updated"
+            );
+        } else {
+            addToolbarComboSelection(uploadedVal);
+        }
     } catch (err) {
         console.error("Upload cancelled or failed:", err);
     }
+}
+
+let uploadToastTimer = null;
+function showUploadRefreshToast(message) {
+    const el = document.getElementById("upload-refresh-toast");
+    if (!el) return;
+    el.textContent = message || "Uploaded mixin updated";
+    el.classList.remove("hidden");
+    el.setAttribute("aria-hidden", "false");
+    requestAnimationFrame(() => {
+        el.classList.add("show");
+    });
+    if (uploadToastTimer) clearTimeout(uploadToastTimer);
+    uploadToastTimer = setTimeout(() => {
+        el.classList.remove("show");
+        el.setAttribute("aria-hidden", "true");
+        setTimeout(() => {
+            el.classList.add("hidden");
+        }, 180);
+    }, 1600);
 }
 
 function collectBadgeIds(listId) {
