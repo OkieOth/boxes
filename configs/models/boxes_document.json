@@ -395,6 +395,10 @@
           "description": "index of this connection, in the boxes_document object",
           "type": "integer"
         },
+        "connRestrictions": {
+          "description": "optional container to define additional contrains for the specific connection",
+          "$ref": "./shared.json#/definitions/ConnRestriction"
+        },
         "comment": {
           "$ref": "./shared.json#/definitions/Comment"
         }
