@@ -1,6 +1,0 @@
-name: I am group 1
-entries:
-  - name: I am a task
-  - name: I am another task
-    start: 2025-01-03
-    end: 2025-10-07
