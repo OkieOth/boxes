@@ -41,6 +41,10 @@
             {
               "name": "modelPackage",
               "value": "types"
+            },
+            {
+              "name": "noExternalTypes",
+              "value": "true"
             }
           ]
         }

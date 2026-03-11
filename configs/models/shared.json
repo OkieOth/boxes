@@ -24,13 +24,13 @@
       },
       "required": ["text"]
     },
-    "ConnRestrictio": {
+    "ConnRestriction": {
       "description": "container to define closer how a connection should be routed",
       "type": "object",
       "properties": {
         "source": {
           "description": "restricts the start of the connection",
-          "$ref": "#/definitions/ConnRestImpl"
+          "$ref": "#/definitions/ConnRestItem"
         },
         "dest": {
           "description": "restricts the end of the connection",

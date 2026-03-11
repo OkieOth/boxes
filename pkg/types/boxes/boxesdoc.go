@@ -339,6 +339,9 @@ type ConnectionElem struct {
     // index of this connection, in the boxes_document object
     ConnectionIndex int  `yaml:"connectionIndex"`
 
+    // optional container to define additional contrains for the specific connection
+    ConnRestrictions *types.ConnRestriction  `yaml:"connRestrictions,omitempty"`
+
     Comment *types.Comment  `yaml:"comment,omitempty"`
 }
 
@@ -364,6 +367,7 @@ func CopyConnectionElem(src *ConnectionElem) *ConnectionElem {
         ret.Parts = append(ret.Parts, e)
     }
     ret.ConnectionIndex = src.ConnectionIndex
+    ret.ConnRestrictions = types.CopyConnRestriction(src.ConnRestrictions)
     ret.Comment = types.CopyComment(src.Comment)
 
     return &ret
