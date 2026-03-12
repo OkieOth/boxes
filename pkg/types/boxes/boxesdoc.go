@@ -253,6 +253,9 @@ type LayoutElement struct {
 
     // Optional link to a source, related to this element. This can be used for instance for on-click handlers in a UI or simply as documentation.
     DataLink *string  `yaml:"dataLink,omitempty"`
+
+    // aggregated connection point restrictions for this element, derived from all connections to and from it
+    ConnRestrictions *types.ConnRestrItem  `yaml:"connRestrictions,omitempty"`
 }
 
 func NewLayoutElement() *LayoutElement {
@@ -307,6 +310,7 @@ func CopyLayoutElement(src *LayoutElement) *LayoutElement {
         ret.Tags = append(ret.Tags, e)
     }
     ret.DataLink = src.DataLink
+    ret.ConnRestrictions = types.CopyConnRestrItem(src.ConnRestrictions)
 
     return &ret
 }
@@ -782,6 +786,9 @@ type LayoutElemConnection struct {
     // is only set by while the layout is processed, don't set it in the definition
     HiddenComments bool  `yaml:"hiddenComments"`
 
+    // optional container to define additional contrains for the specific connection
+    ConnRestrictions *types.ConnRestriction  `yaml:"connRestrictions,omitempty"`
+
     // Tags to annotate the connection, tags are used to format
     Tags []string  `yaml:"tags,omitempty"`
 }
@@ -803,6 +810,7 @@ func CopyLayoutElemConnection(src *LayoutElemConnection) *LayoutElemConnection {
     ret.DestArrow = src.DestArrow
     ret.Format = types.CopyLineDef(src.Format)
     ret.HiddenComments = src.HiddenComments
+    ret.ConnRestrictions = types.CopyConnRestriction(src.ConnRestrictions)
     ret.Tags = make([]string, 0)
     for _, e := range src.Tags {
         ret.Tags = append(ret.Tags, e)

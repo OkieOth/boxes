@@ -249,15 +249,10 @@ note top: Object to define comments in\nthe diagrams
  
 
 class "**ConnRestriction**" as ConnRestriction {
-        ConnRestItem source
-        ConnRestItem dest
+        ConnRestrItem source
+        ConnRestrItem dest
 }
 note top: container to define closer how\na connection should be routed
-
- 
-
-class "ConnRestItem" as ConnRestItem {
-}
 
  
 
@@ -432,10 +427,10 @@ OverlayFormatDef "0" *-- "n" OverlayGradation
 
 
     
-ConnRestriction  *--  ConnRestItem
+ConnRestriction  *--  ConnRestrItem
 
+ConnRestriction  *--  ConnRestrItem
 
-    
     
 
 

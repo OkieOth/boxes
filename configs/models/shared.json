@@ -30,11 +30,11 @@
       "properties": {
         "source": {
           "description": "restricts the start of the connection",
-          "$ref": "#/definitions/ConnRestItem"
+          "$ref": "#/definitions/ConnRestrItem"
         },
         "dest": {
           "description": "restricts the end of the connection",
-          "$ref": "#/definitions/ConnRestItem"
+          "$ref": "#/definitions/ConnRestrItem"
         }
       }
     },

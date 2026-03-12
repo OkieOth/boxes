@@ -32,6 +32,7 @@ func initConnections(l []boxes.Connection, inputFormats map[string]boxes.BoxForm
 		conn.DestArrow = elem.DestArrow
 		conn.HiddenComments = elem.HiddenComments
 		conn.Tags = elem.Tags
+		conn.ConnRestrictions = elem.ConnRestrictions
 		if elem.Format != nil {
 			if formatInst, ok := inputFormats[*elem.Format]; ok {
 				conn.Format = formatInst.Line
@@ -349,7 +350,7 @@ func initLayoutElement(l *boxes.Layout, doc *boxes.BoxesDocument, b *boxes.Boxes
 	if l.Comment != nil {
 		comments = append(comments, *l.Comment)
 	}
-	return boxes.LayoutElement{
+	elem := boxes.LayoutElement{
 		Id:                l.Id,
 		Caption:           l.Caption,
 		Text1:             text1,
@@ -363,6 +364,65 @@ func initLayoutElement(l *boxes.Layout, doc *boxes.BoxesDocument, b *boxes.Boxes
 		DontBlockConPaths: l.DontBlockConPaths,
 		DataLink:          l.DataLink,
 		Connections:       initConnections(l.Connections, doc.Formats),
+	}
+	for _, c := range l.Connections {
+		if c.ConnRestrictions != nil && c.ConnRestrictions.Source != nil {
+			if elem.ConnRestrictions == nil {
+				r := types.ConnRestrItem{}
+				elem.ConnRestrictions = &r
+			}
+			src := c.ConnRestrictions.Source
+			if src.NoTop {
+				elem.ConnRestrictions.NoTop = true
+			}
+			if src.NoBottom {
+				elem.ConnRestrictions.NoBottom = true
+			}
+			if src.NoLeft {
+				elem.ConnRestrictions.NoLeft = true
+			}
+			if src.NoRight {
+				elem.ConnRestrictions.NoRight = true
+			}
+		}
+	}
+	return elem
+}
+
+func applyDestRestrictions(elem *boxes.LayoutElement, doc *boxes.BoxesDocument) {
+	for _, c := range elem.Connections {
+		if c.ConnRestrictions != nil && c.ConnRestrictions.Dest != nil {
+			destElem := doc.FindBoxWithId(c.DestId)
+			if destElem != nil {
+				dest := c.ConnRestrictions.Dest
+				if destElem.ConnRestrictions == nil {
+					r := types.ConnRestrItem{}
+					destElem.ConnRestrictions = &r
+				}
+				if dest.NoTop {
+					destElem.ConnRestrictions.NoTop = true
+				}
+				if dest.NoBottom {
+					destElem.ConnRestrictions.NoBottom = true
+				}
+				if dest.NoLeft {
+					destElem.ConnRestrictions.NoLeft = true
+				}
+				if dest.NoRight {
+					destElem.ConnRestrictions.NoRight = true
+				}
+			}
+		}
+	}
+	if elem.Vertical != nil {
+		for i := range elem.Vertical.Elems {
+			applyDestRestrictions(&elem.Vertical.Elems[i], doc)
+		}
+	}
+	if elem.Horizontal != nil {
+		for i := range elem.Horizontal.Elems {
+			applyDestRestrictions(&elem.Horizontal.Elems[i], doc)
+		}
 	}
 }
 
@@ -446,6 +506,7 @@ func DocumentFromBoxes(b *boxes.Boxes) (*boxes.BoxesDocument, error) {
 	}
 
 	doc.Boxes = initLayoutElement(&b.Boxes, doc, b)
+	applyDestRestrictions(&doc.Boxes, doc)
 	if doc.MinBoxMargin == 0 {
 		doc.MinBoxMargin = types.GlobalMinBoxMargin
 	}

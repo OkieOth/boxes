@@ -529,27 +529,41 @@ func (doc *BoxesDocument) initStartPositionsImpl(elem *LayoutElement) {
 			elem.TopXToStart = &elem.CenterX
 			elem.LeftYToStart = &elem.CenterY
 			elem.RightYToStart = &elem.CenterY
-			// add topX
 			weight := 2 * types.RasterSize
-			doc.newConnectionNodeFromStartPos(elem.Id, *elem.TopXToStart, elem.Y,
-				[]ConnectionEdge{
-					CreateConnectionEdge(*elem.TopXToStart, elem.Y-weight, weight),
-				})
+			noTop := elem.ConnRestrictions != nil && elem.ConnRestrictions.NoTop
+			noBottom := elem.ConnRestrictions != nil && elem.ConnRestrictions.NoBottom
+			noLeft := elem.ConnRestrictions != nil && elem.ConnRestrictions.NoLeft
+			noRight := elem.ConnRestrictions != nil && elem.ConnRestrictions.NoRight
+			// add topX
+			if !noTop {
+				doc.newConnectionNodeFromStartPos(elem.Id, *elem.TopXToStart, elem.Y,
+					[]ConnectionEdge{
+						CreateConnectionEdge(*elem.TopXToStart, elem.Y-weight, weight),
+					})
+			}
 			// add bottomX
-			doc.newConnectionNodeFromStartPos(elem.Id, *elem.BottomXToStart, elem.Y+elem.Height,
-				[]ConnectionEdge{
-					CreateConnectionEdge(*elem.BottomXToStart, elem.Y+elem.Height+weight, weight),
-				})
+			if !noBottom {
+				doc.newConnectionNodeFromStartPos(elem.Id, *elem.BottomXToStart, elem.Y+elem.Height,
+					[]ConnectionEdge{
+						CreateConnectionEdge(*elem.BottomXToStart, elem.Y+elem.Height+weight, weight),
+					})
+			}
 			// add leftY
-			doc.newConnectionNodeFromStartPos(elem.Id, elem.X, *elem.LeftYToStart,
-				[]ConnectionEdge{
-					CreateConnectionEdge(elem.X-weight, *elem.LeftYToStart, weight),
-				})
+			if !noLeft {
+				doc.newConnectionNodeFromStartPos(elem.Id, elem.X, *elem.LeftYToStart,
+					[]ConnectionEdge{
+						CreateConnectionEdge(elem.X-weight, *elem.LeftYToStart, weight),
+					})
+			} else {
+				fmt.Println("DEBUG - noLeft set", elem.Caption)
+			}
 			// add rightY
-			doc.newConnectionNodeFromStartPos(elem.Id, elem.X+elem.Width, *elem.RightYToStart,
-				[]ConnectionEdge{
-					CreateConnectionEdge(elem.X+elem.Width+weight, *elem.LeftYToStart, weight),
-				})
+			if !noRight {
+				doc.newConnectionNodeFromStartPos(elem.Id, elem.X+elem.Width, *elem.RightYToStart,
+					[]ConnectionEdge{
+						CreateConnectionEdge(elem.X+elem.Width+weight, *elem.LeftYToStart, weight),
+					})
+			}
 		}
 	}
 	if elem.Vertical != nil {

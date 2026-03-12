@@ -44,10 +44,10 @@ func CopyComment(src *Comment) *Comment {
 type ConnRestriction struct {
 
     // restricts the start of the connection
-    Source *ConnRestItem  `yaml:"source,omitempty"`
+    Source *ConnRestrItem  `yaml:"source,omitempty"`
 
     // restricts the end of the connection
-    Dest *ConnRestItem  `yaml:"dest,omitempty"`
+    Dest *ConnRestrItem  `yaml:"dest,omitempty"`
 }
 
 
@@ -56,25 +56,8 @@ func CopyConnRestriction(src *ConnRestriction) *ConnRestriction {
         return nil
     }
     var ret ConnRestriction
-    ret.Source = CopyConnRestItem(src.Source)
-    ret.Dest = CopyConnRestItem(src.Dest)
-
-    return &ret
-}
-
-
-
-
-
-type ConnRestItem struct {
-}
-
-
-func CopyConnRestItem(src *ConnRestItem) *ConnRestItem {
-    if src == nil {
-        return nil
-    }
-    var ret ConnRestItem
+    ret.Source = CopyConnRestrItem(src.Source)
+    ret.Dest = CopyConnRestrItem(src.Dest)
 
     return &ret
 }
