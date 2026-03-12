@@ -23,6 +23,43 @@
         }
       },
       "required": ["text"]
+    },
+    "ConnRestriction": {
+      "description": "container to define closer how a connection should be routed",
+      "type": "object",
+      "properties": {
+        "source": {
+          "description": "restricts the start of the connection",
+          "$ref": "#/definitions/ConnRestrItem"
+        },
+        "dest": {
+          "description": "restricts the end of the connection",
+          "$ref": "#/definitions/ConnRestrItem"
+        }
+      }
+    },
+    "ConnRestrItem": {
+      "description": "possible options to restrict a connection start or end",
+      "type": "object",
+      "properties": {
+        "noTop": {
+          "description": "no connection start or end to the top border of a box",
+          "type": "boolean"
+        },
+        "noBottom": {
+          "description": "no connection start or end to the bottom border of a box",
+          "type": "boolean"
+        },
+        "noLeft": {
+          "description": "no connection start or end to the left border of a box",
+          "type": "boolean"
+        },
+        "noRight": {
+          "description": "no connection start or end to the right border of a box",
+          "type": "boolean"
+        }
+      },
+      "required": ["noTop", "noBottom", "noLeft", "noRight"]
     }
   }
 }

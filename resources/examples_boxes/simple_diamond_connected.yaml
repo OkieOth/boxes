@@ -29,3 +29,6 @@ boxes:
       text1: I am in the third line
       connections:
         - destId: r2_2
+          connRestrictions:
+            dest:
+              noBottom: true

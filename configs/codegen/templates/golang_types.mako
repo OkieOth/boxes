@@ -14,6 +14,8 @@
     jsonTypesPackage = templateParameters.get('jsonTypesPackage','<<PLEASE SET jsonTypesPackage TEMPLATE PARAM>>')
     jsonSerialization = templateParameters.get('jsonSerialization',False)
 
+    noExternalTypes = templateParameters.get('noExternalTypes',False)
+
     def printStarForJson(isJson):
         return "*" if isJson else ""
 
@@ -81,7 +83,7 @@
         elif isinstance(typeObj, model.DictionaryType):
             ret = 'map[string]{}'.format(printGolangType(typeObj.valueType, False, True, 0, False))
         elif isinstance(typeObj, model.ComplexType):
-            if typeObj.domain == "base":
+            if (typeObj.domain == "base") and (not noExternalTypes):
                 ret = "{}.{}".format(basePackageName, typeObj.name)
             else:
                 ret = typeObj.name

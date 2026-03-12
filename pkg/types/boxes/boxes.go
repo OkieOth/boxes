@@ -454,6 +454,9 @@ type Connection struct {
     // is only set by while the layout is processed, don't set it in the definition
     HiddenComments bool  `yaml:"hiddenComments"`
 
+    // optional container to define additional contrains for the specific connection
+    ConnRestrictions *types.ConnRestriction  `yaml:"connRestrictions,omitempty"`
+
     // Tags to annotate the connection, tags are used to format
     Tags []string  `yaml:"tags,omitempty"`
 }
@@ -476,6 +479,7 @@ func CopyConnection(src *Connection) *Connection {
     ret.DestArrow = src.DestArrow
     ret.Format = src.Format
     ret.HiddenComments = src.HiddenComments
+    ret.ConnRestrictions = types.CopyConnRestriction(src.ConnRestrictions)
     ret.Tags = make([]string, 0)
     for _, e := range src.Tags {
         ret.Tags = append(ret.Tags, e)

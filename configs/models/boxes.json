@@ -244,6 +244,10 @@
           "description": "is only set by while the layout is processed, don't set it in the definition",
           "type": "boolean"
         },
+        "connRestrictions": {
+          "description": "optional container to define additional contrains for the specific connection",
+          "$ref": "./shared.json#/definitions/ConnRestriction"
+        },
         "tags": {
           "description": "Tags to annotate the connection, tags are used to format",
           "type": "array",

@@ -121,10 +121,10 @@ func TestSvgWithConnections(t *testing.T) {
 			svgdrawing.InitImages(doc.Images)
 			doc.DrawBoxes(svgdrawing)
 			// DEBUG - Start
-			svgdrawing.DrawRaster(doc.Width, doc.Height, types.RasterSize)
-			doc.DrawRoads(svgdrawing)
-			doc.DrawStartPositions(svgdrawing)
-			doc.DrawConnectionNodes(svgdrawing)
+			//svgdrawing.DrawRaster(doc.Width, doc.Height, types.RasterSize)
+			//doc.DrawRoads(svgdrawing)
+			//doc.DrawStartPositions(svgdrawing)
+			//doc.DrawConnectionNodes(svgdrawing)
 			// DEBUG - End
 			doc.DrawConnections(svgdrawing)
 			doc.DrawComments(svgdrawing, textDimensionCalulator)
@@ -192,13 +192,13 @@ func TestSvgWithConnections(t *testing.T) {
 		// 	checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
 		// 	},
 		// },
-		{
-			inputFile:  "../../resources/examples_boxes/horizontal_nested_diamond2_connected.yaml",
-			outputFile: "../../temp/horizontal_nested_diamond2_connected.svg",
-			checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
-				require.NotNil(t, doc)
-			},
-		},
+		// {
+		// 	inputFile:  "../../resources/examples_boxes/horizontal_nested_diamond2_connected.yaml",
+		// 	outputFile: "../../temp/horizontal_nested_diamond2_connected.svg",
+		// 	checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
+		// 		require.NotNil(t, doc)
+		// 	},
+		// },
 		// {
 		// 	inputFile:  "../../ui/data/boxes_random.yaml",
 		// 	outputFile: "../../temp/boxes_random.svg",
@@ -211,19 +211,19 @@ func TestSvgWithConnections(t *testing.T) {
 		// 	checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
 		// 	},
 		// },
-		// {
-		// 	inputFile:  "../../resources/examples_boxes/simple_diamond_connected.yaml",
-		// 	outputFile: "../../temp/simple_diamond_connected.svg",
-		// 	checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
-		// 	},
-		// },
 		{
-			inputFile:  "../../resources/examples_boxes/boxes_random_truncated.yaml",
-			outputFile: "../../temp/boxes_random_truncated.svg",
+			inputFile:  "../../resources/examples_boxes/simple_diamond_connected.yaml",
+			outputFile: "../../temp/simple_diamond_connected.svg",
 			checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
-				require.NotNil(t, doc.Connections)
 			},
 		},
+		// {
+		// 	inputFile:  "../../resources/examples_boxes/boxes_random_truncated.yaml",
+		// 	outputFile: "../../temp/boxes_random_truncated.svg",
+		// 	checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
+		// 		require.NotNil(t, doc.Connections)
+		// 	},
+		// },
 		// {
 		// 	inputFile:  "../../resources/examples_boxes/complex_vertical.yaml",
 		// 	outputFile: "../../temp/TestSimpleSvg_vcomplex_connected.svg",

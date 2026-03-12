@@ -64,6 +64,7 @@ class "**LayoutElement**" as LayoutElement {
         BooleanType dontBlockConPaths
         StringType[] tags
         StringType dataLink
+        ConnRestrItem connRestrictions
 }
 
  
@@ -77,6 +78,7 @@ class "**ConnectionElem**" as ConnectionElem {
         BooleanType hiddenComments
         ConnectionLine[] parts
         IntegerType connectionIndex
+        ConnRestriction connRestrictions
         Comment comment
 }
 
@@ -191,6 +193,7 @@ class "**LayoutElemConnection**" as LayoutElemConnection {
         BooleanType destArrow
         LineDef format
         BooleanType hiddenComments
+        ConnRestriction connRestrictions
         StringType[] tags
 }
 
@@ -232,6 +235,24 @@ class "**Comment**" as Comment {
         StringType format
 }
 note top: Object to define comments in\nthe diagrams
+
+ 
+
+class "**ConnRestriction**" as ConnRestriction {
+        ConnRestrItem source
+        ConnRestrItem dest
+}
+note top: container to define closer how\na connection should be routed
+
+ 
+
+class "**ConnRestrItem**" as ConnRestrItem {
+        BooleanType noTop
+        BooleanType noBottom
+        BooleanType noLeft
+        BooleanType noRight
+}
+note top: possible options to restrict a\nconnection start or end
 
  
 
@@ -385,6 +406,8 @@ LayoutElement "0" *-- "n" LayoutElemConnection
 
 
 
+LayoutElement  *--  ConnRestrItem
+
     
 
 
@@ -395,6 +418,8 @@ ConnectionElem  *--  LineDef
 
 ConnectionElem "0" *-- "n" ConnectionLine
 
+
+ConnectionElem  *--  ConnRestriction
 
 ConnectionElem  *--  Comment
 
@@ -492,6 +517,8 @@ LayoutElemConnection  *--  Comment
 LayoutElemConnection  *--  LineDef
 
 
+LayoutElemConnection  *--  ConnRestriction
+
 
     
 CommentFormat  *--  FontDef
@@ -516,6 +543,16 @@ CommentFormat  *--  FillDef
 OverlayEntry  *--  BoxFormat
 
     
+
+
+
+    
+ConnRestriction  *--  ConnRestrItem
+
+ConnRestriction  *--  ConnRestrItem
+
+    
+
 
 
 

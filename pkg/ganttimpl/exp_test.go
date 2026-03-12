@@ -1,7 +1,0 @@
-package ganttimpl
-
-var LoadAdditionalEventsFileAndMerge = loadAdditionalEventsFileAndMerge
-var LoadAdditionalGroupFilesAndMerge = loadAdditionalGroupFilesAndMerge
-var TrimInputToDates = trimInputToDates
-var FilterEntriesByDates = filterEntriesByDates
-var IsDateToBeConsidered = isDateToBeConsidered

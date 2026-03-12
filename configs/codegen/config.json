@@ -41,6 +41,10 @@
             {
               "name": "modelPackage",
               "value": "types"
+            },
+            {
+              "name": "noExternalTypes",
+              "value": "true"
             }
           ]
         }
@@ -208,116 +212,6 @@
         "singleFileTask": {
           "template": "plantUml",
           "destFile": "/project/docs/models/puml/boxes_document.puml"
-        }
-      }
-    ]
-  },
-  {
-    "name": "gantt",
-    "description": "code gen configuration for gantt input types",
-    "models": [
-      {
-        "schema": "/project/configs/models/gantt.json"
-      }
-    ],
-    "tasks": [
-      {
-        "name": "input",
-        "whiteListed": [
-          {
-            "name": "input",
-            "type": "domain"
-          }
-        ],
-        "singleFileTask": {
-          "template": "/project/configs/codegen/templates/golang_types.mako",
-          "destFile": "/project/pkg/types/gantt/gantt.go",
-          "templateParams": [
-            {
-              "name": "modelPackage",
-              "value": "gantt"
-            },
-            {
-              "name": "baseModelPackage",
-              "value": "types"
-            },
-            {
-              "name": "baseModelPackageImport",
-              "value": "github.com/okieoth/draw.chart.things/pkg/types"
-            }
-          ]
-        }
-      },
-      {
-        "name": "Plantuml",
-        "whiteListed": [
-          {
-            "name": "input",
-            "type": "domain"
-          },
-          {
-            "name": "base",
-            "type": "domain"
-          }
-        ],
-        "singleFileTask": {
-          "template": "plantUml",
-          "destFile": "/project/docs/models/puml/gantt.puml"
-        }
-      }
-    ]
-  },
-  {
-    "name": "gantt-document",
-    "description": "code gen configuration for gantt document types",
-    "models": [
-      {
-        "schema": "/project/configs/models/gantt_document.json"
-      }
-    ],
-    "tasks": [
-      {
-        "name": "input",
-        "whiteListed": [
-          {
-            "name": "implementation",
-            "type": "domain"
-          }
-        ],
-        "singleFileTask": {
-          "template": "/project/configs/codegen/templates/golang_types.mako",
-          "destFile": "/project/pkg/types/gantt/ganttdoc.go",
-          "templateParams": [
-            {
-              "name": "modelPackage",
-              "value": "gantt"
-            },
-            {
-              "name": "baseModelPackage",
-              "value": "types"
-            },
-            {
-              "name": "baseModelPackageImport",
-              "value": "github.com/okieoth/draw.chart.things/pkg/types"
-            }
-          ]
-        }
-      },
-      {
-        "name": "Plantuml",
-        "whiteListed": [
-          {
-            "name": "input",
-            "type": "domain"
-          },
-          {
-            "name": "base",
-            "type": "domain"
-          }
-        ],
-        "singleFileTask": {
-          "template": "plantUml",
-          "destFile": "/project/docs/models/puml/ganttdoc.puml"
         }
       }
     ]

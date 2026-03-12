@@ -53,6 +53,7 @@ class "**Connection**" as Connection {
         BooleanType destArrow
         StringType format
         BooleanType hiddenComments
+        ConnRestriction connRestrictions
         StringType[] tags
 }
 
@@ -146,6 +147,24 @@ class "**Comment**" as Comment {
         StringType format
 }
 note top: Object to define comments in\nthe diagrams
+
+ 
+
+class "**ConnRestriction**" as ConnRestriction {
+        ConnRestrItem source
+        ConnRestrItem dest
+}
+note top: container to define closer how\na connection should be routed
+
+ 
+
+class "**ConnRestrItem**" as ConnRestrItem {
+        BooleanType noTop
+        BooleanType noBottom
+        BooleanType noLeft
+        BooleanType noRight
+}
+note top: possible options to restrict a\nconnection start or end
 
  
 
@@ -264,6 +283,8 @@ Connection  *--  Comment
 
 
 
+Connection  *--  ConnRestriction
+
 
     
 LayoutMixin "0" *-- "n" Layout
@@ -324,6 +345,16 @@ OverlayFormatDef "0" *-- "n" OverlayGradation
 
 
     
+
+
+
+    
+ConnRestriction  *--  ConnRestrItem
+
+ConnRestriction  *--  ConnRestrItem
+
+    
+
 
 
 
