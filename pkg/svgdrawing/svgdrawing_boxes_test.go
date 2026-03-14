@@ -138,153 +138,153 @@ func TestSvgWithConnections(t *testing.T) {
 	}
 
 	tests := []testData{
-		// {
-		// 	inputFile:  "../../resources/examples_boxes/complex_horizontal_connected_01.yaml",
-		// 	outputFile: "../../temp/TestSimpleSvg_hcomplex_connected_01.svg",
-		// 	checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
-		// 	},
-		// },
-		// {
-		// 	inputFile:  "../../resources/examples_boxes/complex_horizontal_connected_02.yaml",
-		// 	outputFile: "../../temp/TestSimpleSvg_hcomplex_connected_02.svg",
-		// 	checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
-		// 	},
-		// },
-		// {
-		// 	inputFile:  "../../resources/examples_boxes/complex_horizontal_connected_03.yaml",
-		// 	outputFile: "../../temp/TestSimpleSvg_hcomplex_connected_03.svg",
-		// 	checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
-		// 	},
-		// },
-		// {
-		// 	inputFile:  "../../resources/examples_boxes/complex_horizontal_connected_04.yaml",
-		// 	outputFile: "../../temp/TestSimpleSvg_hcomplex_connected_04.svg",
-		// 	checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
-		// 	},
-		// },
-		// {
-		// 	inputFile:  "../../resources/examples_boxes/complex_horizontal_connected_05.yaml",
-		// 	outputFile: "../../temp/TestSimpleSvg_hcomplex_connected_05.svg",
-		// 	checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
-		// 	},
-		// },
-		// {
-		// 	inputFile:  "../../resources/examples_boxes/long_horizontal_01.yaml",
-		// 	outputFile: "../../temp/long_horizontal_01.svg",
-		// 	checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
-		// 	},
-		// },
-		// {
-		// 	inputFile:  "../../resources/examples_boxes/long_horizontal_02.yaml",
-		// 	outputFile: "../../temp/long_horizontal_02.svg",
-		// 	checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
-		// 	},
-		// },
-		// {
-		// 	inputFile:  "../../resources/examples_boxes/long_vertical_01.yaml",
-		// 	outputFile: "../../temp/long_vertical_01.svg",
-		// 	checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
-		// 	},
-		// },
-		// {
-		// 	inputFile:  "../../resources/examples_boxes/long_vertical_02.yaml",
-		// 	outputFile: "../../temp/long_vertical_02.svg",
-		// 	checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
-		// 	},
-		// },
-		// {
-		// 	inputFile:  "../../resources/examples_boxes/horizontal_nested_diamond2_connected.yaml",
-		// 	outputFile: "../../temp/horizontal_nested_diamond2_connected.svg",
-		// 	checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
-		// 		require.NotNil(t, doc)
-		// 	},
-		// },
-		// {
-		// 	inputFile:  "../../ui/data/boxes_random.yaml",
-		// 	outputFile: "../../temp/boxes_random.svg",
-		// 	checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
-		// 	},
-		// },
-		// {
-		// 	inputFile:  "../../resources/examples_boxes/complex_horizontal_connected_pics.yaml",
-		// 	outputFile: "../../temp/complex_horizontal_connected_pics.svg",
-		// 	checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
-		// 	},
-		// },
+		{
+			inputFile:  "../../resources/examples_boxes/complex_horizontal_connected_01.yaml",
+			outputFile: "../../temp/TestSimpleSvg_hcomplex_connected_01.svg",
+			checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
+			},
+		},
+		{
+			inputFile:  "../../resources/examples_boxes/complex_horizontal_connected_02.yaml",
+			outputFile: "../../temp/TestSimpleSvg_hcomplex_connected_02.svg",
+			checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
+			},
+		},
+		{
+			inputFile:  "../../resources/examples_boxes/complex_horizontal_connected_03.yaml",
+			outputFile: "../../temp/TestSimpleSvg_hcomplex_connected_03.svg",
+			checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
+			},
+		},
+		{
+			inputFile:  "../../resources/examples_boxes/complex_horizontal_connected_04.yaml",
+			outputFile: "../../temp/TestSimpleSvg_hcomplex_connected_04.svg",
+			checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
+			},
+		},
+		{
+			inputFile:  "../../resources/examples_boxes/complex_horizontal_connected_05.yaml",
+			outputFile: "../../temp/TestSimpleSvg_hcomplex_connected_05.svg",
+			checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
+			},
+		},
+		{
+			inputFile:  "../../resources/examples_boxes/long_horizontal_01.yaml",
+			outputFile: "../../temp/long_horizontal_01.svg",
+			checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
+			},
+		},
+		{
+			inputFile:  "../../resources/examples_boxes/long_horizontal_02.yaml",
+			outputFile: "../../temp/long_horizontal_02.svg",
+			checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
+			},
+		},
+		{
+			inputFile:  "../../resources/examples_boxes/long_vertical_01.yaml",
+			outputFile: "../../temp/long_vertical_01.svg",
+			checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
+			},
+		},
+		{
+			inputFile:  "../../resources/examples_boxes/long_vertical_02.yaml",
+			outputFile: "../../temp/long_vertical_02.svg",
+			checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
+			},
+		},
+		{
+			inputFile:  "../../resources/examples_boxes/horizontal_nested_diamond2_connected.yaml",
+			outputFile: "../../temp/horizontal_nested_diamond2_connected.svg",
+			checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
+				require.NotNil(t, doc)
+			},
+		},
+		{
+			inputFile:  "../../ui/data/boxes_random.yaml",
+			outputFile: "../../temp/boxes_random.svg",
+			checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
+			},
+		},
+		{
+			inputFile:  "../../resources/examples_boxes/complex_horizontal_connected_pics.yaml",
+			outputFile: "../../temp/complex_horizontal_connected_pics.svg",
+			checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
+			},
+		},
 		{
 			inputFile:  "../../resources/examples_boxes/simple_diamond_connected.yaml",
 			outputFile: "../../temp/simple_diamond_connected.svg",
 			checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
 			},
 		},
-		// {
-		// 	inputFile:  "../../resources/examples_boxes/boxes_random_truncated.yaml",
-		// 	outputFile: "../../temp/boxes_random_truncated.svg",
-		// 	checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
-		// 		require.NotNil(t, doc.Connections)
-		// 	},
-		// },
-		// {
-		// 	inputFile:  "../../resources/examples_boxes/complex_vertical.yaml",
-		// 	outputFile: "../../temp/TestSimpleSvg_vcomplex_connected.svg",
-		// 	checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
-		// 		require.NotNil(t, doc.Connections)
-		// 	},
-		// },
-		// {
-		// 	inputFile:  "../../resources/examples_boxes/complex_vertical2.yaml",
-		// 	outputFile: "../../temp/TestSimpleSvg_vcomplex_connected2.svg",
-		// 	checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
-		// 		require.NotNil(t, doc.Connections)
-		// 	},
-		// },
-		// {
-		// 	inputFile:  "../../resources/examples_boxes/boxes_random_truncated2.yaml",
-		// 	outputFile: "../../temp/boxes_random_truncated2.svg",
-		// 	checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
-		// 		require.NotNil(t, doc.Connections)
-		// 	},
-		// },
-		// {
-		// 	inputFile:  "../../resources/examples_boxes/boxes_random_truncated3.yaml",
-		// 	outputFile: "../../temp/boxes_random_truncated3.svg",
-		// 	checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
-		// 		require.NotNil(t, doc.Connections)
-		// 	},
-		// },
-		// {
-		// 	inputFile:  "../../resources/examples_boxes/complex_horizontal_connected_pics2.yaml",
-		// 	outputFile: "../../temp/complex_horizontal_connected_pics2.svg",
-		// 	checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
-		// 		require.NotNil(t, doc.Connections)
-		// 		require.Equal(t, "r5_1", doc.Boxes.Horizontal.Elems[1].Vertical.Elems[0].Id)
-		// 		require.NotEmpty(t, doc.Boxes.Horizontal.Elems[1].Vertical.Elems[0].Caption)
-		// 		require.NotEmpty(t, doc.Boxes.Horizontal.Elems[1].Vertical.Elems[0].Text1)
-		// 		require.NotEmpty(t, doc.Boxes.Horizontal.Elems[1].Vertical.Elems[0].Text2)
+		{
+			inputFile:  "../../resources/examples_boxes/boxes_random_truncated.yaml",
+			outputFile: "../../temp/boxes_random_truncated.svg",
+			checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
+				require.NotNil(t, doc.Connections)
+			},
+		},
+		{
+			inputFile:  "../../resources/examples_boxes/complex_vertical.yaml",
+			outputFile: "../../temp/TestSimpleSvg_vcomplex_connected.svg",
+			checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
+				require.NotNil(t, doc.Connections)
+			},
+		},
+		{
+			inputFile:  "../../resources/examples_boxes/complex_vertical2.yaml",
+			outputFile: "../../temp/TestSimpleSvg_vcomplex_connected2.svg",
+			checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
+				require.NotNil(t, doc.Connections)
+			},
+		},
+		{
+			inputFile:  "../../resources/examples_boxes/boxes_random_truncated2.yaml",
+			outputFile: "../../temp/boxes_random_truncated2.svg",
+			checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
+				require.NotNil(t, doc.Connections)
+			},
+		},
+		{
+			inputFile:  "../../resources/examples_boxes/boxes_random_truncated3.yaml",
+			outputFile: "../../temp/boxes_random_truncated3.svg",
+			checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
+				require.NotNil(t, doc.Connections)
+			},
+		},
+		{
+			inputFile:  "../../resources/examples_boxes/complex_horizontal_connected_pics2.yaml",
+			outputFile: "../../temp/complex_horizontal_connected_pics2.svg",
+			checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
+				require.NotNil(t, doc.Connections)
+				require.Equal(t, "r5_1", doc.Boxes.Horizontal.Elems[1].Vertical.Elems[0].Id)
+				require.NotEmpty(t, doc.Boxes.Horizontal.Elems[1].Vertical.Elems[0].Caption)
+				require.NotEmpty(t, doc.Boxes.Horizontal.Elems[1].Vertical.Elems[0].Text1)
+				require.NotEmpty(t, doc.Boxes.Horizontal.Elems[1].Vertical.Elems[0].Text2)
 
-		// 		require.Equal(t, "r5_2", doc.Boxes.Horizontal.Elems[1].Vertical.Elems[1].Id)
-		// 		require.NotEmpty(t, doc.Boxes.Horizontal.Elems[1].Vertical.Elems[1].Caption)
-		// 		require.NotEmpty(t, doc.Boxes.Horizontal.Elems[1].Vertical.Elems[1].Text1)
-		// 		require.Empty(t, doc.Boxes.Horizontal.Elems[1].Vertical.Elems[1].Text2)
-		// 	},
-		// },
-		// {
-		// 	inputFile:  "../../resources/examples_boxes/complex_horizontal_connected_pics3.yaml",
-		// 	outputFile: "../../temp/complex_horizontal_connected_pics3.svg",
-		// 	checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
-		// 		require.NotNil(t, doc.Connections)
+				require.Equal(t, "r5_2", doc.Boxes.Horizontal.Elems[1].Vertical.Elems[1].Id)
+				require.NotEmpty(t, doc.Boxes.Horizontal.Elems[1].Vertical.Elems[1].Caption)
+				require.NotEmpty(t, doc.Boxes.Horizontal.Elems[1].Vertical.Elems[1].Text1)
+				require.Empty(t, doc.Boxes.Horizontal.Elems[1].Vertical.Elems[1].Text2)
+			},
+		},
+		{
+			inputFile:  "../../resources/examples_boxes/complex_horizontal_connected_pics3.yaml",
+			outputFile: "../../temp/complex_horizontal_connected_pics3.svg",
+			checkFunc: func(t *testing.T, doc *boxes.BoxesDocument) {
+				require.NotNil(t, doc.Connections)
 
-		// 		require.Equal(t, "r5_1", doc.Boxes.Horizontal.Elems[1].Vertical.Elems[0].Id)
-		// 		require.NotEmpty(t, doc.Boxes.Horizontal.Elems[1].Vertical.Elems[0].Caption)
-		// 		require.Empty(t, doc.Boxes.Horizontal.Elems[1].Vertical.Elems[0].Text1)
-		// 		require.Empty(t, doc.Boxes.Horizontal.Elems[1].Vertical.Elems[0].Text2)
+				require.Equal(t, "r5_1", doc.Boxes.Horizontal.Elems[1].Vertical.Elems[0].Id)
+				require.NotEmpty(t, doc.Boxes.Horizontal.Elems[1].Vertical.Elems[0].Caption)
+				require.Empty(t, doc.Boxes.Horizontal.Elems[1].Vertical.Elems[0].Text1)
+				require.Empty(t, doc.Boxes.Horizontal.Elems[1].Vertical.Elems[0].Text2)
 
-		// 		require.Equal(t, "r5_2", doc.Boxes.Horizontal.Elems[1].Vertical.Elems[1].Id)
-		// 		require.NotEmpty(t, doc.Boxes.Horizontal.Elems[1].Vertical.Elems[1].Caption)
-		// 		require.Empty(t, doc.Boxes.Horizontal.Elems[1].Vertical.Elems[1].Text1)
-		// 		require.Empty(t, doc.Boxes.Horizontal.Elems[1].Vertical.Elems[1].Text2)
-		// 	},
-		// },
+				require.Equal(t, "r5_2", doc.Boxes.Horizontal.Elems[1].Vertical.Elems[1].Id)
+				require.NotEmpty(t, doc.Boxes.Horizontal.Elems[1].Vertical.Elems[1].Caption)
+				require.Empty(t, doc.Boxes.Horizontal.Elems[1].Vertical.Elems[1].Text1)
+				require.Empty(t, doc.Boxes.Horizontal.Elems[1].Vertical.Elems[1].Text2)
+			},
+		},
 	}
 	runTests(tests)
 }
