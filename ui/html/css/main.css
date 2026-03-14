@@ -327,13 +327,30 @@ button.tool-btn.active {
     overflow: hidden;
     text-overflow: ellipsis;
 }
-.selected-mixin-remove {
-    padding: 0 6px;
+.selected-mixin-btn-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 0;
+}
+.selected-mixin-toggle {
+    padding: 0 4px;
     line-height: 1;
     font-size: 11px;
     border: none;
     background: transparent;
     color: inherit;
+}
+.selected-mixin-remove {
+    padding: 0 4px;
+    line-height: 1;
+    font-size: 11px;
+    border: none;
+    background: transparent;
+    color: inherit;
+}
+.selected-mixin-badge--hidden {
+    opacity: 0.5;
+    text-decoration: line-through;
 }
 .collector-empty {
     font-size: 12px;

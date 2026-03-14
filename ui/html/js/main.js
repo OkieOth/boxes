@@ -394,6 +394,7 @@ async function applySelectedMixins() {
     const selectedValues = toolbarComboState.selectedValues.slice();
     const contents = [];
     for (const value of selectedValues) {
+        if (toolbarComboState.hiddenValues.has(value)) continue;
         const yamlContent = await loadYamlForComboValue(value);
         if (toolbarComboState.applyToken !== seq) {
             return;
@@ -450,6 +451,7 @@ const toolbarComboState = {
     highlightedIndex: -1,
     filteredOptions: [],
     selectedValues: [], // ordered list of selected mixin option values
+    hiddenValues: new Set(), // values that are selected but temporarily hidden
     selectionMeta: new Map(), // value -> { label, content? }
     contentCache: new Map(), // value -> yaml content
     applyToken: 0,
@@ -503,12 +505,21 @@ function isToolbarComboValueSelected(value) {
 
 function createSelectedCollectorBadge(value, label) {
     const badge = document.createElement("div");
-    badge.className = "selected-mixin-badge";
+    const isHidden = toolbarComboState.hiddenValues.has(value);
+    badge.className = "selected-mixin-badge" + (isHidden ? " selected-mixin-badge--hidden" : "");
     badge.dataset.value = value;
 
     const text = document.createElement("span");
     text.className = "selected-mixin-label";
     text.textContent = label;
+
+    const toggleBtn = document.createElement("button");
+    toggleBtn.type = "button";
+    toggleBtn.className = "selected-mixin-toggle tool-btn";
+    toggleBtn.title = isHidden ? `Show ${label}` : `Hide ${label}`;
+    toggleBtn.innerHTML = isHidden
+        ? '<i class="fa-solid fa-eye-slash"></i>'
+        : '<i class="fa-solid fa-eye"></i>';
 
     const removeBtn = document.createElement("button");
     removeBtn.type = "button";
@@ -516,8 +527,13 @@ function createSelectedCollectorBadge(value, label) {
     removeBtn.title = `Remove ${label}`;
     removeBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
 
+    const btnGroup = document.createElement("span");
+    btnGroup.className = "selected-mixin-btn-group";
+    btnGroup.appendChild(toggleBtn);
+    btnGroup.appendChild(removeBtn);
+
     badge.appendChild(text);
-    badge.appendChild(removeBtn);
+    badge.appendChild(btnGroup);
     return badge;
 }
 
@@ -554,14 +570,32 @@ function initSelectedCollectorInteractions() {
     if (!list || list.__selectedHandlerAttached) return;
     list.__selectedHandlerAttached = true;
     list.addEventListener("click", (evt) => {
-        const btn = evt.target.closest(".selected-mixin-remove");
-        if (!btn) return;
-        const badge = btn.closest(".selected-mixin-badge");
-        const value = badge ? badge.dataset.value : null;
-        if (value) {
-            evt.preventDefault();
-            evt.stopPropagation();
-            removeToolbarComboSelection(value);
+        const removeBtn = evt.target.closest(".selected-mixin-remove");
+        if (removeBtn) {
+            const badge = removeBtn.closest(".selected-mixin-badge");
+            const value = badge ? badge.dataset.value : null;
+            if (value) {
+                evt.preventDefault();
+                evt.stopPropagation();
+                removeToolbarComboSelection(value);
+            }
+            return;
+        }
+        const toggleBtn = evt.target.closest(".selected-mixin-toggle");
+        if (toggleBtn) {
+            const badge = toggleBtn.closest(".selected-mixin-badge");
+            const value = badge ? badge.dataset.value : null;
+            if (value) {
+                evt.preventDefault();
+                evt.stopPropagation();
+                if (toolbarComboState.hiddenValues.has(value)) {
+                    toolbarComboState.hiddenValues.delete(value);
+                } else {
+                    toolbarComboState.hiddenValues.add(value);
+                }
+                updateToolbarComboSelectedList();
+                applySelectedMixins();
+            }
         }
     });
 }
