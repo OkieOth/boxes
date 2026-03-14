@@ -3,8 +3,8 @@ package main
 import (
 	"os"
 
-	"github.com/okieoth/draw.chart.things/pkg/svgdrawing"
-	"github.com/okieoth/draw.chart.things/pkg/types"
+	"github.com/okieoth/boxes/pkg/svgdrawing"
+	"github.com/okieoth/boxes/pkg/types"
 )
 
 func main() {

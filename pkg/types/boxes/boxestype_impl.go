@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"slices"
 
-	"github.com/okieoth/draw.chart.things/pkg/types"
+	"github.com/okieoth/boxes/pkg/types"
 )
 
 func (d *BoxesDocument) DrawBoxes(drawingImpl types.Drawing) error {

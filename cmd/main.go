@@ -5,7 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/okieoth/draw.chart.things/cmd/sub"
+	"github.com/okieoth/boxes/cmd/sub"
 )
 
 var rootCmd = &cobra.Command{

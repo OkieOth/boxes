@@ -3,7 +3,7 @@ package boxes
 import (
 	"fmt"
 
-	"github.com/okieoth/draw.chart.things/pkg/types"
+	"github.com/okieoth/boxes/pkg/types"
 )
 
 func (doc *BoxesDocument) IncludeComments(c types.TextDimensionCalculator) error {

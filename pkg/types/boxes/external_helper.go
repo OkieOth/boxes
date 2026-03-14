@@ -5,7 +5,7 @@ import (
 	"maps"
 	"slices"
 
-	"github.com/okieoth/draw.chart.things/pkg/types"
+	"github.com/okieoth/boxes/pkg/types"
 )
 
 // used in filter situations in cases where no ID are provided

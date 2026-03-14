@@ -6,8 +6,8 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/okieoth/draw.chart.things/pkg/svg"
-	"github.com/okieoth/draw.chart.things/pkg/types"
+	"github.com/okieoth/boxes/pkg/svg"
+	"github.com/okieoth/boxes/pkg/types"
 )
 
 // Font width factor constants

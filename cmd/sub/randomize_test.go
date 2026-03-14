@@ -3,7 +3,7 @@ package sub_test
 import (
 	"testing"
 
-	"github.com/okieoth/draw.chart.things/cmd/sub"
+	"github.com/okieoth/boxes/cmd/sub"
 	"github.com/stretchr/testify/require"
 )
 

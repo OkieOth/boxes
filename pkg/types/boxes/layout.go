@@ -1,7 +1,7 @@
 package boxes
 
 import (
-	"github.com/okieoth/draw.chart.things/pkg/types"
+	"github.com/okieoth/boxes/pkg/types"
 )
 
 func (l *LayoutElement) incrementX(xOffset int) {

@@ -1,4 +1,4 @@
-module github.com/okieoth/draw.chart.things
+module github.com/okieoth/boxes
 
 go 1.24.0
 

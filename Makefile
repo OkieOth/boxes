@@ -10,10 +10,10 @@ build:
 	go build -o build/draw -ldflags "-s -w" cmd/main.go
 
 build-docker:
-	docker build -f Dockerfile.release -t ghcr.io/okieoth/draw.chart.things:$(VERSION) .
+	docker build -f Dockerfile.release -t ghcr.io/okieoth/boxes:$(VERSION) .
 
 build-docker-ui:
-	docker build -f ui/Dockerfile.ui -t ghcr.io/okieoth/draw.chart.things.ui:$(VERSION) .
+	docker build -f ui/Dockerfile.ui -t ghcr.io/okieoth/boxes.ui:$(VERSION) .
 
 build-wasm:
 	rm -f ui/wasm/*.*
@@ -22,16 +22,16 @@ build-wasm:
 	sed -i -e 's-\"/wasm/boxes_.*\.wasm\"-"/wasm/boxes_$(VERSION).wasm"-' ui/html/js/main.js
 
 docker-push:
-	docker push ghcr.io/okieoth/draw.chart.things:$(VERSION)
+	docker push ghcr.io/okieoth/boxes:$(VERSION)
 
 docker-ui-push:
-	docker push ghcr.io/okieoth/draw.chart.things.ui:$(VERSION)
+	docker push ghcr.io/okieoth/boxes.ui:$(VERSION)
 
 generate-all:
 	bash -c scripts/generateAll.sh
 
 run-ui-docker:
-	docker run -p 8081:80 -d --rm ghcr.io/okieoth/draw.chart.things.ui:$(VERSION)
+	docker run -p 8081:80 -d --rm ghcr.io/okieoth/boxes.ui:$(VERSION)
 
 test:
 	go test --cover ./... && echo ":)" || echo ":-/"

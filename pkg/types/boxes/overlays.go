@@ -1,6 +1,6 @@
 package boxes
 
-import "github.com/okieoth/draw.chart.things/pkg/types"
+import "github.com/okieoth/boxes/pkg/types"
 
 func (doc *BoxesDocument) IncludeOverlays(c types.TextDimensionCalculator) error {
 	if len(doc.Overlays) > 0 {

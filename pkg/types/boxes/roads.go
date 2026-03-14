@@ -3,7 +3,7 @@ package boxes
 import (
 	"sort"
 
-	"github.com/okieoth/draw.chart.things/pkg/types"
+	"github.com/okieoth/boxes/pkg/types"
 )
 
 // traces the document and finds all reasonable "roads" to connect
