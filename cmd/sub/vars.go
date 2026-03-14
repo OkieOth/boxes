@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/okieoth/draw.chart.things/pkg/types/boxes"
+	"github.com/okieoth/boxes/pkg/types/boxes"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )

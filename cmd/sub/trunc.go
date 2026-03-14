@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/okieoth/draw.chart.things/pkg/boxesimpl"
+	"github.com/okieoth/boxes/pkg/boxesimpl"
 	"github.com/spf13/cobra"
 )
 

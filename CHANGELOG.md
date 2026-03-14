@@ -1,3 +1,6 @@
+# v1.0.0
+* repo renamed to boxes :)
+
 # v0.17.0
 * pimp up the boxes sub command
 * UI: add possiblility to hide and show selected mixins

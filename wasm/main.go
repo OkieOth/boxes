@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"syscall/js"
 
-	"github.com/okieoth/draw.chart.things/pkg/boxesimpl"
-	"github.com/okieoth/draw.chart.things/pkg/types/boxes"
+	"github.com/okieoth/boxes/pkg/boxesimpl"
+	"github.com/okieoth/boxes/pkg/types/boxes"
 
 	y "gopkg.in/yaml.v3"
 )

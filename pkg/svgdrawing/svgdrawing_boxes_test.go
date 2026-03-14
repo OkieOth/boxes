@@ -7,10 +7,10 @@ import (
 
 	"testing"
 
-	"github.com/okieoth/draw.chart.things/pkg/boxesimpl"
-	"github.com/okieoth/draw.chart.things/pkg/svgdrawing"
-	"github.com/okieoth/draw.chart.things/pkg/types"
-	"github.com/okieoth/draw.chart.things/pkg/types/boxes"
+	"github.com/okieoth/boxes/pkg/boxesimpl"
+	"github.com/okieoth/boxes/pkg/svgdrawing"
+	"github.com/okieoth/boxes/pkg/types"
+	"github.com/okieoth/boxes/pkg/types/boxes"
 )
 
 func TestSimpleSvg(t *testing.T) {

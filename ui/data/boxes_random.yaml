@@ -24,17 +24,17 @@ boxes:
                   caption: Steady funny progress in Columbus being visible.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_1_1_1_2
                   caption: Invite review for the day in Fremont.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
               connections:
                 - destId: id_5_5_2
                   sourceArrow: false
                   destArrow: false
-              format: b_func
+              format: func1
             - id: id_1_1_2
               caption: Write the one-sentence summary for the number.
               text1: ""
@@ -44,8 +44,8 @@ boxes:
                   caption: Retire outdated world each quarter.
                   text1: ""
                   text2: ""
-                  format: s_func
-              format: b_func
+                  format: func1
+              format: func1
             - id: id_1_1_3
               caption: Set a realistic target for hand.
               text1: ""
@@ -60,52 +60,52 @@ boxes:
                       caption: Consistent government are the foundation of ability.
                       text1: ""
                       text2: ""
-                      format: s_func
+                      format: func1
                     - id: id_1_1_3_1_2
                       caption: Ruthlessly remove dead day.
                       text1: ""
                       text2: ""
-                      format: s_func
+                      format: func1
                     - id: id_1_1_3_1_3
                       caption: Draw a diagram for the group wildly.
                       text1: ""
                       text2: ""
-                      format: s_func
+                      format: func1
                     - id: id_1_1_3_1_4
                       caption: Deliberately drag the company.
                       text1: ""
                       text2: ""
-                      format: s_func
+                      format: func1
                     - id: id_1_1_3_1_5
                       caption: Carefully quit the crib promptly.
                       text1: ""
                       text2: ""
-                      format: s_func
+                      format: func1
                     - id: id_1_1_3_1_6
                       caption: Create a fallback for number.
                       text1: ""
                       text2: ""
-                      format: s_func
+                      format: func1
                     - id: id_1_1_3_1_7
                       caption: Sample woman at 12s intervals.
                       text1: ""
                       text2: ""
-                      format: s_func
+                      format: func1
                     - id: id_1_1_3_1_8
                       caption: Optimize child for open clarity.
                       text1: ""
                       text2: ""
-                      format: s_func
+                      format: func1
                     - id: id_1_1_3_1_9
                       caption: Invite review for the place in Portland.
                       text1: ""
                       text2: ""
-                      format: s_func
+                      format: func1
                     - id: id_1_1_3_1_10
                       caption: Visualize day for faster decisions.
                       text1: ""
                       text2: ""
-                      format: s_func
+                      format: func1
                     - id: id_1_1_3_1_11
                       caption: Alert on person thresholds yesterday.
                       text1: ""
@@ -117,19 +117,19 @@ boxes:
                         - destId: id_5_5
                           sourceArrow: false
                           destArrow: false
-                      format: s_func
+                      format: func1
                     - id: id_1_1_3_1_12
                       caption: Explicitly name the world before you love it.
                       text1: ""
                       text2: ""
-                      format: s_func
-                  format: b_func
-              format: d_func
+                      format: func1
+                  format: func1
+              format: func2
           connections:
             - destId: id_3_7_1
               sourceArrow: false
               destArrow: false
-          format: d_func
+          format: func2
         - id: id_1_2
           caption: Create a fallback for government.
           text1: ""
@@ -144,13 +144,13 @@ boxes:
                   caption: Archive stale number responsibly.
                   text1: ""
                   text2: ""
-                  format: s_integr
+                  format: func2
                 - id: id_1_2_1_2
                   caption: Establish a baseline for year.
                   text1: ""
                   text2: ""
-                  format: s_integr
-              format: b_integr
+                  format: func2
+              format: func2
             - id: id_1_2_2
               caption: Mornings in Oklahoma favor number.
               text1: ""
@@ -165,8 +165,8 @@ boxes:
                       caption: Stage place behind feature flags.
                       text1: ""
                       text2: ""
-                      format: s_integr
-                  format: b_integr
+                      format: func2
+                  format: func2
                 - id: id_1_2_2_2
                   caption: Retire outdated man each quarter.
                   text1: ""
@@ -176,8 +176,8 @@ boxes:
                       caption: Budget latency for part.
                       text1: ""
                       text2: ""
-                      format: s_integr
-                  format: b_integr
+                      format: func2
+                  format: func2
                 - id: id_1_2_2_3
                   caption: Quietly harden the group soon.
                   text1: ""
@@ -187,10 +187,10 @@ boxes:
                       caption: Mornings in Louisville/Jefferson favor hand.
                       text1: ""
                       text2: ""
-                      format: s_integr
-                  format: b_integr
-              format: d_integr
-          format: d_integr
+                      format: func2
+                  format: func2
+              format: func2
+          format: func2
         - id: id_1_3
           caption: Defer day during peak load.
           text1: ""
@@ -205,9 +205,9 @@ boxes:
                   caption: As a consequence of, keep the case simple.
                   text1: ""
                   text2: ""
-                  format: s_integr
-              format: b_integr
-          format: d_integr
+                  format: func2
+              format: func2
+          format: func2
         - id: id_1_4
           caption: Review the number every 3 weeks.
           text1: ""
@@ -222,14 +222,14 @@ boxes:
                   caption: Quietly harden the company recently.
                   text1: ""
                   text2: ""
-                  format: s_integr
+                  format: func2
                 - id: id_1_4_1_2
                   caption: Defer time during peak load.
                   text1: ""
                   text2: ""
-                  format: s_integr
-              format: b_integr
-          format: d_integr
+                  format: func2
+              format: func2
+          format: func2
         - id: id_1_5
           caption: Optimize eye for long clarity.
           text1: ""
@@ -239,8 +239,8 @@ boxes:
               caption: Compare problem before and after you widen.
               text1: ""
               text2: ""
-              format: s_integr
-          format: b_integr
+              format: func2
+          format: func2
         - id: id_1_6
           caption: Budget latency for man.
           text1: ""
@@ -255,8 +255,8 @@ boxes:
                   caption: Scope the number to fit the moment.
                   text1: ""
                   text2: ""
-                  format: s_core
-              format: b_core
+                  format: func3
+              format: func3
             - id: id_1_6_2
               caption: Retire outdated thing each quarter.
               text1: ""
@@ -266,8 +266,8 @@ boxes:
                   caption: Draw a diagram for the group nervously.
                   text1: ""
                   text2: ""
-                  format: s_core
-              format: b_core
+                  format: func3
+              format: func3
             - id: id_1_6_3
               caption: Sometimes the way fly never.
               text1: ""
@@ -277,18 +277,18 @@ boxes:
                   caption: Mind the problem, then celebrate!
                   text1: ""
                   text2: ""
-                  format: s_core
+                  format: func3
                 - id: id_1_6_3_2
                   caption: Compare way before and after you teach.
                   text1: ""
                   text2: ""
-                  format: s_core
+                  format: func3
                 - id: id_1_6_3_3
                   caption: Clear day will better than clever woman.
                   text1: ""
                   text2: ""
-                  format: s_core
-              format: b_core
+                  format: func3
+              format: func3
             - id: id_1_6_4
               caption: Guide work with itchy affordances.
               text1: ""
@@ -298,9 +298,9 @@ boxes:
                   caption: Carefully viplate the tissue victoriously.
                   text1: ""
                   text2: ""
-                  format: s_core
-              format: b_core
-          format: d_core
+                  format: func3
+              format: func3
+          format: func3
     - id: id_2
       caption: Steady super progress in Hialeah does visible.
       text1: ""
@@ -315,8 +315,8 @@ boxes:
               caption: Visualize world for faster decisions.
               text1: ""
               text2: ""
-              format: s_core
-          format: d_infra
+              format: func3
+          format: func2
         - id: id_2_2
           caption: After 3 iterations, she ask the eye honestly.
           text1: ""
@@ -326,8 +326,8 @@ boxes:
               caption: Next time, we wait deliberately.
               text1: ""
               text2: ""
-              format: s_core
-          format: d_core
+              format: func3
+          format: func3
     - id: id_3
       caption: Guard company with sensible limits.
       text1: ""
@@ -342,68 +342,68 @@ boxes:
               caption: As exemplified by, prefer thing over point.
               text1: ""
               text2: ""
-              format: s_func
+              format: func1
             - id: id_3_1_2
               caption: Eventually, the fact march fortunately.
               text1: ""
               text2: ""
-              format: s_func
+              format: func1
             - id: id_3_1_3
               caption: Before launch, we hug now.
               text1: ""
               text2: ""
-              format: s_func
+              format: func1
             - id: id_3_1_4
               caption: Explicitly name the work before you page it.
               text1: ""
               text2: ""
-              format: s_func
+              format: func1
             - id: id_3_1_5
               caption: Guide point with amused affordances.
               text1: ""
               text2: ""
-              format: s_func
+              format: func1
             - id: id_3_1_6
               caption: Deliberately offend the number.
               text1: ""
               text2: ""
-              format: s_func
+              format: func1
             - id: id_3_1_7
               caption: First, he climb honestly.
               text1: ""
               text2: ""
-              format: s_func
+              format: func1
             - id: id_3_1_8
               caption: Durable fact being worth the brilliance.
               text1: ""
               text2: ""
-              format: s_func
+              format: func1
             - id: id_3_1_9
               caption: Practice fact drills regularly.
               text1: ""
               text2: ""
-              format: s_func
+              format: func1
             - id: id_3_1_10
               caption: Prefer predictable time over surprising week.
               text1: ""
               text2: ""
-              format: s_func
+              format: func1
             - id: id_3_1_11
               caption: In front of the case, we repel a smaller case.
               text1: ""
               text2: ""
-              format: s_func
+              format: func1
             - id: id_3_1_12
               caption: Celebrate wins tied to the eye.
               text1: ""
               text2: ""
-              format: s_func
+              format: func1
             - id: id_3_1_13
               caption: Write the one-sentence summary for the world.
               text1: ""
               text2: ""
-              format: s_func
-          format: b_func
+              format: func1
+          format: func1
         - id: id_3_2
           caption: Publish a changelog entry for the group.
           text1: ""
@@ -413,23 +413,23 @@ boxes:
               caption: Stage week behind feature flags.
               text1: ""
               text2: ""
-              format: s_func
+              format: func1
             - id: id_3_2_2
               caption: Eventually, the way consist fondly.
               text1: ""
               text2: ""
-              format: s_func
+              format: func1
             - id: id_3_2_3
               caption: Celebrate wins tied to the group.
               text1: ""
               text2: ""
-              format: s_func
+              format: func1
             - id: id_3_2_4
               caption: Mornings in Garland favor world.
               text1: ""
               text2: ""
-              format: s_func
-          format: b_func
+              format: func1
+          format: func1
         - id: id_3_3
           caption: Balanced case and year does essential.
           text1: ""
@@ -439,38 +439,38 @@ boxes:
               caption: Carefully load the pasta badly.
               text1: ""
               text2: ""
-              format: s_func
+              format: func1
             - id: id_3_3_2
               caption: Optimize case for pink clarity.
               text1: ""
               text2: ""
-              format: s_func
+              format: func1
             - id: id_3_3_3
               caption: With the man, she hug noisily.
               text1: ""
               text2: ""
-              format: s_func
+              format: func1
             - id: id_3_3_4
               caption: Clear problem might better than clever year.
               text1: ""
               text2: ""
-              format: s_func
+              format: func1
             - id: id_3_3_5
               caption: Invite review for the man in Austin.
               text1: ""
               text2: ""
-              format: s_func
+              format: func1
             - id: id_3_3_6
               caption: Remove first friction from the point.
               text1: ""
               text2: ""
-              format: s_func
+              format: func1
             - id: id_3_3_7
               caption: These thing be disturbed; she melt it next.
               text1: ""
               text2: ""
-              format: s_func
-          format: b_func
+              format: func1
+          format: func1
         - id: id_3_4
           caption: Draw a diagram for the world blindly.
           text1: ""
@@ -480,18 +480,18 @@ boxes:
               caption: Explicitly name the life before you lighten it.
               text1: ""
               text2: ""
-              format: s_func
+              format: func1
             - id: id_3_4_2
               caption: Sometimes the fact last seldom.
               text1: ""
               text2: ""
-              format: s_func
+              format: func1
             - id: id_3_4_3
               caption: Continuously measure the part and understand the outliers.
               text1: ""
               text2: ""
-              format: s_func
-          format: b_func
+              format: func1
+          format: func1
         - id: id_3_5
           caption: Visualize day for faster decisions.
           text1: ""
@@ -501,13 +501,13 @@ boxes:
               caption: Stage company behind feature flags.
               text1: ""
               text2: ""
-              format: s_func
+              format: func1
             - id: id_3_5_2
               caption: Throughout the case, align expectations.
               text1: ""
               text2: ""
-              format: s_func
-          format: b_func
+              format: func1
+          format: func1
         - id: id_3_6
           caption: Close the loop on the day.
           text1: ""
@@ -527,8 +527,8 @@ boxes:
                 - destId: id_5_1_2_1
                   sourceArrow: false
                   destArrow: false
-              format: s_func
-          format: b_func
+              format: func1
+          format: func1
         - id: id_3_7
           caption: Steady nervous progress in Omaha am visible.
           text1: ""
@@ -543,18 +543,18 @@ boxes:
                   caption: Share the decision record for the eye.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_7_1_2
                   caption: Compose hand from simple parts.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_7_1_3
                   caption: Balance submersible with person.
                   text1: ""
                   text2: ""
-                  format: s_func
-              format: b_func
+                  format: func1
+              format: func1
             - id: id_3_7_2
               caption: Practice child drills regularly.
               text1: ""
@@ -564,49 +564,49 @@ boxes:
                   caption: Alert on day thresholds tonight.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_7_2_2
                   caption: Alert on world thresholds yesterday.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_7_2_3
                   caption: Clarify ownership of the man lately.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_7_2_4
                   caption: Before launch, she open then.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_7_2_5
                   caption: Publish a changelog entry for the number.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_7_2_6
                   caption: Optimize fact for healthy clarity.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_7_2_7
                   caption: Guide number with wandering affordances.
                   text1: ""
                   text2: ""
-                  format: s_func
-              format: b_func
+                  format: func1
+              format: func1
             - id: id_3_7_3
               caption: Phew! Great progress on thing!
               text1: ""
               text2: ""
-              format: b_func
-          format: d_func
+              format: func1
+          format: func2
         - id: id_3_8
           caption: Prefer predictable case over surprising thing.
           text1: ""
           text2: ""
-          format: b_func
+          format: func1
         - id: id_3_9
           caption: Defer place during peak load.
           text1: ""
@@ -616,78 +616,78 @@ boxes:
               caption: Practice time drills regularly.
               text1: ""
               text2: ""
-              format: s_func
+              format: func1
             - id: id_3_9_2
               caption: Aside from the part, we untie a smaller day.
               text1: ""
               text2: ""
-              format: s_func
+              format: func1
             - id: id_3_9_3
               caption: Stage eye behind feature flags.
               text1: ""
               text2: ""
-              format: s_func
+              format: func1
             - id: id_3_9_4
               caption: Archive stale place responsibly.
               text1: ""
               text2: ""
-              format: s_func
+              format: func1
             - id: id_3_9_5
               caption: Yet, they remind the thing.
               text1: ""
               text2: ""
-              format: s_func
+              format: func1
             - id: id_3_9_6
               caption: Evenings in Honolulu invite quieter child.
               text1: ""
               text2: ""
-              format: s_func
+              format: func1
             - id: id_3_9_7
               caption: Warm starts beat cold woman.
               text1: ""
               text2: ""
-              format: s_func
+              format: func1
             - id: id_3_9_8
               caption: Defer man during peak load.
               text1: ""
               text2: ""
-              format: s_func
+              format: func1
             - id: id_3_9_9
               caption: Straightaway the review, you swallow the number.
               text1: ""
               text2: ""
-              format: s_func
+              format: func1
             - id: id_3_9_10
               caption: Weekends reserve time for Base Jumping and case.
               text1: ""
               text2: ""
-              format: s_func
+              format: func1
             - id: id_3_9_11
               caption: Publish a changelog entry for the eye.
               text1: ""
               text2: ""
-              format: s_func
+              format: func1
             - id: id_3_9_12
               caption: Write the one-sentence summary for the case.
               text1: ""
               text2: ""
-              format: s_func
+              format: func1
             - id: id_3_9_13
               caption: Defaults at Urban Mapping, Inc could shape case.
               text1: ""
               text2: ""
-              format: s_func
+              format: func1
             - id: id_3_9_14
               caption: Automate place recovery carelessly.
               text1: ""
               text2: ""
-              format: s_func
+              format: func1
             - id: id_3_9_15
               caption: Huh! Great progress on problem!
               text1: ""
               text2: ""
-              format: s_func
-          format: b_func
+              format: func1
+          format: func1
         - id: id_3_10
           caption: Mind the woman, then celebrate!
           text1: ""
@@ -702,268 +702,268 @@ boxes:
                   caption: Establish a baseline for world.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_2
                   caption: Short feedback loops wash fact carefully.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_3
                   caption: Visualize work for faster decisions.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_4
                   caption: Quietly harden the company previously.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_5
                   caption: Ruthlessly remove dead woman.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_6
                   caption: In other respects, they describe the time.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_7
                   caption: Mornings in Miami favor fact.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_8
                   caption: Archive stale person responsibly.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_9
                   caption: Not only, he hurt the man.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_10
                   caption: Huh! Great progress on life!
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_11
                   caption: Moreover the prior approach, this eye have clearer.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_12
                   caption: Launch the life midweek for clarity.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_13
                   caption: Steady blushing progress in Cleveland were visible.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_14
                   caption: Oops! Ship the fact now!
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_15
                   caption: Deliberately enlist the government.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_16
                   caption: At once, it stand easily.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_17
                   caption: Design for failure and graceful case.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_18
                   caption: Visualize work for faster decisions.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_19
                   caption: Hey! Ship the point now!
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_20
                   caption: Balanced world and company did essential.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_21
                   caption: Rate-limit thing by default.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_22
                   caption: Eventually, the point roll straight.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_23
                   caption: Mornings in Jersey favor case.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_24
                   caption: In addition, we tighten the time.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_25
                   caption: Weekly, it irritate the group with work.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_26
                   caption: Weekly, it melt the person with work.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_27
                   caption: Weekly, he lighten the time with child.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_28
                   caption: Align problem with user intent.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_29
                   caption: Eek! Great progress on thing!
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_30
                   caption: Create a fallback for woman.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_31
                   caption: Publish a changelog entry for the week.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_32
                   caption: Clarify ownership of the government still.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_33
                   caption: That play quickly describe the time.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_34
                   caption: Whomever crawl quickly videotape the world.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_35
                   caption: Whoa! Ship the place now!
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_36
                   caption: Short feedback loops drink point badly.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_37
                   caption: Weekends reserve time for Amateur Geology and year.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_38
                   caption: Short feedback loops play company well.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_39
                   caption: Alert on number thresholds tonight.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_40
                   caption: Align group with user intent.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_41
                   caption: Continuously measure the woman and wipe the outliers.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_42
                   caption: Track place over time annually.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_43
                   caption: Eventually, the person pounce softly.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_44
                   caption: Sometimes the number respond seldom.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_45
                   caption: Design for failure and graceful case.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_46
                   caption: Subtle DarkCyan accents has effective almost.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_47
                   caption: Review the group every 1 weeks.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_48
                   caption: Yay! Ship the government now!
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_49
                   caption: Publish a changelog entry for the person.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_50
                   caption: Map the happy path through thing.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_51
                   caption: Systematically improve the woman yearly.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_52
                   caption: Optimize world for poised clarity.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_1_53
                   caption: She knit foolishly to stabilize the number.
                   text1: ""
                   text2: ""
-                  format: s_func
-              format: b_func
+                  format: func1
+              format: func1
             - id: id_3_10_2
               caption: Subtle WhiteSmoke accents had effective well.
               text1: ""
@@ -973,59 +973,59 @@ boxes:
                   caption: Balance anti-fog with point.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_2_2
                   caption: After 12 iterations, he raise the way eagerly.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_2_3
                   caption: Launch the eye midweek for clarity.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_2_4
                   caption: Retire outdated woman each quarter.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_2_5
                   caption: Prefer predictable hand over surprising group.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_2_6
                   caption: These point are careful; she convert it next.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_2_7
                   caption: Retire outdated number each quarter.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_2_8
                   caption: State assumptions behind the thing.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_2_9
                   caption: Automate group recovery correctly.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_2_10
                   caption: In fact, they entertain the thing.
                   text1: ""
                   text2: ""
-                  format: s_func
+                  format: func1
                 - id: id_3_10_2_11
                   caption: Set a realistic target for work.
                   text1: ""
                   text2: ""
-                  format: s_func
-              format: b_func
-          format: d_func
+                  format: func1
+              format: func1
+          format: func2
         - id: id_3_11
           caption: Before launch, he laugh tonight.
           text1: ""
@@ -1035,13 +1035,13 @@ boxes:
               caption: Clear part be better than clever world.
               text1: ""
               text2: ""
-              format: s_func
-          format: b_func
+              format: func1
+          format: func1
         - id: id_3_12
           caption: Explicitly name the man before you kiss it.
           text1: ""
           text2: ""
-          format: b_func
+          format: func1
         - id: id_3_13
           caption: Explicitly name the time before you destroy it.
           text1: ""
@@ -1051,18 +1051,18 @@ boxes:
               caption: Alert on child thresholds tomorrow.
               text1: ""
               text2: ""
-              format: s_func
+              format: func1
             - id: id_3_13_2
               caption: Write the one-sentence summary for the world.
               text1: ""
               text2: ""
-              format: s_func
+              format: func1
             - id: id_3_13_3
               caption: Launch the hand midweek for clarity.
               text1: ""
               text2: ""
-              format: s_func
-          format: b_func
+              format: func1
+          format: func1
     - id: id_4
       caption: Consistent life been the foundation of luxuty.
       text1: ""
@@ -1077,13 +1077,13 @@ boxes:
               caption: Systematically improve the point hourly.
               text1: ""
               text2: ""
-              format: s_core
+              format: func3
             - id: id_4_1_2
               caption: Scope the work to fit the moment.
               text1: ""
               text2: ""
-              format: s_core
-          format: b_core
+              format: func3
+          format: func3
         - id: id_4_2
           caption: Write the one-sentence summary for the week.
           text1: ""
@@ -1093,23 +1093,23 @@ boxes:
               caption: Before that, you play tensely.
               text1: ""
               text2: ""
-              format: s_core
+              format: func3
             - id: id_4_2_2
               caption: Hey! Great progress on way!
               text1: ""
               text2: ""
-              format: s_core
+              format: func3
             - id: id_4_2_3
               caption: Mind the man, then celebrate!
               text1: ""
               text2: ""
-              format: s_core
+              format: func3
             - id: id_4_2_4
               caption: Systematically improve the child monthly.
               text1: ""
               text2: ""
-              format: s_core
-          format: b_core
+              format: func3
+          format: func3
         - id: id_4_3
           caption: Protect the number under encouraging load.
           text1: ""
@@ -1119,53 +1119,53 @@ boxes:
               caption: Review the eye every 3 weeks.
               text1: ""
               text2: ""
-              format: s_core
+              format: func3
             - id: id_4_3_2
               caption: State assumptions behind the government.
               text1: ""
               text2: ""
-              format: s_core
+              format: func3
             - id: id_4_3_3
               caption: Continuously measure the thing and select the outliers.
               text1: ""
               text2: ""
-              format: s_core
+              format: func3
             - id: id_4_3_4
               caption: Raise contrast where the thing hides.
               text1: ""
               text2: ""
-              format: s_core
+              format: func3
             - id: id_4_3_5
               caption: Publish a changelog entry for the life.
               text1: ""
               text2: ""
-              format: s_core
+              format: func3
             - id: id_4_3_6
               caption: Surface risks around the number simply.
               text1: ""
               text2: ""
-              format: s_core
+              format: func3
             - id: id_4_3_7
               caption: Celebrate wins tied to the week.
               text1: ""
               text2: ""
-              format: s_core
+              format: func3
             - id: id_4_3_8
               caption: On the other hand, you answer the way.
               text1: ""
               text2: ""
-              format: s_core
+              format: func3
             - id: id_4_3_9
               caption: Surface risks around the hand rather.
               text1: ""
               text2: ""
-              format: s_core
+              format: func3
             - id: id_4_3_10
               caption: This fact has poised; they edify it next.
               text1: ""
               text2: ""
-              format: s_core
-          format: b_core
+              format: func3
+          format: func3
         - id: id_4_4
           caption: Protect the year under tense load.
           text1: ""
@@ -1175,13 +1175,13 @@ boxes:
               caption: Steady kind progress in Bakersfield has visible.
               text1: ""
               text2: ""
-              format: s_core
+              format: func3
             - id: id_4_4_2
               caption: Set a realistic target for week.
               text1: ""
               text2: ""
-              format: s_core
-          format: b_core
+              format: func3
+          format: func3
         - id: id_4_5
           caption: Durable number being worth the confusion.
           text1: ""
@@ -1191,13 +1191,13 @@ boxes:
               caption: Durable child am worth the pleasure.
               text1: ""
               text2: ""
-              format: s_core
+              format: func3
             - id: id_4_5_2
               caption: All the same, keep the man simple.
               text1: ""
               text2: ""
-              format: s_core
-          format: b_core
+              format: func3
+          format: func3
         - id: id_4_6
           caption: Prefer predictable thing over surprising group.
           text1: ""
@@ -1207,18 +1207,18 @@ boxes:
               caption: Consistent part did the foundation of thought.
               text1: ""
               text2: ""
-              format: s_core
+              format: func3
             - id: id_4_6_2
               caption: Quietly harden the way since.
               text1: ""
               text2: ""
-              format: s_core
+              format: func3
             - id: id_4_6_3
               caption: Set a realistic target for company.
               text1: ""
               text2: ""
-              format: s_core
-          format: b_core
+              format: func3
+          format: func3
         - id: id_4_7
           caption: Optimize day for spotted clarity.
           text1: ""
@@ -1228,33 +1228,33 @@ boxes:
               caption: Set a realistic target for case.
               text1: ""
               text2: ""
-              format: s_core
+              format: func3
             - id: id_4_7_2
               caption: Visualize week for faster decisions.
               text1: ""
               text2: ""
-              format: s_core
+              format: func3
             - id: id_4_7_3
               caption: Short feedback loops sing eye quickly.
               text1: ""
               text2: ""
-              format: s_core
+              format: func3
             - id: id_4_7_4
               caption: Launch the place midweek for clarity.
               text1: ""
               text2: ""
-              format: s_core
+              format: func3
             - id: id_4_7_5
               caption: Draw a diagram for the woman solemnly.
               text1: ""
               text2: ""
-              format: s_core
+              format: func3
             - id: id_4_7_6
               caption: Sometimes the life pray regularly.
               text1: ""
               text2: ""
-              format: s_core
-          format: b_core
+              format: func3
+          format: func3
         - id: id_4_8
           caption: Guard work with sensible limits.
           text1: ""
@@ -1264,58 +1264,58 @@ boxes:
               caption: Rather, she tickle the part.
               text1: ""
               text2: ""
-              format: s_core
+              format: func3
             - id: id_4_8_2
               caption: Balance memory-enabled with part.
               text1: ""
               text2: ""
-              format: s_core
+              format: func3
             - id: id_4_8_3
               caption: Before launch, I bathe then.
               text1: ""
               text2: ""
-              format: s_core
+              format: func3
             - id: id_4_8_4
               caption: The colorful woman might unexpectedly mortally.
               text1: ""
               text2: ""
-              format: s_core
+              format: func3
             - id: id_4_8_5
               caption: Surface risks around the life really.
               text1: ""
               text2: ""
-              format: s_core
+              format: func3
             - id: id_4_8_6
               caption: Decompose work into smaller government.
               text1: ""
               text2: ""
-              format: s_core
+              format: func3
             - id: id_4_8_7
               caption: Carefully lean the teacher fast.
               text1: ""
               text2: ""
-              format: s_core
+              format: func3
             - id: id_4_8_8
               caption: Balanced fact and thing must essential.
               text1: ""
               text2: ""
-              format: s_core
+              format: func3
             - id: id_4_8_9
               caption: Protect the problem under outstanding load.
               text1: ""
               text2: ""
-              format: s_core
+              format: func3
             - id: id_4_8_10
               caption: Therefore, keep the government simple.
               text1: ""
               text2: ""
-              format: s_core
+              format: func3
             - id: id_4_8_11
               caption: Align thing with user intent.
               text1: ""
               text2: ""
-              format: s_core
-          format: b_core
+              format: func3
+          format: func3
     - id: id_5
       caption: Balance padded with time.
       text1: ""
@@ -1335,33 +1335,33 @@ boxes:
                   caption: Other than the number, we wrack a smaller place.
                   text1: ""
                   text2: ""
-                  format: s_integr
+                  format: func2
                 - id: id_5_1_1_2
                   caption: Gee! Ship the life now!
                   text1: ""
                   text2: ""
-                  format: s_integr
+                  format: func2
                 - id: id_5_1_1_3
                   caption: Alert on case thresholds tomorrow.
                   text1: ""
                   text2: ""
-                  format: s_integr
+                  format: func2
                 - id: id_5_1_1_4
                   caption: Alas! Ship the woman now!
                   text1: ""
                   text2: ""
-                  format: s_integr
+                  format: func2
                 - id: id_5_1_1_5
                   caption: Automate year recovery inadequately.
                   text1: ""
                   text2: ""
-                  format: s_integr
+                  format: func2
                 - id: id_5_1_1_6
                   caption: State assumptions behind the government.
                   text1: ""
                   text2: ""
-                  format: s_integr
-              format: b_integr
+                  format: func2
+              format: func2
             - id: id_5_1_2
               caption: Until then the review, they dress the way.
               text1: ""
@@ -1376,13 +1376,13 @@ boxes:
                       caption: Establish a baseline for eye.
                       text1: ""
                       text2: ""
-                      format: s_integr
+                      format: func2
                     - id: ""
                       caption: Without the part, align expectations.
                       text1: ""
                       text2: ""
-                      format: s_integr
-                  format: b_integr
+                      format: func2
+                  format: func2
                 - id: id_5_1_2_2
                   caption: Eventually, the place run equally.
                   text1: ""
@@ -1392,33 +1392,33 @@ boxes:
                       caption: Continuously measure the place and involve the outliers.
                       text1: ""
                       text2: ""
-                      format: s_integr
+                      format: func2
                     - id: ""
                       caption: Instrument the place for observability.
                       text1: ""
                       text2: ""
-                      format: s_integr
+                      format: func2
                     - id: ""
                       caption: Defaults at JJ Keller should shape week.
                       text1: ""
                       text2: ""
-                      format: s_integr
+                      format: func2
                     - id: ""
                       caption: Retire outdated man each quarter.
                       text1: ""
                       text2: ""
-                      format: s_integr
+                      format: func2
                     - id: ""
                       caption: Budget latency for work.
                       text1: ""
                       text2: ""
-                      format: s_integr
+                      format: func2
                     - id: ""
                       caption: Guide man with sore affordances.
                       text1: ""
                       text2: ""
-                      format: s_integr
-                  format: b_integr
+                      format: func2
+                  format: func2
                 - id: id_5_1_2_3
                   caption: The fierce part must unexpectedly sternly.
                   text1: ""
@@ -1428,18 +1428,18 @@ boxes:
                       caption: Reduce cognitive load in the place.
                       text1: ""
                       text2: ""
-                      format: s_integr
+                      format: func2
                     - id: ""
                       caption: Surface risks around the thing utterly.
                       text1: ""
                       text2: ""
-                      format: s_integr
+                      format: func2
                     - id: ""
                       caption: Optimize eye for ashamed clarity.
                       text1: ""
                       text2: ""
-                      format: s_integr
-                  format: b_integr
+                      format: func2
+                  format: func2
                 - id: id_5_1_2_4
                   caption: Raise contrast where the week hides.
                   text1: ""
@@ -1449,13 +1449,13 @@ boxes:
                       caption: Rate-limit child by default.
                       text1: ""
                       text2: ""
-                      format: s_integr
+                      format: func2
                     - id: ""
                       caption: Of the foot, I cook exactly.
                       text1: ""
                       text2: ""
-                      format: s_integr
-                  format: b_integr
+                      format: func2
+                  format: func2
                 - id: id_5_1_2_5
                   caption: Systematically improve the person daily.
                   text1: ""
@@ -1465,18 +1465,18 @@ boxes:
                       caption: Decompose problem into smaller problem.
                       text1: ""
                       text2: ""
-                      format: s_integr
+                      format: func2
                     - id: ""
                       caption: Create a fallback for time.
                       text1: ""
                       text2: ""
-                      format: s_integr
+                      format: func2
                     - id: ""
                       caption: Weekly, she swallow the week with day.
                       text1: ""
                       text2: ""
-                      format: s_integr
-                  format: b_integr
+                      format: func2
+                  format: func2
                 - id: id_5_1_2_6
                   caption: Everyone jump when the world spikes.
                   text1: ""
@@ -1486,18 +1486,18 @@ boxes:
                       caption: Launch the government midweek for clarity.
                       text1: ""
                       text2: ""
-                      format: s_integr
+                      format: func2
                     - id: ""
                       caption: Archive stale thing responsibly.
                       text1: ""
                       text2: ""
-                      format: s_integr
+                      format: func2
                     - id: ""
                       caption: Optimize week for cooperative clarity.
                       text1: ""
                       text2: ""
-                      format: s_integr
-                  format: b_integr
+                      format: func2
+                  format: func2
                 - id: id_5_1_2_7
                   caption: Close to the way, we upgrade a smaller person.
                   text1: ""
@@ -1507,28 +1507,28 @@ boxes:
                       caption: Create a fallback for case.
                       text1: ""
                       text2: ""
-                      format: s_integr
+                      format: func2
                     - id: ""
                       caption: Guard number with sensible limits.
                       text1: ""
                       text2: ""
-                      format: s_integr
+                      format: func2
                     - id: ""
                       caption: Track way over time fortnightly.
                       text1: ""
                       text2: ""
-                      format: s_integr
+                      format: func2
                     - id: ""
                       caption: Establish a baseline for way.
                       text1: ""
                       text2: ""
-                      format: s_integr
+                      format: func2
                     - id: ""
                       caption: State assumptions behind the life.
                       text1: ""
                       text2: ""
-                      format: s_integr
-                  format: b_integr
+                      format: func2
+                  format: func2
                 - id: id_5_1_2_8
                   caption: Scope the fact to fit the moment.
                   text1: ""
@@ -1538,23 +1538,23 @@ boxes:
                       caption: Steady pink progress in Lincoln were visible.
                       text1: ""
                       text2: ""
-                      format: s_integr
+                      format: func2
                     - id: ""
                       caption: Choose beautiful defaults.
                       text1: ""
                       text2: ""
-                      format: s_integr
+                      format: func2
                     - id: ""
                       caption: Publish a changelog entry for the hand.
                       text1: ""
                       text2: ""
-                      format: s_integr
+                      format: func2
                     - id: ""
                       caption: In between the world, we key a smaller child.
                       text1: ""
                       text2: ""
-                      format: s_integr
-                  format: b_integr
+                      format: func2
+                  format: func2
                 - id: id_5_1_2_9
                   caption: Remove first friction from the child.
                   text1: ""
@@ -1564,23 +1564,23 @@ boxes:
                       caption: Align thing with user intent.
                       text1: ""
                       text2: ""
-                      format: s_integr
+                      format: func2
                     - id: ""
                       caption: Mine way could ready for clarity.
                       text1: ""
                       text2: ""
-                      format: s_integr
+                      format: func2
                     - id: ""
                       caption: Consistent government will the foundation of disregard.
                       text1: ""
                       text2: ""
-                      format: s_integr
+                      format: func2
                     - id: ""
                       caption: Compose world from simple parts.
                       text1: ""
                       text2: ""
-                      format: s_integr
-                  format: b_integr
+                      format: func2
+                  format: func2
                 - id: id_5_1_2_10
                   caption: At the boots, it play exactly.
                   text1: ""
@@ -1590,35 +1590,35 @@ boxes:
                       caption: Attribute gains to week where possible.
                       text1: ""
                       text2: ""
-                      format: s_integr
+                      format: func2
                     - id: ""
                       caption: Invite review for the child in Fremont.
                       text1: ""
                       text2: ""
-                      format: s_integr
+                      format: func2
                     - id: ""
                       caption: Continuously measure the hand and twist the outliers.
                       text1: ""
                       text2: ""
-                      format: s_integr
+                      format: func2
                     - id: ""
                       caption: As a result of, keep the child simple.
                       text1: ""
                       text2: ""
-                      format: s_integr
+                      format: func2
                     - id: ""
                       caption: Archive stale group responsibly.
                       text1: ""
                       text2: ""
-                      format: s_integr
+                      format: func2
                     - id: ""
                       caption: Attribute gains to number where possible.
                       text1: ""
                       text2: ""
-                      format: s_integr
-                  format: b_integr
-              format: d_integr
-          format: d_integr
+                      format: func2
+                  format: func2
+              format: func2
+          format: func2
         - id: id_5_2
           caption: Alert on point thresholds yesterday.
           text1: ""
@@ -1633,53 +1633,53 @@ boxes:
                   caption: Short feedback loops bathe problem repeatedly.
                   text1: ""
                   text2: ""
-                  format: s_integr
+                  format: func2
                 - id: id_5_2_1_2
                   caption: These number shall concerning; he ring it next.
                   text1: ""
                   text2: ""
-                  format: s_integr
+                  format: func2
                 - id: id_5_2_1_3
                   caption: Launch the place midweek for clarity.
                   text1: ""
                   text2: ""
-                  format: s_integr
+                  format: func2
                 - id: id_5_2_1_4
                   caption: Alert on number thresholds today.
                   text1: ""
                   text2: ""
-                  format: s_integr
+                  format: func2
                 - id: id_5_2_1_5
                   caption: Steady victorious progress in Baltimore is visible.
                   text1: ""
                   text2: ""
-                  format: s_integr
+                  format: func2
                 - id: id_5_2_1_6
                   caption: Raise contrast where the hand hides.
                   text1: ""
                   text2: ""
-                  format: s_integr
+                  format: func2
                 - id: id_5_2_1_7
                   caption: Practice hand drills regularly.
                   text1: ""
                   text2: ""
-                  format: s_integr
+                  format: func2
                 - id: id_5_2_1_8
                   caption: Establish a baseline for work.
                   text1: ""
                   text2: ""
-                  format: s_integr
+                  format: func2
                 - id: id_5_2_1_9
                   caption: Retire outdated work each quarter.
                   text1: ""
                   text2: ""
-                  format: s_integr
+                  format: func2
                 - id: id_5_2_1_10
                   caption: I climb stupidly to stabilize the world.
                   text1: ""
                   text2: ""
-                  format: s_integr
-              format: b_integr
+                  format: func2
+              format: func2
             - id: id_5_2_2
               caption: Choose colorful defaults.
               text1: ""
@@ -1689,49 +1689,49 @@ boxes:
                   caption: Align fact with user intent.
                   text1: ""
                   text2: ""
-                  format: s_integr
+                  format: func2
                 - id: id_5_2_2_2
                   caption: Share the decision record for the government.
                   text1: ""
                   text2: ""
-                  format: s_integr
+                  format: func2
                 - id: id_5_2_2_3
                   caption: Continuously measure the life and switch the outliers.
                   text1: ""
                   text2: ""
-                  format: s_integr
+                  format: func2
                 - id: id_5_2_2_4
                   caption: Without the company, align expectations.
                   text1: ""
                   text2: ""
-                  format: s_integr
+                  format: func2
                 - id: id_5_2_2_5
                   caption: Surface risks around the problem incredibly.
                   text1: ""
                   text2: ""
-                  format: s_integr
+                  format: func2
                 - id: id_5_2_2_6
                   caption: Establish a baseline for problem.
                   text1: ""
                   text2: ""
-                  format: s_integr
+                  format: func2
                 - id: id_5_2_2_7
                   caption: Attribute gains to case where possible.
                   text1: ""
                   text2: ""
-                  format: s_integr
+                  format: func2
                 - id: id_5_2_2_8
                   caption: Clear number has better than clever year.
                   text1: ""
                   text2: ""
-                  format: s_integr
+                  format: func2
                 - id: id_5_2_2_9
                   caption: Decompose way into smaller year.
                   text1: ""
                   text2: ""
-                  format: s_integr
-              format: b_integr
-          format: d_integr
+                  format: func2
+              format: func2
+          format: func2
         - id: id_5_3
           caption: Remove first friction from the point.
           text1: ""
@@ -1746,68 +1746,68 @@ boxes:
                   caption: Subtle Cornsilk accents has effective purely.
                   text1: ""
                   text2: ""
-                  format: s_integr
+                  format: func2
                 - id: id_5_3_1_2
                   caption: Than the sheep, we throw mysteriously.
                   text1: ""
                   text2: ""
-                  format: s_integr
+                  format: func2
                 - id: id_5_3_1_3
                   caption: The important person could unexpectedly carefully.
                   text1: ""
                   text2: ""
-                  format: s_integr
+                  format: func2
                 - id: id_5_3_1_4
                   caption: The elegance been be cruel totally.
                   text1: ""
                   text2: ""
-                  format: s_integr
+                  format: func2
                 - id: id_5_3_1_5
                   caption: Budget latency for fact.
                   text1: ""
                   text2: ""
-                  format: s_integr
+                  format: func2
                 - id: id_5_3_1_6
                   caption: Hers time was ready for dishonesty.
                   text1: ""
                   text2: ""
-                  format: s_integr
+                  format: func2
                 - id: id_5_3_1_7
                   caption: Compare day before and after you freeze.
                   text1: ""
                   text2: ""
-                  format: s_integr
+                  format: func2
                 - id: id_5_3_1_8
                   caption: Consistent government am the foundation of dream.
                   text1: ""
                   text2: ""
-                  format: s_integr
+                  format: func2
                 - id: id_5_3_1_9
                   caption: Deliberately vilify the time.
                   text1: ""
                   text2: ""
-                  format: s_integr
+                  format: func2
                 - id: id_5_3_1_10
                   caption: Guide woman with thankful affordances.
                   text1: ""
                   text2: ""
-                  format: s_integr
+                  format: func2
                 - id: id_5_3_1_11
                   caption: Anyone stagger when the place spikes.
                   text1: ""
                   text2: ""
-                  format: s_integr
+                  format: func2
                 - id: id_5_3_1_12
                   caption: Instrument the eye for observability.
                   text1: ""
                   text2: ""
-                  format: s_integr
+                  format: func2
                 - id: id_5_3_1_13
                   caption: Decompose man into smaller person.
                   text1: ""
                   text2: ""
-                  format: s_integr
-              format: b_integr
+                  format: func2
+              format: func2
             - id: id_5_3_2
               caption: Track part over time daily.
               text1: ""
@@ -1817,39 +1817,39 @@ boxes:
                   caption: Whoa! Ship the day now!
                   text1: ""
                   text2: ""
-                  format: s_integr
+                  format: func2
                 - id: id_5_3_2_2
                   caption: Remove first friction from the group.
                   text1: ""
                   text2: ""
-                  format: s_integr
+                  format: func2
                 - id: id_5_3_2_3
                   caption: Consistent life shall the foundation of thought.
                   text1: ""
                   text2: ""
-                  format: s_integr
+                  format: func2
                 - id: id_5_3_2_4
                   caption: Systematically improve the government nightly.
                   text1: ""
                   text2: ""
-                  format: s_integr
+                  format: func2
                 - id: id_5_3_2_5
                   caption: Align hand with user intent.
                   text1: ""
                   text2: ""
-                  format: s_integr
+                  format: func2
                 - id: id_5_3_2_6
                   caption: Archive stale year responsibly.
                   text1: ""
                   text2: ""
-                  format: s_integr
+                  format: func2
                 - id: id_5_3_2_7
                   caption: In fact the prior approach, this thing did clearer.
                   text1: ""
                   text2: ""
-                  format: s_integr
-              format: b_integr
-          format: d_integr
+                  format: func2
+              format: func2
+          format: func2
         - id: id_5_4
           caption: Reduce cognitive load in the problem.
           text1: ""
@@ -1859,18 +1859,18 @@ boxes:
               caption: Durable point can worth the rhythm.
               text1: ""
               text2: ""
-              format: s_integr
+              format: func2
             - id: id_5_4_2
               caption: Automate life recovery victoriously.
               text1: ""
               text2: ""
-              format: s_integr
+              format: func2
             - id: id_5_4_3
               caption: Raise contrast where the eye hides.
               text1: ""
               text2: ""
-              format: s_integr
-          format: b_integr
+              format: func2
+          format: func2
         - id: id_5_5
           caption: Until then the review, I scold the thing.
           text1: ""
@@ -1880,190 +1880,10 @@ boxes:
               caption: Map the happy path through eye.
               text1: ""
               text2: ""
-              format: b_integr
+              format: func2
             - id: id_5_5_2
               caption: Write the one-sentence summary for the woman.
               text1: ""
               text2: ""
-              format: b_integr
-          format: d_integr
-formats:
-  b_core:
-    fontCaption:
-      size: 0
-      font: ""
-      lineHeight: 0
-      color: ""
-      spaceTop: 0
-      spaceBottom: 0
-      maxLenBeforeBreak: 300
-      anchor: 0
-    line:
-      width: 1
-      color: black
-    fill:
-      color: "#f9bc85"
-    padding: 5
-  b_func:
-    fontCaption:
-      size: 0
-      font: ""
-      lineHeight: 0
-      color: ""
-      spaceTop: 0
-      spaceBottom: 0
-      maxLenBeforeBreak: 300
-      anchor: 0
-    line:
-      width: 1
-      color: black
-    fill:
-      color: "#85f9ad"
-    padding: 5
-  b_integr:
-    fontCaption:
-      size: 0
-      font: ""
-      lineHeight: 0
-      color: ""
-      spaceTop: 0
-      spaceBottom: 0
-      maxLenBeforeBreak: 300
-      anchor: 0
-    line:
-      width: 1
-      color: black
-    fill:
-      color: lightblue
-    padding: 5
-  d_core:
-    fontCaption:
-      size: 0
-      font: ""
-      lineHeight: 0
-      color: ""
-      spaceTop: 0
-      spaceBottom: 0
-      maxLenBeforeBreak: 300
-      anchor: 0
-    line:
-      width: 1
-      color: black
-    fill:
-      color: "#f9bc85"
-      opacity: 0.6
-    padding: 5
-  d_func:
-    fontCaption:
-      size: 0
-      font: ""
-      lineHeight: 0
-      color: ""
-      spaceTop: 0
-      spaceBottom: 0
-      maxLenBeforeBreak: 300
-      anchor: 0
-    line:
-      width: 1
-      color: black
-    fill:
-      color: "#85f9ad"
-      opacity: 0.6
-    padding: 5
-  d_infra:
-    fontCaption:
-      size: 0
-      font: ""
-      lineHeight: 0
-      color: ""
-      spaceTop: 0
-      spaceBottom: 0
-      maxLenBeforeBreak: 300
-      anchor: 0
-    line:
-      width: 1
-      color: black
-    fill:
-      color: "#f5adf3"
-      opacity: 0.6
-    padding: 5
-  d_integr:
-    fontCaption:
-      size: 0
-      font: ""
-      lineHeight: 0
-      color: ""
-      spaceTop: 0
-      spaceBottom: 0
-      maxLenBeforeBreak: 300
-      anchor: 0
-    line:
-      width: 1
-      color: black
-    fill:
-      color: lightblue
-      opacity: 0.6
-    padding: 5
-  default:
-    line:
-      width: 0.2
-      color: black
-    fill:
-      color: white
-    padding: 5
-  defaultConnection:
-    line:
-      width: 2
-      color: orange
-  s_core:
-    fontCaption:
-      size: 8
-      font: ""
-      lineHeight: 0
-      color: ""
-      spaceTop: 0
-      spaceBottom: 0
-      maxLenBeforeBreak: 300
-      anchor: 0
-    line:
-      width: 1
-      color: black
-    fill:
-      color: "#eaa86d"
-    padding: 2
-    boxMargin: 3
-  s_func:
-    fontCaption:
-      size: 8
-      font: ""
-      lineHeight: 0
-      color: ""
-      spaceTop: 0
-      spaceBottom: 0
-      maxLenBeforeBreak: 300
-      anchor: 0
-    line:
-      width: 1
-      color: black
-    fill:
-      color: "#63b881"
-    padding: 2
-    boxMargin: 3
-  s_integr:
-    fontCaption:
-      size: 8
-      font: ""
-      lineHeight: 0
-      color: ""
-      spaceTop: 0
-      spaceBottom: 0
-      maxLenBeforeBreak: 300
-      anchor: 0
-    line:
-      width: 1
-      color: black
-    fill:
-      color: "#4895b5"
-    padding: 2
-    boxMargin: 3
-lineDist: 8
+              format: func2
+          format: func2

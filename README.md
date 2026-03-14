@@ -1,4 +1,4 @@
-[![CI](https://github.com/OkieOth/draw.chart.things/actions/workflows/test.yml/badge.svg?branch=main&event=push)](https://github.com/OkieOth/draw.chart.things/actions/workflows/test.yml)
+[![CI](https://github.com/OkieOth/boxes/actions/workflows/test.yml/badge.svg?branch=main&event=push)](https://github.com/OkieOth/boxes/actions/workflows/test.yml)
 
 # boxes
 
@@ -20,6 +20,10 @@ You write YAML. You get SVG. Between those two things, the tool:
 - **Renders overlays** — heatmaps and visual layers on top of the diagram
 - **Aggregates comments** per box and renders them as a side panel
 - **Exports SVG** to file or stdout, or serves live previews in the browser
+
+
+![Example](./docs/img/boxes_example.png)
+
 
 ---
 
@@ -157,6 +161,8 @@ A live preview UI runs in the browser via WebAssembly. Write YAML in the left pa
 
 ```bash
 make run-ui-docker   # serves on http://localhost:8081
+
+YOUR_BROWSER http://localhost:8080/?input=boxes_random.yaml&options=options.yaml
 ```
 
 Features:
@@ -170,6 +176,9 @@ Features:
 - Comment legend panel
 
 > **Chrome rendering note:** If the SVG appears blurry after zooming, press `Ctrl++` then `Ctrl+-` to reset the raster.
+
+![Example UI](./docs/img/boxes_ui.png)
+
 
 ---
 

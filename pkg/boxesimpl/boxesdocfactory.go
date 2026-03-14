@@ -5,8 +5,8 @@ import (
 	"os"
 	"slices"
 
-	"github.com/okieoth/draw.chart.things/pkg/types"
-	"github.com/okieoth/draw.chart.things/pkg/types/boxes"
+	"github.com/okieoth/boxes/pkg/types"
+	"github.com/okieoth/boxes/pkg/types/boxes"
 )
 
 func initLayoutElemContainer(l []boxes.Layout, doc *boxes.BoxesDocument, b *boxes.Boxes) *boxes.LayoutElemContainer {

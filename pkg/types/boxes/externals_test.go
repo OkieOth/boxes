@@ -3,8 +3,8 @@ package boxes_test
 import (
 	"testing"
 
-	"github.com/okieoth/draw.chart.things/pkg/types"
-	"github.com/okieoth/draw.chart.things/pkg/types/boxes"
+	"github.com/okieoth/boxes/pkg/types"
+	"github.com/okieoth/boxes/pkg/types/boxes"
 	"github.com/stretchr/testify/require"
 )
 

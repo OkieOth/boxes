@@ -8,9 +8,9 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/okieoth/draw.chart.things/pkg/svgdrawing"
-	"github.com/okieoth/draw.chart.things/pkg/types"
-	"github.com/okieoth/draw.chart.things/pkg/types/boxes"
+	"github.com/okieoth/boxes/pkg/svgdrawing"
+	"github.com/okieoth/boxes/pkg/types"
+	"github.com/okieoth/boxes/pkg/types/boxes"
 )
 
 func LoadBoxesFromFile(inputFile string) (*boxes.Boxes, error) {
