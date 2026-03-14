@@ -1,3 +1,7 @@
+# v0.17.0
+* pimp up the boxes sub command
+* UI: add possiblility to hide and show selected mixins
+
 # v0.15.0
 ## Boxes
 * UI: split formats to a separate file
