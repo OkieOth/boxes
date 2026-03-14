@@ -11,14 +11,14 @@ boxes:
   horizontal:
     - vertical:
         - id: r4_1
-          caption: Ferdows
+          caption: A Box
           text1: Stuff ...
           text2: More stuff
           connections:
             - destId: r6_2
     - vertical:
         - id: r5_1
-          caption: Most Left Element, Das ist für Matthias mal sehen was passiert
+          caption: Most Left Element ... with a longer text
           text1: I am in the second line
         - id: r5_2
           caption: Center Element

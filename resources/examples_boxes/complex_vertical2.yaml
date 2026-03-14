@@ -19,7 +19,7 @@ boxes:
             - destId: r6_1
             - destId: r6_2
         - id: r5_3
-          caption: Right Element Für Erik und den ganzen Rest der Familie!!!
+          caption: Right Element .. with some additional words to see how it works!!!
           text1: I am in the second line
           connections:
             - destId: r6_1
