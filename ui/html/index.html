@@ -96,6 +96,15 @@
                 >
                     <i class="fa-solid fa-folder-open"></i>
                 </button>
+                <!-- Search button -->
+                <button
+                    id="btn-search"
+                    class="tool-btn"
+                    title="Search Boxes"
+                    style="margin-left: 8px"
+                >
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </button>
                 <!-- Hide Comments toggle button -->
                 <button
                     id="btn-hide-comments"
@@ -151,15 +160,6 @@
                     style="margin-left: 8px"
                 >
                     <i class="fa-solid fa-expand"></i>
-                </button>
-                <!-- Search button -->
-                <button
-                    id="btn-search"
-                    class="tool-btn"
-                    title="Search Boxes"
-                    style="margin-left: 8px"
-                >
-                    <i class="fa-solid fa-magnifying-glass"></i>
                 </button>
             </div>
             <div
@@ -663,6 +663,12 @@
                     const blacklisted = getBlacklistedIds();
                     if (blacklisted && blacklisted.length)
                         params.set("blacklistedIds", blacklisted.join(","));
+                    const searchIds =
+                        typeof window.getSearchSelectedIds === "function"
+                            ? window.getSearchSelectedIds()
+                            : [];
+                    if (searchIds.length)
+                        params.set("search_ids", searchIds.join(","));
                     return (
                         window.location.origin +
                         window.location.pathname +
@@ -989,9 +995,16 @@
                     return indexPromise;
                 }
 
-                // Rebuild eagerly in background whenever the SVG re-renders
+                // Expose selected IDs for permalink writing
+                window.getSearchSelectedIds = function () {
+                    return Array.from(selectedIds);
+                };
+
+                let searchStateRestored = false;
+
+                // Rebuild index eagerly in background whenever the SVG re-renders
                 // with a new input, so the index is ready before the user opens
-                // the popup.
+                // the popup. Also restore search state from permalink on first render.
                 document
                     .getElementById("canvas")
                     .addEventListener("htmx:afterSwap", function () {
@@ -1001,6 +1014,19 @@
                                 : "";
                         if (yaml && yaml !== indexBuiltForInput) {
                             buildSearchIndex();
+                        }
+                        if (
+                            !searchStateRestored &&
+                            Array.isArray(window.querySearchIds) &&
+                            window.querySearchIds.length > 0
+                        ) {
+                            console.log("[search] restoring from permalink, querySearchIds=", window.querySearchIds, "getSearchMixin available:", typeof window.getSearchMixin === "function");
+                            searchStateRestored = true;
+                            window.querySearchIds.forEach((id) =>
+                                selectedIds.add(id),
+                            );
+                            updateBtnState();
+                            applySelection();
                         }
                     });
 
@@ -1028,6 +1054,7 @@
                         selectedIds.size === 0 ||
                         typeof window.getSearchMixin !== "function"
                     ) {
+                        console.log("[search] applySelection bail: size=", selectedIds.size, "getSearchMixin=", typeof window.getSearchMixin);
                         toolbarComboState.contentCache.delete(SEARCH_KEY);
                         removeToolbarComboSelection(SEARCH_KEY);
                         hidePopup();
@@ -1037,6 +1064,7 @@
                     const mixinYaml = window.getSearchMixin(
                         Array.from(selectedIds),
                     );
+                    console.log("[search] applySelection: selectedIds=", Array.from(selectedIds), "mixinYaml length=", mixinYaml ? mixinYaml.length : 0);
                     if (!mixinYaml) {
                         toolbarComboState.contentCache.delete(SEARCH_KEY);
                         removeToolbarComboSelection(SEARCH_KEY);

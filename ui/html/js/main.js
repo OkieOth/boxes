@@ -2176,6 +2176,13 @@ function handleInputQueryParam() {
                 window.blacklist = blacklistedIds;
             });
         }
+
+        // Search IDs
+        if (params.has("search_ids")) {
+            window.querySearchIds = params.get("search_ids").split(",").map(s => s.trim()).filter(Boolean);
+        } else {
+            window.querySearchIds = [];
+        }
     } catch (e) {
         console.error("Failed to read query params:", e);
         // Defaults when parsing fails
