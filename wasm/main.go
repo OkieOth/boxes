@@ -4,13 +4,16 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"syscall/js"
 
 	"github.com/okieoth/boxes/pkg/boxesimpl"
+	"github.com/okieoth/boxes/pkg/types"
 	"github.com/okieoth/boxes/pkg/types/boxes"
 
+	"gopkg.in/yaml.v3"
 	y "gopkg.in/yaml.v3"
 )
 
@@ -200,11 +203,111 @@ func createSvgForConnectedWrapper(this js.Value, args []js.Value) interface{} {
 	return obj
 }
 
+type searchItem struct {
+	Id      string `json:"id"`
+	Caption string `json:"caption"`
+}
+
+func collectSearchItems(layout boxes.Layout, items *[]searchItem) {
+	if layout.Id != "" && layout.Caption != "" {
+		*items = append(*items, searchItem{Id: layout.Id, Caption: layout.Caption})
+	}
+	for _, child := range layout.Vertical {
+		collectSearchItems(child, items)
+	}
+	for _, child := range layout.Horizontal {
+		collectSearchItems(child, items)
+	}
+}
+
+func getSearchableItems(boxesYaml string, mixins []string) string {
+	var b boxes.Boxes
+	if err := y.Unmarshal([]byte(boxesYaml), &b); err != nil {
+		fmt.Printf("getSearchableItems: error unmarshalling input: %v\n", err)
+		return "[]"
+	}
+	for i, c := range mixins {
+		var m boxes.BoxesFileMixings
+		if err := y.Unmarshal([]byte(c), &m); err != nil {
+			fmt.Printf("getSearchableItems: error unmarshalling mixin (%d): %v\n", i, err)
+		}
+		b.MixinThings(m)
+	}
+	items := make([]searchItem, 0)
+	collectSearchItems(b.Boxes, &items)
+	jsonBytes, err := json.Marshal(items)
+	if err != nil {
+		return "[]"
+	}
+	return string(jsonBytes)
+}
+
+func getSearchableItemsWrapper(this js.Value, args []js.Value) interface{} {
+	if len(args) < 2 {
+		return "[]"
+	}
+	input := args[0].String()
+	mixins, err := getArrayFromJsValue(args, 1)
+	if err != nil {
+		return "[]"
+	}
+	return getSearchableItems(input, mixins)
+}
+
+// Function returns a mixin to highlight the the selected items
+func getSearchMixin(selectedIds []string) string {
+	if len(selectedIds) == 0 {
+		return ""
+	}
+	const searchResultColor = "#f50057"
+	mixin := boxes.NewBoxesFileMixings()
+	format := boxes.Format{
+		Line: types.InitLineDef2(searchResultColor, 1),
+		Fill: types.InitFillDef2(searchResultColor, 1),
+	}
+	mixin.Legend = boxes.NewLegend()
+	mixin.Legend.Entries = append(mixin.Legend.Entries, boxes.LegendEntry{
+		Text:   "Search Result",
+		Format: "searchResult",
+	})
+	mixin.Formats["searchResult"] = format
+	overlay := boxes.NewOverlay()
+	overlay.Caption = "Search Result"
+	overlay.CenterXOffset = -1
+	overlay.CenterYOffset = -1
+	overlay.Formats = boxes.NewOverlayFormatDef()
+	overlay.Formats.Default = "searchResult"
+	for _, id := range selectedIds {
+		overlay.Layouts[id] = 5
+	}
+	mixin.Overlays = append(mixin.Overlays, *overlay)
+	bytes, err := yaml.Marshal(mixin)
+	if err != nil {
+		fmt.Println("error while marshal search mixin:", *mixin)
+		return ""
+
+	}
+	return string(bytes)
+}
+
+func getSearchMixinWrapper(this js.Value, args []js.Value) interface{} {
+	if len(args) < 1 {
+		return ""
+	}
+	selectedIds, err := getArrayFromJsValue(args, 0)
+	if err != nil {
+		return ""
+	}
+	return getSearchMixin(selectedIds)
+}
+
 func main() {
 	// Expose the function to JS as `getSvg`
 	js.Global().Set("createSvg", js.FuncOf(createSvgWrapper))
 	js.Global().Set("createSvgExt", js.FuncOf(createSvgExtWrapper))
 	js.Global().Set("createSvgForConnected", js.FuncOf(createSvgForConnectedWrapper))
+	js.Global().Set("getSearchableItems", js.FuncOf(getSearchableItemsWrapper))
+	js.Global().Set("getSearchMixin", js.FuncOf(getSearchMixinWrapper))
 
 	// Keep Go running
 	select {}

@@ -9,7 +9,7 @@
             window.formatMixin = "default_formats.yaml";
             window.defaultDepth = 2;
             window.uiVersion = "v1";
-            window.renderingVersion = "v0.17.0";
+            window.renderingVersion = "v1.0.0";
         </script>
 
         <script src="./js/htmx_1.9.12.min.js"></script>
@@ -95,6 +95,15 @@
                     style="margin-left: 8px"
                 >
                     <i class="fa-solid fa-folder-open"></i>
+                </button>
+                <!-- Search button -->
+                <button
+                    id="btn-search"
+                    class="tool-btn"
+                    title="Search Boxes"
+                    style="margin-left: 8px"
+                >
+                    <i class="fa-solid fa-magnifying-glass"></i>
                 </button>
                 <!-- Hide Comments toggle button -->
                 <button
@@ -431,6 +440,101 @@
             </div>
         </div>
 
+        <!-- Search popup -->
+        <div
+            id="search-popup"
+            class="hidden"
+            tabindex="-1"
+            aria-modal="true"
+            role="dialog"
+            style="
+                position: fixed;
+                top: 30%;
+                left: 50%;
+                transform: translate(-50%, -30%);
+                background: #fff;
+                border: 1px solid #888;
+                padding: 1.5em;
+                z-index: 1000;
+                box-shadow: 0 2px 16px #0002;
+                min-width: 360px;
+                display: none;
+            "
+        >
+            <div
+                style="
+                    margin-bottom: 0.75em;
+                    font-weight: bold;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 8px;
+                "
+            >
+                <span>Search Boxes</span>
+                <button
+                    id="search-close-btn"
+                    class="tool-btn"
+                    title="Close"
+                    style="padding: 4px 8px"
+                >
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <input
+                id="search-input"
+                type="text"
+                placeholder="Search boxes..."
+                autocomplete="off"
+                style="width: 100%; box-sizing: border-box; margin-bottom: 0.5em; font-size: 1em"
+            />
+            <div
+                id="search-results"
+                style="
+                    max-height: 40vh;
+                    overflow: auto;
+                    border: 1px solid #ddd;
+                    padding: 4px;
+                    border-radius: 4px;
+                "
+            >
+                <!-- populated dynamically -->
+            </div>
+            <div
+                style="
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-top: 10px;
+                    gap: 8px;
+                "
+            >
+                <button
+                    id="search-remove-all-btn"
+                    class="tool-btn"
+                    title="Remove all selections"
+                >
+                    <i class="fa-solid fa-trash"></i> Remove all
+                </button>
+                <label
+                    style="
+                        display: flex;
+                        align-items: center;
+                        gap: 5px;
+                        font-size: 13px;
+                        cursor: pointer;
+                        white-space: nowrap;
+                    "
+                >
+                    <input id="search-expand-checkbox" type="checkbox" />
+                    Expand selected
+                </label>
+                <button id="search-apply-btn" class="tool-btn" title="Apply Selection">
+                    <i class="fa-solid fa-check"></i> Apply
+                </button>
+            </div>
+        </div>
+
         <script>
             window.initPage();
             window.handleInputQueryParam();
@@ -512,16 +616,18 @@
                     return el ? el.value : "";
                 }
                 function getComboValues() {
+                    let values = [];
                     if (
                         typeof window.getToolbarComboSelectionValues ===
                         "function"
                     ) {
-                        const values = window.getToolbarComboSelectionValues();
-                        return Array.isArray(values) ? values : [];
+                        const raw = window.getToolbarComboSelectionValues();
+                        values = Array.isArray(raw) ? raw : [];
+                    } else {
+                        const sel = document.getElementById("toolbar-combo");
+                        if (sel && sel.value) values = [sel.value];
                     }
-                    const sel = document.getElementById("toolbar-combo");
-                    if (!sel || !sel.value) return [];
-                    return [sel.value];
+                    return values.filter((v) => v !== "__search_result__");
                 }
                 function makePermalink() {
                     const params = new URLSearchParams();
@@ -557,6 +663,12 @@
                     const blacklisted = getBlacklistedIds();
                     if (blacklisted && blacklisted.length)
                         params.set("blacklistedIds", blacklisted.join(","));
+                    const searchIds =
+                        typeof window.getSearchSelectedIds === "function"
+                            ? window.getSearchSelectedIds()
+                            : [];
+                    if (searchIds.length)
+                        params.set("search_ids", searchIds.join(","));
                     return (
                         window.location.origin +
                         window.location.pathname +
@@ -829,6 +941,258 @@
                 window.unhighlightConnectionGroup = function (groupClass) {
                     removeHighlight(groupClass);
                 };
+            })();
+
+            // Search popup logic
+            (function () {
+                const btn = document.getElementById("btn-search");
+                const popup = document.getElementById("search-popup");
+                const closeBtn = document.getElementById("search-close-btn");
+                const input = document.getElementById("search-input");
+                const results = document.getElementById("search-results");
+                if (!btn || !popup || !input || !results) return;
+
+                let allItems = [];
+                let selectedIds = new Set();
+                let indexPromise = null; // pending or resolved build
+                let indexBuiltForInput = null; // which window.input the index covers
+
+                const applyBtn = document.getElementById("search-apply-btn");
+                const removeAllBtn = document.getElementById("search-remove-all-btn");
+                const expandCheckbox = document.getElementById("search-expand-checkbox");
+
+                function updateBtnState() {
+                    btn.classList.toggle("active", selectedIds.size > 0);
+                }
+
+                function buildSearchIndex() {
+                    const yaml =
+                        typeof window.input === "string" ? window.input : "";
+                    // Skip if already built for this input
+                    if (indexPromise && indexBuiltForInput === yaml)
+                        return indexPromise;
+                    indexBuiltForInput = yaml;
+                    if (typeof window.getSearchableItems !== "function") {
+                        indexPromise = Promise.resolve();
+                        return indexPromise;
+                    }
+                    const mixins =
+                        typeof getCombinedMixins === "function"
+                            ? getCombinedMixins()
+                            : [];
+                    indexPromise = Promise.resolve()
+                        .then(() => window.getSearchableItems(yaml, mixins))
+                        .then((json) => {
+                            try {
+                                allItems = JSON.parse(json);
+                            } catch (e) {
+                                allItems = [];
+                            }
+                        })
+                        .catch(() => {
+                            allItems = [];
+                        });
+                    return indexPromise;
+                }
+
+                // Expose selected IDs for permalink writing
+                window.getSearchSelectedIds = function () {
+                    return Array.from(selectedIds);
+                };
+
+                let searchStateRestored = false;
+
+                // Rebuild index eagerly in background whenever the SVG re-renders
+                // with a new input, so the index is ready before the user opens
+                // the popup. Also restore search state from permalink on first render.
+                document
+                    .getElementById("canvas")
+                    .addEventListener("htmx:afterSwap", function () {
+                        const yaml =
+                            typeof window.input === "string"
+                                ? window.input
+                                : "";
+                        if (yaml && yaml !== indexBuiltForInput) {
+                            buildSearchIndex();
+                        }
+                        if (
+                            !searchStateRestored &&
+                            Array.isArray(window.querySearchIds) &&
+                            window.querySearchIds.length > 0
+                        ) {
+                            console.log("[search] restoring from permalink, querySearchIds=", window.querySearchIds, "getSearchMixin available:", typeof window.getSearchMixin === "function");
+                            searchStateRestored = true;
+                            window.querySearchIds.forEach((id) =>
+                                selectedIds.add(id),
+                            );
+                            updateBtnState();
+                            applySelection();
+                        }
+                    });
+
+                async function showPopup() {
+                    popup.classList.remove("hidden");
+                    popup.style.display = "block";
+                    btn.classList.add("active");
+                    input.value = "";
+                    input.focus();
+                    // If index is already ready this is instant; only shows
+                    // "Loading…" when the popup is opened before the background
+                    // build finishes.
+                    if (!indexPromise || indexBuiltForInput !== window.input) {
+                        results.innerHTML =
+                            '<div style="padding:6px 8px;font-size:13px;color:#666;font-style:italic;">Loading…</div>';
+                        await buildSearchIndex();
+                    }
+                    renderResults("");
+                }
+
+                function applySelection() {
+                    const SEARCH_KEY = "__search_result__";
+
+                    if (
+                        selectedIds.size === 0 ||
+                        typeof window.getSearchMixin !== "function"
+                    ) {
+                        console.log("[search] applySelection bail: size=", selectedIds.size, "getSearchMixin=", typeof window.getSearchMixin);
+                        toolbarComboState.contentCache.delete(SEARCH_KEY);
+                        removeToolbarComboSelection(SEARCH_KEY);
+                        hidePopup();
+                        return;
+                    }
+
+                    const mixinYaml = window.getSearchMixin(
+                        Array.from(selectedIds),
+                    );
+                    console.log("[search] applySelection: selectedIds=", Array.from(selectedIds), "mixinYaml length=", mixinYaml ? mixinYaml.length : 0);
+                    if (!mixinYaml) {
+                        toolbarComboState.contentCache.delete(SEARCH_KEY);
+                        removeToolbarComboSelection(SEARCH_KEY);
+                        hidePopup();
+                        return;
+                    }
+
+                    // Inject into content cache so loadYamlForComboValue
+                    // returns it directly without a fetch
+                    toolbarComboState.contentCache.set(SEARCH_KEY, mixinYaml);
+
+                    if (
+                        !toolbarComboState.selectedValues.includes(SEARCH_KEY)
+                    ) {
+                        addToolbarComboSelection(SEARCH_KEY, { silent: true });
+                    }
+                    // Override label after addToolbarComboSelection sets it
+                    // from option lookup (which wouldn't find __search_result__)
+                    toolbarComboState.selectionMeta.set(SEARCH_KEY, {
+                        ...(toolbarComboState.selectionMeta.get(SEARCH_KEY) ||
+                            {}),
+                        label: "Search Result",
+                    });
+                    updateToolbarComboSelectedList();
+                    if (expandCheckbox && expandCheckbox.checked && window.applyBadgeState) {
+                        const existing = collectBadgeIds("badge-list");
+                        const merged = Array.from(
+                            new Set([...existing, ...Array.from(selectedIds)])
+                        ).map((id) => ({ id: "", hid: id }));
+                        window.applyBadgeState(merged);
+                    }
+                    applySelectedMixins();
+                    hidePopup();
+                }
+
+                function hidePopup() {
+                    popup.classList.add("hidden");
+                    popup.style.display = "none";
+                    // Keep btn active if items remain selected
+                    updateBtnState();
+                }
+
+                function renderResults(query) {
+                    results.innerHTML = "";
+                    if (allItems.length === 0) {
+                        results.innerHTML =
+                            '<div style="padding:6px 8px;font-size:13px;color:#666;font-style:italic;">No boxes available.</div>';
+                        return;
+                    }
+                    const q = query.toLowerCase();
+                    const matches = q
+                        ? allItems.filter(({ caption }) =>
+                              caption.toLowerCase().includes(q),
+                          )
+                        : allItems;
+                    if (matches.length === 0) {
+                        results.innerHTML =
+                            '<div style="padding:6px 8px;font-size:13px;color:#666;font-style:italic;">No results.</div>';
+                        return;
+                    }
+                    matches.forEach(({ id, caption }) => {
+                        const item = document.createElement("label");
+                        item.style.cssText =
+                            "display:flex;align-items:center;gap:8px;padding:5px 8px;font-size:13px;cursor:pointer;border-radius:4px;color:#0a3d62;";
+                        item.title = id;
+                        const checkbox = document.createElement("input");
+                        checkbox.type = "checkbox";
+                        checkbox.value = id;
+                        checkbox.checked = selectedIds.has(id);
+                        checkbox.addEventListener("change", function () {
+                            if (this.checked) {
+                                selectedIds.add(id);
+                            } else {
+                                selectedIds.delete(id);
+                            }
+                            updateBtnState();
+                        });
+                        const label = document.createElement("span");
+                        label.textContent = caption;
+                        item.appendChild(checkbox);
+                        item.appendChild(label);
+                        item.addEventListener("mouseover", function () {
+                            this.style.background = "rgba(10,132,255,0.1)";
+                        });
+                        item.addEventListener("mouseout", function () {
+                            this.style.background = "";
+                        });
+                        results.appendChild(item);
+                    });
+                }
+
+                // Intercept badge removal for __search_result__ to keep
+                // selectedIds and btn-search active state in sync.
+                const _origRemoveCombo = removeToolbarComboSelection;
+                removeToolbarComboSelection = function (value, options) {
+                    if (value === "__search_result__") {
+                        selectedIds.clear();
+                        updateBtnState();
+                    }
+                    return _origRemoveCombo(value, options);
+                };
+
+                btn.addEventListener("click", showPopup);
+                closeBtn.addEventListener("click", hidePopup);
+                if (applyBtn) applyBtn.addEventListener("click", applySelection);
+                if (removeAllBtn)
+                    removeAllBtn.addEventListener("click", function () {
+                        selectedIds.clear();
+                        results
+                            .querySelectorAll("input[type='checkbox']")
+                            .forEach((cb) => (cb.checked = false));
+                        updateBtnState();
+                    });
+                input.addEventListener("input", function () {
+                    renderResults(this.value.trim());
+                });
+                popup.addEventListener("keydown", function (e) {
+                    if (e.key === "Escape") hidePopup();
+                });
+                document.addEventListener("mousedown", function (e) {
+                    if (
+                        !popup.classList.contains("hidden") &&
+                        !popup.contains(e.target) &&
+                        e.target !== btn
+                    ) {
+                        hidePopup();
+                    }
+                });
             })();
 
             // Hide Comments toggle: button logs current state to console and notifies stub

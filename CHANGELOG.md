@@ -1,3 +1,7 @@
+# v1.1.0
+* introduces search feature in the UI
+* fix connection issues, when using the to connections restricted view
+
 # v1.0.0
 * repo renamed to boxes :)
 

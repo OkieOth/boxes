@@ -582,14 +582,19 @@ func (doc *BoxesDocument) DrawComments(drawing types.Drawing, c types.TextDimens
 }
 
 func (doc *BoxesDocument) DrawOverlays(drawing types.Drawing, c types.TextDimensionCalculator) error {
+	fmt.Println("DEBUG: Overlays-1")
 	if len(doc.Overlays) > 0 {
+		fmt.Println("DEBUG: Overlays-2")
 		for i := range doc.Overlays {
+			fmt.Println("DEBUG: Overlays-3")
 			o := doc.Overlays[i]
 			for j := range o.Layouts {
+				fmt.Println("DEBUG: Overlays-4")
 				oe := doc.Overlays[i].Layouts[j]
 				if oe.Format.Fill == nil || oe.Format.Line == nil {
 					continue
 				}
+				fmt.Println("DEBUG: Overlays-5", oe.X, oe.Y, int(oe.Radius), *oe.Format.Fill, *oe.Format.Line)
 				drawing.DrawCircleWithBorder(oe.X, oe.Y, int(oe.Radius), oe.Format.Fill, oe.Format.Line)
 				if o.PrintValue {
 					label := fmt.Sprintf("%d", int(oe.Value))
