@@ -413,7 +413,11 @@ async function applySelectedMixins() {
     if (toolbarComboState.applyToken !== seq) {
         return;
     }
-    await regenerateSvgWithState(savedBadgeState, savedBlacklistState);
+    if (connectedModeActive) {
+        await regenerateSvgWithConnectedOnce(savedBadgeState, savedBlacklistState);
+    } else {
+        await regenerateSvgWithState(savedBadgeState, savedBlacklistState);
+    }
 }
 let state = { scale: 1, tx: 0, ty: 0 };
 let baseSize = { width: 0, height: 0 };
@@ -436,6 +440,7 @@ let collectorPanelVisible = false;
 let collectorVisibilityGuardAttached = false;
 let commentLegendPanelVisible = false;
 let connectionAnimationEnabled = false;
+let connectedModeActive = false;
 const commentLegendState = {
     byNodeId: new Map(),
     byGroupClass: new Map(),
@@ -1323,9 +1328,15 @@ function initPage() {
                     alert("Connected render is not available yet.");
                     return;
                 }
+                connectedModeActive = !connectedModeActive;
+                connectedBtn.classList.toggle("active", connectedModeActive);
                 const savedBadgeState = collectBadgeIds("badge-list");
                 const savedBlacklistState = collectBadgeIds("blacklist-list");
-                regenerateSvgWithConnectedOnce(savedBadgeState, savedBlacklistState);
+                if (connectedModeActive) {
+                    regenerateSvgWithConnectedOnce(savedBadgeState, savedBlacklistState);
+                } else {
+                    regenerateSvgWithState(savedBadgeState, savedBlacklistState);
+                }
             });
         }
         if (toolbarHandle && menuWrapper) {
