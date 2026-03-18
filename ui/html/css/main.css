@@ -497,6 +497,10 @@ button.tool-btn.active {
     font-style: italic;
 }
 
+.overlay-circle {
+    pointer-events: none;
+}
+
 /* Spinner overlay */
 #spinner {
     position: fixed;

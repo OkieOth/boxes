@@ -1,3 +1,6 @@
+# v1.1.1
+* UI: enable clickable boxes even through visible overlays
+
 # v1.1.0
 * introduces search feature in the UI
 * fix connection issues, when using the to connections restricted view
