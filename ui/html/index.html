@@ -486,7 +486,12 @@
                 type="text"
                 placeholder="Search boxes..."
                 autocomplete="off"
-                style="width: 100%; box-sizing: border-box; margin-bottom: 0.5em; font-size: 1em"
+                style="
+                    width: 100%;
+                    box-sizing: border-box;
+                    margin-bottom: 0.5em;
+                    font-size: 1em;
+                "
             />
             <div
                 id="search-results"
@@ -529,7 +534,11 @@
                     <input id="search-expand-checkbox" type="checkbox" />
                     Expand selected
                 </label>
-                <button id="search-apply-btn" class="tool-btn" title="Apply Selection">
+                <button
+                    id="search-apply-btn"
+                    class="tool-btn"
+                    title="Apply Selection"
+                >
                     <i class="fa-solid fa-check"></i> Apply
                 </button>
             </div>
@@ -958,8 +967,12 @@
                 let indexBuiltForInput = null; // which window.input the index covers
 
                 const applyBtn = document.getElementById("search-apply-btn");
-                const removeAllBtn = document.getElementById("search-remove-all-btn");
-                const expandCheckbox = document.getElementById("search-expand-checkbox");
+                const removeAllBtn = document.getElementById(
+                    "search-remove-all-btn",
+                );
+                const expandCheckbox = document.getElementById(
+                    "search-expand-checkbox",
+                );
 
                 function updateBtnState() {
                     btn.classList.toggle("active", selectedIds.size > 0);
@@ -1020,7 +1033,12 @@
                             Array.isArray(window.querySearchIds) &&
                             window.querySearchIds.length > 0
                         ) {
-                            console.log("[search] restoring from permalink, querySearchIds=", window.querySearchIds, "getSearchMixin available:", typeof window.getSearchMixin === "function");
+                            console.log(
+                                "[search] restoring from permalink, querySearchIds=",
+                                window.querySearchIds,
+                                "getSearchMixin available:",
+                                typeof window.getSearchMixin === "function",
+                            );
                             searchStateRestored = true;
                             window.querySearchIds.forEach((id) =>
                                 selectedIds.add(id),
@@ -1054,7 +1072,12 @@
                         selectedIds.size === 0 ||
                         typeof window.getSearchMixin !== "function"
                     ) {
-                        console.log("[search] applySelection bail: size=", selectedIds.size, "getSearchMixin=", typeof window.getSearchMixin);
+                        console.log(
+                            "[search] applySelection bail: size=",
+                            selectedIds.size,
+                            "getSearchMixin=",
+                            typeof window.getSearchMixin,
+                        );
                         toolbarComboState.contentCache.delete(SEARCH_KEY);
                         removeToolbarComboSelection(SEARCH_KEY);
                         hidePopup();
@@ -1064,7 +1087,13 @@
                     const mixinYaml = window.getSearchMixin(
                         Array.from(selectedIds),
                     );
-                    console.log("[search] applySelection: selectedIds=", Array.from(selectedIds), "mixinYaml length=", mixinYaml ? mixinYaml.length : 0);
+                    console.log(
+                        "[search] applySelection: selectedIds=",
+                        Array.from(selectedIds),
+                        "mixinYaml length=",
+                        mixinYaml ? mixinYaml.length : 0,
+                    );
+
                     if (!mixinYaml) {
                         toolbarComboState.contentCache.delete(SEARCH_KEY);
                         removeToolbarComboSelection(SEARCH_KEY);
@@ -1089,10 +1118,14 @@
                         label: "Search Result",
                     });
                     updateToolbarComboSelectedList();
-                    if (expandCheckbox && expandCheckbox.checked && window.applyBadgeState) {
+                    if (
+                        expandCheckbox &&
+                        expandCheckbox.checked &&
+                        window.applyBadgeState
+                    ) {
                         const existing = collectBadgeIds("badge-list");
                         const merged = Array.from(
-                            new Set([...existing, ...Array.from(selectedIds)])
+                            new Set([...existing, ...Array.from(selectedIds)]),
                         ).map((id) => ({ id: "", hid: id }));
                         window.applyBadgeState(merged);
                     }
@@ -1169,7 +1202,8 @@
 
                 btn.addEventListener("click", showPopup);
                 closeBtn.addEventListener("click", hidePopup);
-                if (applyBtn) applyBtn.addEventListener("click", applySelection);
+                if (applyBtn)
+                    applyBtn.addEventListener("click", applySelection);
                 if (removeAllBtn)
                     removeAllBtn.addEventListener("click", function () {
                         selectedIds.clear();

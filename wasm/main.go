@@ -256,6 +256,49 @@ func getSearchableItemsWrapper(this js.Value, args []js.Value) interface{} {
 
 // Function returns a mixin to highlight the the selected items
 func getSearchMixin(selectedIds []string) string {
+	return getSearchMixin_tags(selectedIds)
+}
+
+func getSearchMixin_tags(selectedIds []string) string {
+	if len(selectedIds) == 0 {
+		return ""
+	}
+	const searchResultColor = "#f50057"
+	mixin := boxes.NewBoxesFileMixings()
+	format := boxes.Format{
+		Line: types.InitLineDef2(searchResultColor, 1),
+	}
+	var ten float64 = 3
+	format.Line.Width = &ten
+	searchResult := "selected"
+	mixin.Legend = boxes.NewLegend()
+	mixin.Legend.Entries = append(mixin.Legend.Entries, boxes.LegendEntry{
+		Text:   "Search Result",
+		Format: searchResult,
+	})
+	mixin.Formats[searchResult] = format
+	fv := boxes.NewFormatVariations()
+	fv.HasTag[searchResult] = boxes.FormatVariation{
+		Priority:  1,
+		FormatRef: &searchResult,
+	}
+	mixin.FormatVariations = fv
+
+	for _, id := range selectedIds {
+		tags := boxes.NewTags()
+		tags.Tags = append(tags.Tags, searchResult)
+		mixin.Tags[id] = *tags
+	}
+	bytes, err := yaml.Marshal(mixin)
+	if err != nil {
+		fmt.Println("error while marshal search mixin:", *mixin)
+		return ""
+
+	}
+	return string(bytes)
+}
+
+func getSearchMixin_overlays(selectedIds []string) string {
 	if len(selectedIds) == 0 {
 		return ""
 	}

@@ -68,6 +68,8 @@ func (b *Boxes) mixInTagsImpl(l *Layout, additional map[string]Tags) {
 	if l.Caption != "" {
 		if tags, ok := additional[l.Caption]; ok {
 			l.Tags = append(l.Tags, tags.Tags...)
+		} else if tags, ok := additional[l.Id]; ok {
+			l.Tags = append(l.Tags, tags.Tags...)
 		}
 	}
 	b.mixInTagsImplCont(l.Horizontal, additional)

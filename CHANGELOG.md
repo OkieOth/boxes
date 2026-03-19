@@ -1,3 +1,6 @@
+# v1.1.2
+* UI: change selected visualization to a border around selected boxes
+
 # v1.1.1
 * UI: enable clickable boxes even through visible overlays
 
