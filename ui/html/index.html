@@ -9,7 +9,7 @@
             window.formatMixin = "default_formats.yaml";
             window.defaultDepth = 2;
             window.uiVersion = "v1";
-            window.renderingVersion = "v1.1.1";
+            window.renderingVersion = "v1.1.2";
         </script>
 
         <script src="./js/htmx_1.9.12.min.js"></script>
@@ -678,11 +678,21 @@
                             : [];
                     if (searchIds.length)
                         params.set("search_ids", searchIds.join(","));
+                    const queryStr = params.toString();
+                    if (typeof window.compressString === "function") {
+                        const compressed = window.compressString(queryStr);
+                        return (
+                            window.location.origin +
+                            window.location.pathname +
+                            "?z=" +
+                            compressed
+                        );
+                    }
                     return (
                         window.location.origin +
                         window.location.pathname +
                         "?" +
-                        params.toString()
+                        queryStr
                     );
                 }
                 function showPopup(link) {

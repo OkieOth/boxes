@@ -1,3 +1,6 @@
+# v1.2.0
+* UI: introduce zipped perm links
+
 # v1.1.2
 * UI: change selected visualization to a border around selected boxes
 
