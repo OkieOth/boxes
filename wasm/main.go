@@ -4,9 +4,13 @@
 package main
 
 import (
+	"bytes"
+	"compress/flate"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"syscall/js"
 
 	"github.com/okieoth/boxes/pkg/boxesimpl"
@@ -344,6 +348,41 @@ func getSearchMixinWrapper(this js.Value, args []js.Value) interface{} {
 	return getSearchMixin(selectedIds)
 }
 
+func compressStringWrapper(this js.Value, args []js.Value) interface{} {
+	if len(args) < 1 {
+		return ""
+	}
+	var buf bytes.Buffer
+	w, err := flate.NewWriter(&buf, flate.BestCompression)
+	if err != nil {
+		return ""
+	}
+	if _, err = w.Write([]byte(args[0].String())); err != nil {
+		return ""
+	}
+	if err = w.Close(); err != nil {
+		return ""
+	}
+	return base64.RawURLEncoding.EncodeToString(buf.Bytes())
+}
+
+func decompressStringWrapper(this js.Value, args []js.Value) interface{} {
+	if len(args) < 1 {
+		return ""
+	}
+	compressed, err := base64.RawURLEncoding.DecodeString(args[0].String())
+	if err != nil {
+		return ""
+	}
+	r := flate.NewReader(bytes.NewReader(compressed))
+	defer r.Close()
+	out, err := io.ReadAll(r)
+	if err != nil {
+		return ""
+	}
+	return string(out)
+}
+
 func main() {
 	// Expose the function to JS as `getSvg`
 	js.Global().Set("createSvg", js.FuncOf(createSvgWrapper))
@@ -351,6 +390,8 @@ func main() {
 	js.Global().Set("createSvgForConnected", js.FuncOf(createSvgForConnectedWrapper))
 	js.Global().Set("getSearchableItems", js.FuncOf(getSearchableItemsWrapper))
 	js.Global().Set("getSearchMixin", js.FuncOf(getSearchMixinWrapper))
+	js.Global().Set("compressString", js.FuncOf(compressStringWrapper))
+	js.Global().Set("decompressString", js.FuncOf(decompressStringWrapper))
 
 	// Keep Go running
 	select {}

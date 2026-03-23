@@ -1968,7 +1968,7 @@ async function loadSVGFromWasm() {
     // Fetch boxes.wasm with streaming fallback
     let resp;
     try {
-        resp = await fetch(window.getBasePath() + "/wasm/boxes_1.1.1.wasm", {
+        resp = await fetch(window.getBasePath() + "/wasm/boxes_1.1.2.wasm", {
             cache: "no-cache",
         });
         if (!resp.ok) throw new Error("HTTP " + resp.status);
@@ -2021,6 +2021,16 @@ async function loadSVGFromWasm() {
             return;
         }
         await new Promise((r) => setTimeout(r, 50));
+    }
+
+    // If the URL had a compressed ?z= permalink, decompress and apply now that WASM is ready.
+    // Then re-run loadYamlInput and loadComboOptionsFromYaml so all state is correctly restored.
+    if (window.queryZ) {
+        applyCompressedQueryParam();
+        await loadYamlInput();
+        if (typeof window.loadComboOptionsFromYaml === "function") {
+            await window.loadComboOptionsFromYaml();
+        }
     }
 
     // Install spinner wrapper once renderers are available
@@ -2085,111 +2095,144 @@ async function loadSVGFromWasm() {
     canvas.dispatchEvent(evt);
 }
 
-function handleInputQueryParam() {
-    try {
-        const params = new URLSearchParams(window.location.search);
-        // Store input (existing)
-        if (params.has("input")) {
-            const raw = params.get("input") || "";
-            const content = raw.replace(/\+/g, " ");
-            window.queryInput = content;
-        }
-        // NEW: parse 'options' query param for dynamic combo source
-        if (params.has("options")) {
-            const rawOptions = params.get("options") || "";
-            window.queryOptions = rawOptions.replace(/\+/g, " ");
+function applyQueryParams(params) {
+    // Store input (existing)
+    if (params.has("input")) {
+        const raw = params.get("input") || "";
+        const content = raw.replace(/\+/g, " ");
+        window.queryInput = content;
+    }
+    // parse 'options' query param for dynamic combo source
+    if (params.has("options")) {
+        const rawOptions = params.get("options") || "";
+        window.queryOptions = rawOptions.replace(/\+/g, " ");
+    } else {
+        window.queryOptions = undefined;
+    }
+    // parse 'debug' query param and store as global boolean
+    const rawDebug = params.get("debug");
+    const truthy = ["true", "1", "yes", "on"];
+    const falsy = ["false", "0", "no", "off"];
+    let val = false;
+    if (rawDebug != null) {
+        const normalized = String(rawDebug).toLowerCase();
+        if (!normalized) {
+            val = true;
+        } else if (falsy.includes(normalized)) {
+            val = false;
+        } else if (truthy.includes(normalized)) {
+            val = true;
         } else {
-            window.queryOptions = undefined;
+            val = true;
         }
-        // NEW: parse 'debug' query param and store as global boolean
-        const rawDebug = params.get("debug");
-        const truthy = ["true", "1", "yes", "on"];
-        const falsy = ["false", "0", "no", "off"];
-        let val = false;
-        if (rawDebug != null) {
-            const normalized = String(rawDebug).toLowerCase();
-            if (!normalized) {
-                val = true;
-            } else if (falsy.includes(normalized)) {
-                val = false;
-            } else if (truthy.includes(normalized)) {
-                val = true;
-            } else {
-                val = true;
+    }
+    window.debug = val;
+
+    // Parse combo, expandedIds, blacklistedIds
+    // Combo box (allow comma-separated or repeated params)
+    const comboParams = params.getAll("combo");
+    if (comboParams.length) {
+        const comboList = [];
+        const seen = new Set();
+        comboParams.forEach((chunk) => {
+            String(chunk || "")
+                .split(",")
+                .map((part) => part.trim())
+                .filter(Boolean)
+                .forEach((val) => {
+                    if (!seen.has(val)) {
+                        seen.add(val);
+                        comboList.push(val);
+                    }
+                });
+        });
+        window.queryComboValues = comboList;
+        window.queryCombo = comboList.length ? comboList[0] : undefined;
+    } else {
+        window.queryComboValues = [];
+        window.queryCombo = undefined;
+    }
+
+    // Expanded IDs (badges) — works before and after DOMContentLoaded
+    if (params.has("expandedIds")) {
+        const expandedIds = params.get("expandedIds").split(",").map(s => s.trim()).filter(Boolean);
+        const applyExpanded = function () {
+            const list = document.getElementById("badge-list");
+            if (list && expandedIds.length) {
+                list.innerHTML = "";
+                expandedIds.forEach(hid => {
+                    const span = document.createElement("span");
+                    span.className = "badge";
+                    span.dataset.hid = hid;
+                    const label = document.createElement("span");
+                    label.textContent = (window.getCaptionForId ? window.getCaptionForId(hid) : hid);
+                    span.appendChild(label);
+                    list.appendChild(span);
+                });
+                requestAnimationFrame(window.refitAllBadges || (()=>{}));
             }
-        }
-        window.debug = val;
-
-        // --- NEW: Parse combo, expandedIds, blacklistedIds ---
-        // Combo box (allow comma-separated or repeated params)
-        const comboParams = params.getAll("combo");
-        if (comboParams.length) {
-            const comboList = [];
-            const seen = new Set();
-            comboParams.forEach((chunk) => {
-                String(chunk || "")
-                    .split(",")
-                    .map((part) => part.trim())
-                    .filter(Boolean)
-                    .forEach((val) => {
-                        if (!seen.has(val)) {
-                            seen.add(val);
-                            comboList.push(val);
-                        }
-                    });
-            });
-            window.queryComboValues = comboList;
-            window.queryCombo = comboList.length ? comboList[0] : undefined;
+        };
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", applyExpanded);
         } else {
-            window.queryComboValues = [];
-            window.queryCombo = undefined;
+            applyExpanded();
         }
+    }
 
-        // Expanded IDs (badges)
-        if (params.has("expandedIds")) {
-            const expandedIds = params.get("expandedIds").split(",").map(s => s.trim()).filter(Boolean);
-            document.addEventListener("DOMContentLoaded", function () {
-                const list = document.getElementById("badge-list");
-                if (list && expandedIds.length) {
-                    // Remove existing badges
-                    list.innerHTML = "";
-                    expandedIds.forEach(hid => {
-                        // Try to find the element in the SVG after load
-                        // Fallback: create minimal badge
-                        const span = document.createElement("span");
-                        span.className = "badge";
-                        span.dataset.hid = hid;
-                        const label = document.createElement("span");
-                        label.textContent = (window.getCaptionForId ? window.getCaptionForId(hid) : hid);
-                        span.appendChild(label);
-                        list.appendChild(span);
-                    });
-                    requestAnimationFrame(window.refitAllBadges || (()=>{}));
-                }
-            });
-        }
-
-        // Blacklisted IDs (badges)
-        if (params.has("blacklistedIds")) {
-            const blacklistedIds = params.get("blacklistedIds").split(",").map(s => s.trim()).filter(Boolean);
+    // Blacklisted IDs
+    if (params.has("blacklistedIds")) {
+        const blacklistedIds = params.get("blacklistedIds").split(",").map(s => s.trim()).filter(Boolean);
+        if (document.readyState === "loading") {
             document.addEventListener("DOMContentLoaded", function () {
                 window.blacklist = blacklistedIds;
             });
-        }
-
-        // Search IDs
-        if (params.has("search_ids")) {
-            window.querySearchIds = params.get("search_ids").split(",").map(s => s.trim()).filter(Boolean);
         } else {
-            window.querySearchIds = [];
+            window.blacklist = blacklistedIds;
         }
+    }
+
+    // Search IDs
+    if (params.has("search_ids")) {
+        window.querySearchIds = params.get("search_ids").split(",").map(s => s.trim()).filter(Boolean);
+    } else {
+        window.querySearchIds = [];
+    }
+}
+
+function handleInputQueryParam() {
+    try {
+        const params = new URLSearchParams(window.location.search);
+        // If a compressed permalink is present, defer processing until WASM is ready
+        if (params.has("z")) {
+            window.queryZ = params.get("z");
+            return;
+        }
+        applyQueryParams(params);
     } catch (e) {
         console.error("Failed to read query params:", e);
-        // Defaults when parsing fails
         if (typeof window.queryInput === "undefined") {
             window.queryInput = undefined;
         }
         window.debug = false;
+    }
+}
+
+function applyCompressedQueryParam() {
+    if (!window.queryZ) return;
+    if (typeof window.decompressString !== "function") {
+        console.error("decompressString not available from WASM");
+        return;
+    }
+    try {
+        const decompressed = window.decompressString(window.queryZ);
+        if (!decompressed) {
+            console.error("Failed to decompress permalink z param");
+            return;
+        }
+        console.log("[permalink] decompressed z param:", decompressed);
+        applyQueryParams(new URLSearchParams(decompressed));
+    } catch (e) {
+        console.error("Failed to apply compressed query param:", e);
     }
 }
 
