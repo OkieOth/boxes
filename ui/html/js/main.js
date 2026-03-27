@@ -409,7 +409,10 @@ async function applySelectedMixins() {
         return;
     }
     const savedBadgeState = collectBadgeIds("badge-list");
-    const savedBlacklistState = collectBadgeIds("blacklist-list");
+    const domBlacklistState = collectBadgeIds("blacklist-list");
+    const savedBlacklistState = domBlacklistState.length > 0
+        ? domBlacklistState
+        : (window.blacklist && Array.isArray(window.blacklist) ? window.blacklist.slice() : []);
     if (toolbarComboState.applyToken !== seq) {
         return;
     }
@@ -1968,7 +1971,7 @@ async function loadSVGFromWasm() {
     // Fetch boxes.wasm with streaming fallback
     let resp;
     try {
-        resp = await fetch(window.getBasePath() + "/wasm/boxes_1.1.2.wasm", {
+        resp = await fetch(window.getBasePath() + "/wasm/boxes_1.2.1.wasm", {
             cache: "no-cache",
         });
         if (!resp.ok) throw new Error("HTTP " + resp.status);
