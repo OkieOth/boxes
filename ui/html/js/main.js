@@ -2072,7 +2072,7 @@ async function loadSVGFromWasm() {
     // Fetch boxes.wasm with streaming fallback
     let resp;
     try {
-        resp = await fetch(window.getBasePath() + "/wasm/boxes_1.2.1.wasm", {
+        resp = await fetch(window.getBasePath() + "/wasm/boxes_1.2.2.wasm", {
             cache: "no-cache",
         });
         if (!resp.ok) throw new Error("HTTP " + resp.status);
