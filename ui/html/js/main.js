@@ -106,7 +106,7 @@ async function triggerToolbarComboUpload() {
             showUploadRefreshToast(
                 upload.label
                     ? `Updated: ${upload.label}`
-                    : "Uploaded mixin updated"
+                    : "Uploaded mixin updated",
             );
         } else {
             addToolbarComboSelection(uploadedVal);
@@ -209,9 +209,7 @@ let formatMixinLoadPromise = null;
 
 async function ensureFormatMixinLoaded() {
     const name =
-        typeof window.formatMixin === "string"
-            ? window.formatMixin.trim()
-            : "";
+        typeof window.formatMixin === "string" ? window.formatMixin.trim() : "";
     if (!name) {
         formatMixinLoaded = true;
         formatMixinContent = "";
@@ -246,7 +244,11 @@ function getCombinedMixins() {
     return combined;
 }
 
-function normalizeCreateSvgResult(result, fallbackExpanded, fallbackBlacklisted) {
+function normalizeCreateSvgResult(
+    result,
+    fallbackExpanded,
+    fallbackBlacklisted,
+) {
     let svgStr = "";
     let expanded = fallbackExpanded;
     let blacklisted = fallbackBlacklisted;
@@ -304,19 +306,20 @@ async function regenerateSvgWithState(expandedIds, blacklistIds) {
         "blacklist ids: ",
         blacklistIds,
         "comments hidden: ",
-        window.hideCommentsEnabled
+        window.hideCommentsEnabled,
     );
     try {
         let result = await callCreateSvgWithMode(
             arg,
             expandedIds,
-            blacklistIds
+            blacklistIds,
         );
-        result = result && typeof result.then === "function" ? await result : result;
+        result =
+            result && typeof result.then === "function" ? await result : result;
         const normalized = normalizeCreateSvgResult(
             result,
             expandedIds,
-            blacklistIds
+            blacklistIds,
         );
         if (
             typeof normalized.svgStr !== "string" ||
@@ -331,7 +334,7 @@ async function regenerateSvgWithState(expandedIds, blacklistIds) {
         canvas.dispatchEvent(evtSwap);
         applyExpandedAndBlacklistState(
             normalized.expanded,
-            normalized.blacklisted
+            normalized.blacklisted,
         );
     } catch (err) {
         console.error("Error updating SVG via createSvg:", err);
@@ -354,20 +357,21 @@ async function regenerateSvgWithConnectedOnce(expandedIds, blacklistIds) {
         "blacklist ids: ",
         blacklistIds,
         "comments hidden: ",
-        window.hideCommentsEnabled
+        window.hideCommentsEnabled,
     );
     try {
         await ensureFormatMixinLoaded();
         let result = window.createSvgForConnected(
             arg,
             getCombinedMixins(),
-            window.debug
+            window.debug,
         );
-        result = result && typeof result.then === "function" ? await result : result;
+        result =
+            result && typeof result.then === "function" ? await result : result;
         const normalized = normalizeCreateSvgResult(
             result,
             expandedIds,
-            blacklistIds
+            blacklistIds,
         );
         if (
             typeof normalized.svgStr !== "string" ||
@@ -382,7 +386,7 @@ async function regenerateSvgWithConnectedOnce(expandedIds, blacklistIds) {
         canvas.dispatchEvent(evtSwap);
         applyExpandedAndBlacklistState(
             normalized.expanded,
-            normalized.blacklisted
+            normalized.blacklisted,
         );
     } catch (err) {
         console.error("Error updating SVG via createSvg:", err);
@@ -404,20 +408,28 @@ async function applySelectedMixins() {
         }
     }
     mixins = contents;
-    window.currentYamlFile = selectedValues.length ? selectedValues.join(",") : undefined;
+    window.currentYamlFile = selectedValues.length
+        ? selectedValues.join(",")
+        : undefined;
     if (!getActiveCreateSvgFunction()) {
         return;
     }
     const savedBadgeState = collectBadgeIds("badge-list");
     const domBlacklistState = collectBadgeIds("blacklist-list");
-    const savedBlacklistState = domBlacklistState.length > 0
-        ? domBlacklistState
-        : (window.blacklist && Array.isArray(window.blacklist) ? window.blacklist.slice() : []);
+    const savedBlacklistState =
+        domBlacklistState.length > 0
+            ? domBlacklistState
+            : window.blacklist && Array.isArray(window.blacklist)
+              ? window.blacklist.slice()
+              : [];
     if (toolbarComboState.applyToken !== seq) {
         return;
     }
     if (connectedModeActive) {
-        await regenerateSvgWithConnectedOnce(savedBadgeState, savedBlacklistState);
+        await regenerateSvgWithConnectedOnce(
+            savedBadgeState,
+            savedBlacklistState,
+        );
     } else {
         await regenerateSvgWithState(savedBadgeState, savedBlacklistState);
     }
@@ -514,7 +526,9 @@ function isToolbarComboValueSelected(value) {
 function createSelectedCollectorBadge(value, label) {
     const badge = document.createElement("div");
     const isHidden = toolbarComboState.hiddenValues.has(value);
-    badge.className = "selected-mixin-badge" + (isHidden ? " selected-mixin-badge--hidden" : "");
+    badge.className =
+        "selected-mixin-badge" +
+        (isHidden ? " selected-mixin-badge--hidden" : "");
     badge.dataset.value = value;
 
     const text = document.createElement("span");
@@ -567,7 +581,7 @@ function updateToolbarComboSelectedList() {
     if (panel) {
         panel.setAttribute(
             "aria-hidden",
-            panel.classList.contains("hidden") ? "true" : "false"
+            panel.classList.contains("hidden") ? "true" : "false",
         );
     }
     positionBlacklistCollector();
@@ -675,9 +689,15 @@ function renderToolbarComboDropdown() {
                 evt.preventDefault();
                 toggleToolbarComboValue(opt.value);
             });
-            row.setAttribute("aria-selected", checkbox.checked ? "true" : "false");
+            row.setAttribute(
+                "aria-selected",
+                checkbox.checked ? "true" : "false",
+            );
         }
-        row.classList.toggle("active", idx === toolbarComboState.highlightedIndex);
+        row.classList.toggle(
+            "active",
+            idx === toolbarComboState.highlightedIndex,
+        );
         row.addEventListener("mouseenter", () => {
             toolbarComboState.highlightedIndex = idx;
             updateToolbarComboActiveOption();
@@ -734,8 +754,10 @@ function positionToolbarComboDropdown() {
     const anchor = getToolbarComboAnchorElement();
     if (!dropdown || !anchor) return;
     const rect = anchor.getBoundingClientRect();
-    const viewportWidth = document.documentElement.clientWidth || window.innerWidth || 0;
-    const viewportHeight = document.documentElement.clientHeight || window.innerHeight || 0;
+    const viewportWidth =
+        document.documentElement.clientWidth || window.innerWidth || 0;
+    const viewportHeight =
+        document.documentElement.clientHeight || window.innerHeight || 0;
     const margin = 8;
     let width = rect.width;
     if (!Number.isFinite(width) || width <= 0) {
@@ -758,7 +780,10 @@ function positionToolbarComboDropdown() {
         if (!toolbarComboState.isOpen) return;
         const dropdownHeight = dropdown.offsetHeight;
         if (!dropdownHeight) return;
-        if (top + dropdownHeight > viewportHeight - margin && rect.top - 6 - dropdownHeight >= margin) {
+        if (
+            top + dropdownHeight > viewportHeight - margin &&
+            rect.top - 6 - dropdownHeight >= margin
+        ) {
             const aboveTop = Math.max(rect.top - 6 - dropdownHeight, margin);
             dropdown.style.top = `${Math.round(aboveTop)}px`;
             dropdown.dataset.placement = "above";
@@ -837,14 +862,18 @@ function handleToolbarComboKeydown(evt) {
         case "ArrowDown":
             evt.preventDefault();
             if (!toolbarComboState.isOpen) {
-                openToolbarComboDropdown({ filterText: toolbarComboState.filterText });
+                openToolbarComboDropdown({
+                    filterText: toolbarComboState.filterText,
+                });
             }
             moveToolbarComboHighlight(1);
             break;
         case "ArrowUp":
             evt.preventDefault();
             if (!toolbarComboState.isOpen) {
-                openToolbarComboDropdown({ filterText: toolbarComboState.filterText });
+                openToolbarComboDropdown({
+                    filterText: toolbarComboState.filterText,
+                });
             }
             moveToolbarComboHighlight(-1);
             break;
@@ -854,7 +883,10 @@ function handleToolbarComboKeydown(evt) {
                 return;
             }
             evt.preventDefault();
-            const choice = toolbarComboState.filteredOptions[toolbarComboState.highlightedIndex];
+            const choice =
+                toolbarComboState.filteredOptions[
+                    toolbarComboState.highlightedIndex
+                ];
             if (choice) {
                 if (choice.value === "__upload__") {
                     triggerToolbarComboUpload();
@@ -989,12 +1021,17 @@ window.getToolbarComboSelectionValues = function () {
 function getFirstSelectableComboValue() {
     const { select } = getToolbarComboElements();
     if (!select) return null;
-    const opt = Array.from(select.options).find((o) => o.value && o.value !== "__upload__");
+    const opt = Array.from(select.options).find(
+        (o) => o.value && o.value !== "__upload__",
+    );
     return opt ? opt.value : null;
 }
 
 function getDefaultComboSelectionValues() {
-    if (Array.isArray(window.queryComboValues) && window.queryComboValues.length) {
+    if (
+        Array.isArray(window.queryComboValues) &&
+        window.queryComboValues.length
+    ) {
         return window.queryComboValues.slice();
     }
     const first = getFirstSelectableComboValue();
@@ -1026,7 +1063,8 @@ function upsertUploadedMixin(id, title, content) {
     const list = getUploadedMixins();
     const idx = list.findIndex((x) => x && x.id === id);
     const entry = { id, title: title || id, content: content || "" };
-    if (idx >= 0) list[idx] = entry; else list.push(entry);
+    if (idx >= 0) list[idx] = entry;
+    else list.push(entry);
     setUploadedMixins(list);
     return entry;
 }
@@ -1040,7 +1078,10 @@ function parseTitleFromYaml(text, fallback) {
             const m = clean.match(/^title\s*:\s*(.+)$/i);
             if (m) {
                 let val = m[1].trim();
-                if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+                if (
+                    (val.startsWith('"') && val.endsWith('"')) ||
+                    (val.startsWith("'") && val.endsWith("'"))
+                ) {
                     val = val.slice(1, -1);
                 }
                 return val || fallback || "Uploaded";
@@ -1055,9 +1096,15 @@ function parseTitleFromYaml(text, fallback) {
 function ensureUploadOptionsInCombo(sel) {
     if (!sel) return;
     // Remove stale uploaded options that are no longer in storage
-    const current = new Set(getUploadedMixins().map((u) => `uploaded::${u.id}`));
+    const current = new Set(
+        getUploadedMixins().map((u) => `uploaded::${u.id}`),
+    );
     Array.from(sel.querySelectorAll("option")).forEach((opt) => {
-        if (opt && typeof opt.value === "string" && opt.value.startsWith("uploaded::")) {
+        if (
+            opt &&
+            typeof opt.value === "string" &&
+            opt.value.startsWith("uploaded::")
+        ) {
             if (!current.has(opt.value)) opt.remove();
         }
     });
@@ -1065,7 +1112,9 @@ function ensureUploadOptionsInCombo(sel) {
     const uploaded = getUploadedMixins();
     for (const u of uploaded) {
         const val = `uploaded::${u.id}`;
-        const existing = sel.querySelector(`option[value='${CSS.escape(val)}']`);
+        const existing = sel.querySelector(
+            `option[value='${CSS.escape(val)}']`,
+        );
         if (!existing) {
             const opt = document.createElement("option");
             opt.value = val;
@@ -1078,7 +1127,9 @@ function ensureUploadOptionsInCombo(sel) {
     }
     // Always ensure the upload sentinel exists as last option
     const sentinelVal = "__upload__";
-    let sentinel = sel.querySelector(`option[value='${CSS.escape(sentinelVal)}']`);
+    let sentinel = sel.querySelector(
+        `option[value='${CSS.escape(sentinelVal)}']`,
+    );
     if (!sentinel) {
         sentinel = document.createElement("option");
         sentinel.value = sentinelVal;
@@ -1141,10 +1192,17 @@ function installCreateSvgSpinnerWrapper(fnName) {
 }
 
 function getActiveCreateSvgFunction() {
-    return typeof window.createSvgExt === "function" ? window.createSvgExt : null;
+    return typeof window.createSvgExt === "function"
+        ? window.createSvgExt
+        : null;
 }
 
-async function callCreateSvgWithMode(arg, filterTexts, blacklistIds, depthOverride) {
+async function callCreateSvgWithMode(
+    arg,
+    filterTexts,
+    blacklistIds,
+    depthOverride,
+) {
     const fn = getActiveCreateSvgFunction();
     if (!fn) return null;
     await ensureFormatMixinLoaded();
@@ -1155,7 +1213,7 @@ async function callCreateSvgWithMode(arg, filterTexts, blacklistIds, depthOverri
         filterTexts || [],
         blacklistIds || [],
         window.hideCommentsEnabled,
-        window.debug
+        window.debug,
     );
 }
 
@@ -1205,9 +1263,15 @@ function initPage() {
         const doneBtn = document.getElementById("uploads-done");
         const clearAllBtn = document.getElementById("uploads-clear-all");
         const connectedBtn = document.getElementById("btn-connected");
-        const clearExpandedLink = document.getElementById("link-clear-expanded");
-        const clearBlacklistLink = document.getElementById("link-clear-blacklist");
-        const toolbarHandle = document.getElementById("toolbar-collapse-handle");
+        const clearExpandedLink = document.getElementById(
+            "link-clear-expanded",
+        );
+        const clearBlacklistLink = document.getElementById(
+            "link-clear-blacklist",
+        );
+        const toolbarHandle = document.getElementById(
+            "toolbar-collapse-handle",
+        );
         const menuWrapper = document.getElementById("menu-wrapper");
 
         function refreshComboAfterStorageChange(removedId) {
@@ -1216,7 +1280,7 @@ function initPage() {
             ensureUploadOptionsInCombo(sel);
 
             const storedUploaded = new Set(
-                getUploadedMixins().map((u) => `uploaded::${u.id}`)
+                getUploadedMixins().map((u) => `uploaded::${u.id}`),
             );
 
             Array.from(toolbarComboState.contentCache.keys()).forEach((key) => {
@@ -1232,14 +1296,16 @@ function initPage() {
             }
 
             const available = new Set(
-                Array.from(sel.options).map((o) => o.value)
+                Array.from(sel.options).map((o) => o.value),
             );
-            const filtered = toolbarComboState.selectedValues.filter((value) => {
-                if (value.startsWith("uploaded::")) {
-                    return storedUploaded.has(value);
-                }
-                return available.has(value);
-            });
+            const filtered = toolbarComboState.selectedValues.filter(
+                (value) => {
+                    if (value.startsWith("uploaded::")) {
+                        return storedUploaded.has(value);
+                    }
+                    return available.has(value);
+                },
+            );
             if (filtered.length !== toolbarComboState.selectedValues.length) {
                 setToolbarComboSelections(filtered, { silent: true });
             }
@@ -1320,11 +1386,12 @@ function initPage() {
         if (manageBtn) manageBtn.addEventListener("click", showUploadsPopup);
         if (closeBtn) closeBtn.addEventListener("click", hideUploadsPopup);
         if (doneBtn) doneBtn.addEventListener("click", hideUploadsPopup);
-        if (clearAllBtn) clearAllBtn.addEventListener("click", () => {
-            clearUploadedMixins();
-            populateUploadsPopup();
-            refreshComboAfterStorageChange(null);
-        });
+        if (clearAllBtn)
+            clearAllBtn.addEventListener("click", () => {
+                clearUploadedMixins();
+                populateUploadsPopup();
+                refreshComboAfterStorageChange(null);
+            });
         if (connectedBtn) {
             connectedBtn.addEventListener("click", () => {
                 if (typeof window.createSvgForConnected !== "function") {
@@ -1336,19 +1403,28 @@ function initPage() {
                 const savedBadgeState = collectBadgeIds("badge-list");
                 const savedBlacklistState = collectBadgeIds("blacklist-list");
                 if (connectedModeActive) {
-                    regenerateSvgWithConnectedOnce(savedBadgeState, savedBlacklistState);
+                    regenerateSvgWithConnectedOnce(
+                        savedBadgeState,
+                        savedBlacklistState,
+                    );
                 } else {
-                    regenerateSvgWithState(savedBadgeState, savedBlacklistState);
+                    regenerateSvgWithState(
+                        savedBadgeState,
+                        savedBlacklistState,
+                    );
                 }
             });
         }
         if (toolbarHandle && menuWrapper) {
             const toggleToolbar = () => {
-                const collapsed = menuWrapper.classList.toggle("toolbar-collapsed");
-                toolbarHandle.title = collapsed ? "Expand Toolbar" : "Collapse Toolbar";
+                const collapsed =
+                    menuWrapper.classList.toggle("toolbar-collapsed");
+                toolbarHandle.title = collapsed
+                    ? "Expand Toolbar"
+                    : "Collapse Toolbar";
                 toolbarHandle.setAttribute(
                     "aria-label",
-                    collapsed ? "Expand Toolbar" : "Collapse Toolbar"
+                    collapsed ? "Expand Toolbar" : "Collapse Toolbar",
                 );
             };
             toolbarHandle.addEventListener("click", toggleToolbar);
@@ -1388,7 +1464,11 @@ function initPage() {
                 if (e.key === "Escape") hideUploadsPopup();
             });
             document.addEventListener("mousedown", function (e) {
-                if (!popup.classList.contains("hidden") && !popup.contains(e.target) && e.target !== manageBtn) {
+                if (
+                    !popup.classList.contains("hidden") &&
+                    !popup.contains(e.target) &&
+                    e.target !== manageBtn
+                ) {
                     hideUploadsPopup();
                 }
             });
@@ -1402,7 +1482,9 @@ function initPage() {
     });
     const selectedPanel = document.getElementById("selected-collector");
     if (selectedPanel) {
-        const selectedObserver = new MutationObserver(positionBlacklistCollector);
+        const selectedObserver = new MutationObserver(
+            positionBlacklistCollector,
+        );
         selectedObserver.observe(selectedPanel, {
             childList: true,
             subtree: true,
@@ -1476,7 +1558,7 @@ function initPage() {
                 collectTextsFromNode(container, acc);
             } else {
                 const related = svg.querySelectorAll(
-                    `[id^="${CSS.escape(boxId)}"]`
+                    `[id^="${CSS.escape(boxId)}"]`,
                 );
                 related.forEach((node) => collectTextsFromNode(node, acc));
             }
@@ -1484,7 +1566,7 @@ function initPage() {
             // If nothing collected, include element-level text arrays across related nodes
             if (acc.size === 0) {
                 const related = svg.querySelectorAll(
-                    `[id^="${CSS.escape(boxId)}"]`
+                    `[id^="${CSS.escape(boxId)}"]`,
                 );
                 related.forEach((node) => {
                     getTextContentArray(node).forEach((t) => acc.add(t));
@@ -1496,7 +1578,7 @@ function initPage() {
 
             // As last resort, include ids to make filters stable
             const relatedIds = svg.querySelectorAll(
-                `[id^="${CSS.escape(boxId)}"]`
+                `[id^="${CSS.escape(boxId)}"]`,
             );
             relatedIds.forEach((node) => acc.add(node.id));
 
@@ -1526,7 +1608,7 @@ function initPage() {
             if (anyBadgeIsChildOf(clickedHid)) {
                 console.log(
                     "Ignoring parent click because a child is already selected:",
-                    el.id
+                    el.id,
                 );
                 return;
             }
@@ -1552,7 +1634,7 @@ function initPage() {
             if (selected) {
                 el.setAttribute(
                     "stroke-width",
-                    el.getAttribute("data-original-stroke-width") || "3"
+                    el.getAttribute("data-original-stroke-width") || "3",
                 );
                 el.removeAttribute("filter");
             } else {
@@ -1560,15 +1642,15 @@ function initPage() {
                 if (!el.hasAttribute("data-original-stroke-width")) {
                     el.setAttribute(
                         "data-original-stroke-width",
-                        el.getAttribute("stroke-width") || "3"
+                        el.getAttribute("stroke-width") || "3",
                     );
                 }
                 el.setAttribute(
                     "stroke-width",
                     String(
                         Number(el.getAttribute("data-original-stroke-width")) +
-                            2
-                    )
+                            2,
+                    ),
                 );
             }
             console.log("Clicked item:", el.id);
@@ -1641,12 +1723,12 @@ function initPage() {
                         "blacklist ids: ",
                         blacklistIds,
                         "comments hidden: ",
-                        window.hideCommentsEnabled
+                        window.hideCommentsEnabled,
                     );
                     let svgStr = await callCreateSvgWithMode(
                         arg,
                         filterTexts,
-                        blacklistIds
+                        blacklistIds,
                     );
                     svgStr =
                         svgStr && typeof svgStr.then === "function"
@@ -1658,7 +1740,7 @@ function initPage() {
                         !svgStr.trim().startsWith("<svg")
                     ) {
                         console.error(
-                            "createSvg did not return a valid SVG string."
+                            "createSvg did not return a valid SVG string.",
                         );
                         console.error(svgStr);
                         return;
@@ -1725,7 +1807,7 @@ function initPage() {
                 if (!clone.getAttribute("xmlns:xlink")) {
                     clone.setAttribute(
                         "xmlns:xlink",
-                        "http://www.w3.org/1999/xlink"
+                        "http://www.w3.org/1999/xlink",
                     );
                 }
                 // Preserve viewBox if available; fallback to width/height
@@ -1755,7 +1837,7 @@ function initPage() {
                 mmWrap.style.display = minimapVisible ? "flex" : "none";
                 mmWrap.setAttribute(
                     "aria-hidden",
-                    minimapVisible ? "false" : "true"
+                    minimapVisible ? "false" : "true",
                 );
                 if (minimapVisible) {
                     initMinimap();
@@ -1837,7 +1919,7 @@ function initPage() {
                         if (!el.hasAttribute("onclick")) {
                             el.setAttribute(
                                 "onclick",
-                                "window.shapeClick(event)"
+                                "window.shapeClick(event)",
                             );
                         }
                     });
@@ -1849,48 +1931,64 @@ function initPage() {
             }
         });
 
-// Attach click handlers to .additionalLink elements inside the current SVG
-function attachAdditionalLinkHandlers() {
-    const svg = getSvg();
-    if (!svg) return;
-    const nodes = svg.querySelectorAll(".additionalLink");
-    nodes.forEach((node) => {
-        try {
-            node.style.cursor = "pointer";
-        } catch {}
-        if (node.__additionalLinkBound) return;
-        node.__additionalLinkBound = true;
-        node.addEventListener(
-            "click",
-            function (evt) {
+        // Attach click handlers to .additionalLink elements inside the current SVG
+        function attachAdditionalLinkHandlers() {
+            const svg = getSvg();
+            if (!svg) return;
+            const nodes = svg.querySelectorAll(".additionalLink");
+            nodes.forEach((node) => {
                 try {
-                    let el = evt.target;
-                    while (
-                        el &&
-                        el !== svg &&
-                        !(el.classList && el.classList.contains("additionalLink"))
-                    ) {
-                        el = el.parentNode;
-                    }
-                    const url = el && el.getAttribute ? el.getAttribute("data-link") : null;
-                    if (url && typeof url === "string") {
-                        window.open(url, "_blank", "noopener,noreferrer");
-                    } else {
-                        console.warn("additionalLink clicked without data-link URL", el);
-                    }
-                } catch (err) {
-                    console.error("Failed to handle additionalLink click:", err);
-                } finally {
-                    if (evt) {
-                        evt.preventDefault();
-                        evt.stopPropagation();
-                    }
-                }
-            },
-            { capture: true }
-        );
-    });
-}
+                    node.style.cursor = "pointer";
+                } catch {}
+                if (node.__additionalLinkBound) return;
+                node.__additionalLinkBound = true;
+                node.addEventListener(
+                    "click",
+                    function (evt) {
+                        try {
+                            let el = evt.target;
+                            while (
+                                el &&
+                                el !== svg &&
+                                !(
+                                    el.classList &&
+                                    el.classList.contains("additionalLink")
+                                )
+                            ) {
+                                el = el.parentNode;
+                            }
+                            const url =
+                                el && el.getAttribute
+                                    ? el.getAttribute("data-link")
+                                    : null;
+                            if (url && typeof url === "string") {
+                                window.open(
+                                    url,
+                                    "_blank",
+                                    "noopener,noreferrer",
+                                );
+                            } else {
+                                console.warn(
+                                    "additionalLink clicked without data-link URL",
+                                    el,
+                                );
+                            }
+                        } catch (err) {
+                            console.error(
+                                "Failed to handle additionalLink click:",
+                                err,
+                            );
+                        } finally {
+                            if (evt) {
+                                evt.preventDefault();
+                                evt.stopPropagation();
+                            }
+                        }
+                    },
+                    { capture: true },
+                );
+            });
+        }
 
         // Keep centered and minimap in sync on resize
         window.addEventListener("resize", function () {
@@ -1919,7 +2017,7 @@ async function loadYamlInput() {
     try {
         if (location.protocol === "file:") {
             console.error(
-                "YAML must be served over HTTP(S). Use a local web server to host this page."
+                "YAML must be served over HTTP(S). Use a local web server to host this page.",
             );
             window.input = "";
             window.inputLoaded = Promise.resolve();
@@ -1928,9 +2026,12 @@ async function loadYamlInput() {
         }
         const yamlFile = window.queryInput;
         const p = (async () => {
-            const resp = await fetch(window.getBasePath() + "/data/" + yamlFile, {
-                cache: "no-cache",
-            });
+            const resp = await fetch(
+                window.getBasePath() + "/data/" + yamlFile,
+                {
+                    cache: "no-cache",
+                },
+            );
             if (!resp.ok) throw new Error("HTTP " + resp.status);
             window.input = await resp.text();
             window.currentYamlFile = yamlFile;
@@ -1954,14 +2055,14 @@ async function loadSVGFromWasm() {
 
     if (typeof Go !== "function") {
         console.error(
-            "Go runtime not available. Ensure ./wasm_exec.js is loaded before this script."
+            "Go runtime not available. Ensure ./wasm_exec.js is loaded before this script.",
         );
         return;
     }
     // Warn if running from file:// which cannot fetch WASM
     if (location.protocol === "file:") {
         console.error(
-            "WASM must be served over HTTP(S). Use a local web server to host this page."
+            "WASM must be served over HTTP(S). Use a local web server to host this page.",
         );
         return;
     }
@@ -1971,7 +2072,7 @@ async function loadSVGFromWasm() {
     // Fetch boxes.wasm with streaming fallback
     let resp;
     try {
-        resp = await fetch(window.getBasePath() + "/wasm/boxes_1.2.1.wasm", {
+        resp = await fetch(window.getBasePath() + "/wasm/boxes_1.2.2.wasm", {
             cache: "no-cache",
         });
         if (!resp.ok) throw new Error("HTTP " + resp.status);
@@ -1986,20 +2087,20 @@ async function loadSVGFromWasm() {
             try {
                 ({ instance } = await WebAssembly.instantiateStreaming(
                     resp,
-                    go.importObject
+                    go.importObject,
                 ));
             } catch {
                 const buf = await resp.arrayBuffer();
                 ({ instance } = await WebAssembly.instantiate(
                     buf,
-                    go.importObject
+                    go.importObject,
                 ));
             }
         } else {
             const buf = await resp.arrayBuffer();
             ({ instance } = await WebAssembly.instantiate(
                 buf,
-                go.importObject
+                go.importObject,
             ));
         }
     } catch (e) {
@@ -2019,7 +2120,7 @@ async function loadSVGFromWasm() {
     ) {
         if (Date.now() - start > timeoutMs) {
             console.error(
-                'createSvgExt/createSvgForConnected not exposed by boxes.wasm within timeout. Ensure js.Global().Set("createSvgExt", fn) or js.Global().Set("createSvgForConnected", fn).'
+                'createSvgExt/createSvgForConnected not exposed by boxes.wasm within timeout. Ensure js.Global().Set("createSvgExt", fn) or js.Global().Set("createSvgForConnected", fn).',
             );
             return;
         }
@@ -2051,9 +2152,24 @@ async function loadSVGFromWasm() {
         }
         // Get current expanded and blacklisted IDs
         const badgeList = document.getElementById("badge-list");
-        const filterTexts = badgeList ? Array.from(badgeList.querySelectorAll(".badge")).map(b => b.dataset.hid).filter(Boolean) : [];
+        const filterTexts = badgeList
+            ? Array.from(badgeList.querySelectorAll(".badge"))
+                  .map((b) => b.dataset.hid)
+                  .filter(Boolean)
+            : [];
         // Use window.blacklist if set, otherwise fallback to DOM
-        const blacklistIds = (window.blacklist && Array.isArray(window.blacklist)) ? window.blacklist : (document.getElementById("blacklist-list") ? Array.from(document.getElementById("blacklist-list").querySelectorAll(".badge")).map(b => b.dataset.hid).filter(Boolean) : []);
+        const blacklistIds =
+            window.blacklist && Array.isArray(window.blacklist)
+                ? window.blacklist
+                : document.getElementById("blacklist-list")
+                  ? Array.from(
+                        document
+                            .getElementById("blacklist-list")
+                            .querySelectorAll(".badge"),
+                    )
+                        .map((b) => b.dataset.hid)
+                        .filter(Boolean)
+                  : [];
         const initialArg =
             typeof window.input === "string" && window.input.length > 0
                 ? window.input
@@ -2064,23 +2180,24 @@ async function loadSVGFromWasm() {
             "blacklist ids: ",
             blacklistIds,
             "comments hidden: ",
-            window.hideCommentsEnabled
+            window.hideCommentsEnabled,
         );
         const res = await callCreateSvgWithMode(
             initialArg,
             filterTexts,
-            blacklistIds
+            blacklistIds,
         );
-        const resolved = res && typeof res.then === "function" ? await res : res;
+        const resolved =
+            res && typeof res.then === "function" ? await res : res;
         const normalized = normalizeCreateSvgResult(
             resolved,
             filterTexts,
-            blacklistIds
+            blacklistIds,
         );
         svgStr = normalized.svgStr;
         applyExpandedAndBlacklistState(
             normalized.expanded,
-            normalized.blacklisted
+            normalized.blacklisted,
         );
     } catch (e) {
         console.error("Error calling createSvg:", e);
@@ -2158,21 +2275,27 @@ function applyQueryParams(params) {
 
     // Expanded IDs (badges) — works before and after DOMContentLoaded
     if (params.has("expandedIds")) {
-        const expandedIds = params.get("expandedIds").split(",").map(s => s.trim()).filter(Boolean);
+        const expandedIds = params
+            .get("expandedIds")
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean);
         const applyExpanded = function () {
             const list = document.getElementById("badge-list");
             if (list && expandedIds.length) {
                 list.innerHTML = "";
-                expandedIds.forEach(hid => {
+                expandedIds.forEach((hid) => {
                     const span = document.createElement("span");
                     span.className = "badge";
                     span.dataset.hid = hid;
                     const label = document.createElement("span");
-                    label.textContent = (window.getCaptionForId ? window.getCaptionForId(hid) : hid);
+                    label.textContent = window.getCaptionForId
+                        ? window.getCaptionForId(hid)
+                        : hid;
                     span.appendChild(label);
                     list.appendChild(span);
                 });
-                requestAnimationFrame(window.refitAllBadges || (()=>{}));
+                requestAnimationFrame(window.refitAllBadges || (() => {}));
             }
         };
         if (document.readyState === "loading") {
@@ -2184,7 +2307,11 @@ function applyQueryParams(params) {
 
     // Blacklisted IDs
     if (params.has("blacklistedIds")) {
-        const blacklistedIds = params.get("blacklistedIds").split(",").map(s => s.trim()).filter(Boolean);
+        const blacklistedIds = params
+            .get("blacklistedIds")
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean);
         if (document.readyState === "loading") {
             document.addEventListener("DOMContentLoaded", function () {
                 window.blacklist = blacklistedIds;
@@ -2196,7 +2323,11 @@ function applyQueryParams(params) {
 
     // Search IDs
     if (params.has("search_ids")) {
-        window.querySearchIds = params.get("search_ids").split(",").map(s => s.trim()).filter(Boolean);
+        window.querySearchIds = params
+            .get("search_ids")
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean);
     } else {
         window.querySearchIds = [];
     }
@@ -2246,7 +2377,8 @@ window.loadComboOptionsFromYaml = async function () {
         const src = window.queryOptions;
         if (!src) {
             // Even if no remote options source, still ensure upload entries are present
-            const { select: selNoSrc, root: comboRoot } = getToolbarComboElements();
+            const { select: selNoSrc, root: comboRoot } =
+                getToolbarComboElements();
             if (comboRoot) comboRoot.style.display = "";
             if (selNoSrc) {
                 ensureUploadOptionsInCombo(selNoSrc);
@@ -2257,7 +2389,9 @@ window.loadComboOptionsFromYaml = async function () {
             console.error("Options YAML must be served over HTTP(S).");
             return;
         }
-        const resp = await fetch(window.getBasePath() + "/data/" + src, { cache: "no-cache" });
+        const resp = await fetch(window.getBasePath() + "/data/" + src, {
+            cache: "no-cache",
+        });
         if (!resp.ok) throw new Error("HTTP " + resp.status);
         const text = await resp.text();
         // Parse a simple YAML mapping: label: value (labels may be quoted)
@@ -2300,11 +2434,17 @@ function parseSimpleYamlMapping(text) {
         let key = m[1].trim();
         let val = m[2].trim();
         // Remove surrounding quotes from key
-        if ((key.startsWith('"') && key.endsWith('"')) || (key.startsWith("'") && key.endsWith("'"))) {
+        if (
+            (key.startsWith('"') && key.endsWith('"')) ||
+            (key.startsWith("'") && key.endsWith("'"))
+        ) {
             key = key.slice(1, -1);
         }
         // Remove surrounding quotes from value
-        if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+        if (
+            (val.startsWith('"') && val.endsWith('"')) ||
+            (val.startsWith("'") && val.endsWith("'"))
+        ) {
             val = val.slice(1, -1);
         }
         out.push([key, val]);
@@ -2330,7 +2470,7 @@ function attachBadgeRemoval() {
                 el.setAttribute("data-selected", "false");
                 el.setAttribute(
                     "stroke-width",
-                    el.getAttribute("data-original-stroke-width") || "3"
+                    el.getAttribute("data-original-stroke-width") || "3",
                 );
                 el.removeAttribute("filter");
             }
@@ -2442,7 +2582,7 @@ function deselectElementByHid(hid) {
         el.setAttribute("data-selected", "false");
         el.setAttribute(
             "stroke-width",
-            el.getAttribute("data-original-stroke-width") || "3"
+            el.getAttribute("data-original-stroke-width") || "3",
         );
         el.removeAttribute("filter");
     }
@@ -2521,7 +2661,10 @@ async function reloadSvgFromBadgesImpl(forceAllExpanded) {
         // NEW: preserve current zoom/pan state before reload
         const preservedState = { ...state };
 
-        if (window.inputLoaded && typeof window.inputLoaded.then === "function") {
+        if (
+            window.inputLoaded &&
+            typeof window.inputLoaded.then === "function"
+        ) {
             await window.inputLoaded;
         }
 
@@ -2530,34 +2673,40 @@ async function reloadSvgFromBadgesImpl(forceAllExpanded) {
         if (forceAllExpanded) {
             // Instead of collecting all box IDs, set maxDepth to 100 to expand all
             maxDepth = 100;
-        }
-        else {
+        } else {
             // Use badges in the collector
             const list = document.getElementById("badge-list");
             if (list) {
-                expandedIds = Array.from(list.querySelectorAll(".badge")).map(b => b.dataset.hid).filter(Boolean);
+                expandedIds = Array.from(list.querySelectorAll(".badge"))
+                    .map((b) => b.dataset.hid)
+                    .filter(Boolean);
             }
         }
         // Extract ids from blacklisted badges (elements in blacklist)
         const blacklistIds = getAllBadgeCaptions("blacklist-list");
         // Use input YAML filename or fallback
-        const arg = (typeof window.input === "string" && window.input.length > 0) ? window.input : "1";
+        const arg =
+            typeof window.input === "string" && window.input.length > 0
+                ? window.input
+                : "1";
         console.log(
             "Refreshing SVG: ",
             expandedIds,
             "blacklist ids: ",
             blacklistIds,
             "comments hidden: ",
-            window.hideCommentsEnabled
+            window.hideCommentsEnabled,
         );
         let svgStr = await callCreateSvgWithMode(
             arg,
             expandedIds,
             blacklistIds,
-            maxDepth
+            maxDepth,
         );
-        svgStr = svgStr && typeof svgStr.then === "function" ? await svgStr : svgStr;
-        if (typeof svgStr !== "string" || !svgStr.trim().startsWith("<svg")) return;
+        svgStr =
+            svgStr && typeof svgStr.then === "function" ? await svgStr : svgStr;
+        if (typeof svgStr !== "string" || !svgStr.trim().startsWith("<svg"))
+            return;
 
         canvas.innerHTML = svgStr;
 
@@ -2782,7 +2931,9 @@ function getStrokeColor(el) {
 function clearConnectionRunners(targetSvg) {
     const svg = targetSvg || getSvg();
     if (!svg) return;
-    svg.querySelectorAll(".connection-runner-dot").forEach((runner) => runner.remove());
+    svg.querySelectorAll(".connection-runner-dot").forEach((runner) =>
+        runner.remove(),
+    );
 }
 
 function installConnectionRunners() {
@@ -2802,7 +2953,7 @@ function installConnectionRunners() {
     }
 
     const connections = svg.querySelectorAll(
-        "line.connection, path.connection, polyline.connection"
+        "line.connection, path.connection, polyline.connection",
     );
     connections.forEach((conn) => {
         if (!conn.parentNode) return;
@@ -2835,7 +2986,10 @@ function installConnectionRunners() {
         motion.setAttribute("path", pathData);
         motion.setAttribute("rotate", "auto");
         if (Math.random() > 0.5) {
-            motion.setAttribute("begin", `${(-Math.random() * duration).toFixed(2)}s`);
+            motion.setAttribute(
+                "begin",
+                `${(-Math.random() * duration).toFixed(2)}s`,
+            );
         }
         runner.appendChild(motion);
 
@@ -2940,7 +3094,11 @@ function hasCommentClass(el) {
     if (!el) return false;
     if (el.classList && el.classList.length) {
         for (const cls of el.classList) {
-            if (String(cls || "").toLowerCase().includes("comment")) {
+            if (
+                String(cls || "")
+                    .toLowerCase()
+                    .includes("comment")
+            ) {
                 return true;
             }
         }
@@ -2958,7 +3116,11 @@ function hasCommentClass(el) {
 }
 
 function isSvgTextElement(el) {
-    return !!el && typeof el.tagName === "string" && el.tagName.toLowerCase() === "text";
+    return (
+        !!el &&
+        typeof el.tagName === "string" &&
+        el.tagName.toLowerCase() === "text"
+    );
 }
 
 function getTrimmedSvgText(el) {
@@ -2966,11 +3128,21 @@ function getTrimmedSvgText(el) {
     return (el.textContent || "").replace(/\s+/g, " ").trim();
 }
 
-function findNextLegendSibling(list, startIndex, predicate, processed, maxDistance) {
+function findNextLegendSibling(
+    list,
+    startIndex,
+    predicate,
+    processed,
+    maxDistance,
+) {
     if (!Array.isArray(list)) return null;
     let steps = 0;
     for (let i = startIndex; i < list.length; i++) {
-        if (typeof maxDistance === "number" && maxDistance >= 0 && steps > maxDistance) {
+        if (
+            typeof maxDistance === "number" &&
+            maxDistance >= 0 &&
+            steps > maxDistance
+        ) {
             break;
         }
         const candidate = list[i];
@@ -2993,7 +3165,7 @@ function resolveLegendTripletFromList(circle, list, processed, maxDistance) {
         idx + 1,
         (el) => isSvgTextElement(el) && hasCommentClass(el),
         processed,
-        maxDistance
+        maxDistance,
     );
     if (!marker) return null;
     const description = findNextLegendSibling(
@@ -3001,7 +3173,7 @@ function resolveLegendTripletFromList(circle, list, processed, maxDistance) {
         marker.index + 1,
         (el) => isSvgTextElement(el),
         processed,
-        maxDistance
+        maxDistance,
     );
     if (!description) return null;
     return { marker: marker.node, description: description.node };
@@ -3016,7 +3188,8 @@ function collectCommentLegendEntries() {
     const orderedNodes = Array.from(svg.querySelectorAll("circle, text"));
     const circles = svg.querySelectorAll("circle");
     circles.forEach((circle) => {
-        if (!circle || processed.has(circle) || !hasCommentClass(circle)) return;
+        if (!circle || processed.has(circle) || !hasCommentClass(circle))
+            return;
         const parentList = circle.parentElement
             ? Array.from(circle.parentElement.children || [])
             : [];
@@ -3029,7 +3202,9 @@ function collectCommentLegendEntries() {
         processed.add(triplet.description);
         const strokeColor = circle.getAttribute("stroke");
         const fallbackColor =
-            strokeColor && typeof strokeColor === "string" && strokeColor.toLowerCase() !== "none"
+            strokeColor &&
+            typeof strokeColor === "string" &&
+            strokeColor.toLowerCase() !== "none"
                 ? strokeColor
                 : "#6c7a89";
         const groupClassSet = new Set();
@@ -3042,7 +3217,11 @@ function collectCommentLegendEntries() {
             });
         });
         const groupClasses = Array.from(groupClassSet);
-        const sourceIds = [circle.id, triplet.marker.id, triplet.description.id].filter(Boolean);
+        const sourceIds = [
+            circle.id,
+            triplet.marker.id,
+            triplet.description.id,
+        ].filter(Boolean);
         entries.push({
             id:
                 circle.id ||
@@ -3184,12 +3363,12 @@ function observeCaptionAndRefresh(el) {
                     "blacklist ids: ",
                     blacklistIds,
                     "comments hidden: ",
-                    window.hideCommentsEnabled
+                    window.hideCommentsEnabled,
                 );
                 let svgStr = await callCreateSvgWithMode(
                     arg,
                     filterTexts,
-                    blacklistIds
+                    blacklistIds,
                 );
 
                 svgStr =
@@ -3291,7 +3470,7 @@ function findBadgesByBoxId(boxId) {
     if (!list || !boxId) return [];
     // Use [data-hid] to uniquely identify badges per box
     return Array.from(
-        list.querySelectorAll(`.badge[data-hid="${CSS.escape(boxId)}"]`)
+        list.querySelectorAll(`.badge[data-hid="${CSS.escape(boxId)}"]`),
     );
 }
 
@@ -3388,7 +3567,8 @@ function positionBlacklistCollector() {
             return;
         }
         panel.style.top = currentTop + "px";
-        const height = panel.offsetHeight || panel.getBoundingClientRect().height || 0;
+        const height =
+            panel.offsetHeight || panel.getBoundingClientRect().height || 0;
         currentTop += (height || 0) + gap;
     });
 }
@@ -3620,11 +3800,15 @@ function updateMinimap() {
         h;
     vp.setAttribute(
         "x",
-        String(Math.max(parseFloat(scene.getAttribute("x")), Math.min(x, maxX)))
+        String(
+            Math.max(parseFloat(scene.getAttribute("x")), Math.min(x, maxX)),
+        ),
     );
     vp.setAttribute(
         "y",
-        String(Math.max(parseFloat(scene.getAttribute("y")), Math.min(y, maxY)))
+        String(
+            Math.max(parseFloat(scene.getAttribute("y")), Math.min(y, maxY)),
+        ),
     );
     vp.setAttribute("width", String(Math.max(1, w)));
     vp.setAttribute("height", String(Math.max(1, h)));
@@ -3688,10 +3872,16 @@ function updateToolButtons() {
         btnHideComments.classList.toggle("active", enabled);
     }
     if (btnCommentLegend) {
-        btnCommentLegend.classList.toggle("active", !!commentLegendPanelVisible);
+        btnCommentLegend.classList.toggle(
+            "active",
+            !!commentLegendPanelVisible,
+        );
     }
     if (btnConnectionAnim) {
-        btnConnectionAnim.classList.toggle("active", !!connectionAnimationEnabled);
+        btnConnectionAnim.classList.toggle(
+            "active",
+            !!connectionAnimationEnabled,
+        );
     }
 }
 
@@ -3728,7 +3918,10 @@ function updateBlacklistUI() {
     if (!list) return;
     list.innerHTML = "";
     // Use window.blacklist if set, otherwise fallback to local blacklist
-    const ids = (window.blacklist && Array.isArray(window.blacklist)) ? window.blacklist : blacklist;
+    const ids =
+        window.blacklist && Array.isArray(window.blacklist)
+            ? window.blacklist
+            : blacklist;
     ids.forEach((boxId) => {
         // Try to find the SVG element for color extraction
         const el =
@@ -3755,13 +3948,16 @@ function updateBlacklistUI() {
         badge.onclick = function () {
             // Remove from window.blacklist if present, else from local blacklist
             if (window.blacklist && Array.isArray(window.blacklist)) {
-                window.blacklist = window.blacklist.filter(id => id !== boxId);
+                window.blacklist = window.blacklist.filter(
+                    (id) => id !== boxId,
+                );
             } else {
-                blacklist = blacklist.filter(id => id !== boxId);
+                blacklist = blacklist.filter((id) => id !== boxId);
             }
             updateBlacklistUI();
             // Also reload the SVG to reflect the change
-            if (typeof reloadSvgFromBadges === "function") reloadSvgFromBadges();
+            if (typeof reloadSvgFromBadges === "function")
+                reloadSvgFromBadges();
         };
         list.appendChild(badge);
     });
