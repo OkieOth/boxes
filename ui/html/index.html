@@ -640,24 +640,25 @@
                 }
                 function makePermalink() {
                     const params = new URLSearchParams();
-                    // Always include the original 'input' query parameter if present in the URL
+                    // Always include the original 'input' query parameter if present in the URL.
+                    // Fall back to window.queryInput for pages loaded via a compressed ?z= permalink,
+                    // where 'input' is not directly present in window.location.search.
                     const origInput = (function () {
                         const urlParams = new URLSearchParams(
                             window.location.search,
                         );
-                        return urlParams.has("input")
-                            ? urlParams.get("input")
-                            : "";
+                        if (urlParams.has("input")) return urlParams.get("input");
+                        return window.queryInput || "";
                     })();
                     if (origInput) params.set("input", origInput);
-                    // Also include the original 'options' query parameter if present in the URL
+                    // Also include the original 'options' query parameter if present in the URL.
+                    // Fall back to window.queryOptions for the same reason as above.
                     const origOptions = (function () {
                         const urlParams = new URLSearchParams(
                             window.location.search,
                         );
-                        return urlParams.has("options")
-                            ? urlParams.get("options")
-                            : "";
+                        if (urlParams.has("options")) return urlParams.get("options");
+                        return window.queryOptions || "";
                     })();
                     if (origOptions) params.set("options", origOptions);
                     const comboValues = getComboValues();
