@@ -3397,9 +3397,24 @@ function createCommentLegendItem(entry) {
                 window.highlightConnectionGroup(stepClass);
             }
         });
-        tag.addEventListener("mouseleave", () => {
+        tag.addEventListener("mouseleave", (e) => {
             if (typeof window.unhighlightConnectionGroup === "function") {
                 window.unhighlightConnectionGroup(stepClass);
+            }
+            // removeHighlight() strips highlight-group from shared elements
+            // (e.g. conLine_N step_N). addHighlight() has an early-exit guard
+            // when the group is already in activeGroupHighlights, so a plain
+            // re-call is a no-op. Force re-apply by cycling unhighlight→highlight.
+            if (item.contains(e.relatedTarget)) {
+                const grps = Array.isArray(entry.groupClasses) ? entry.groupClasses.filter(Boolean) : [];
+                grps.forEach((grp) => {
+                    if (typeof window.unhighlightConnectionGroup === "function") {
+                        window.unhighlightConnectionGroup(grp);
+                    }
+                    if (typeof window.highlightConnectionGroup === "function") {
+                        window.highlightConnectionGroup(grp);
+                    }
+                });
             }
         });
         markerRow.appendChild(tag);
