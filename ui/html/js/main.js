@@ -632,6 +632,19 @@ function createSelectedCollectorBadge(value, label) {
 
             row.appendChild(stepLabel);
             row.appendChild(stepToggle);
+
+            const stepClass = `step_${step.index}`;
+            row.addEventListener("mouseenter", () => {
+                if (typeof window.highlightConnectionGroup === "function") {
+                    window.highlightConnectionGroup(stepClass);
+                }
+            });
+            row.addEventListener("mouseleave", () => {
+                if (typeof window.unhighlightConnectionGroup === "function") {
+                    window.unhighlightConnectionGroup(stepClass);
+                }
+            });
+
             stepsContainer.appendChild(row);
         }
         badge.appendChild(stepsContainer);
@@ -3316,15 +3329,20 @@ function collectCommentLegendEntries() {
                 ? strokeColor
                 : "#6c7a89";
         const groupClassSet = new Set();
+        const stepClassSet = new Set();
         [circle, triplet.marker, triplet.description].forEach((node) => {
             if (!node || !node.classList) return;
             node.classList.forEach((cls) => {
                 if (/^conLine_\d+$/.test(cls)) {
                     groupClassSet.add(cls);
                 }
+                if (/^step_\d+$/.test(cls)) {
+                    stepClassSet.add(cls);
+                }
             });
         });
         const groupClasses = Array.from(groupClassSet);
+        const stepClasses = Array.from(stepClassSet);
         const sourceIds = [
             circle.id,
             triplet.marker.id,
@@ -3341,9 +3359,21 @@ function collectCommentLegendEntries() {
             color: getEffectiveFill(circle) || fallbackColor,
             sourceIds,
             groupClasses,
+            stepClasses,
         });
     });
     return entries;
+}
+
+function getStepCaption(stepClass) {
+    const m = /^step_(\d+)$/.exec(stepClass);
+    if (!m) return stepClass;
+    const idx = parseInt(m[1], 10);
+    for (const steps of toolbarComboState.mixinSteps.values()) {
+        const found = steps.find((s) => s.index === idx);
+        if (found) return found.caption;
+    }
+    return `Step ${idx + 1}`;
 }
 
 function createCommentLegendItem(entry) {
@@ -3356,6 +3386,24 @@ function createCommentLegendItem(entry) {
     label.className = "comment-legend-label";
     label.textContent = entry.markerLabel || "Comment";
     markerRow.appendChild(label);
+    const stepClasses = Array.isArray(entry.stepClasses) ? entry.stepClasses.filter(Boolean) : [];
+    stepClasses.forEach((stepClass) => {
+        const tag = document.createElement("span");
+        tag.className = "comment-step-tag";
+        tag.textContent = getStepCaption(stepClass);
+        tag.title = `Highlight ${tag.textContent}`;
+        tag.addEventListener("mouseenter", () => {
+            if (typeof window.highlightConnectionGroup === "function") {
+                window.highlightConnectionGroup(stepClass);
+            }
+        });
+        tag.addEventListener("mouseleave", () => {
+            if (typeof window.unhighlightConnectionGroup === "function") {
+                window.unhighlightConnectionGroup(stepClass);
+            }
+        });
+        markerRow.appendChild(tag);
+    });
     const body = document.createElement("div");
     body.className = "comment-legend-body";
     body.textContent = entry.body || "";

@@ -380,6 +380,13 @@ button.tool-btn.active {
     font-size: 11px;
     color: #1a5276;
     width: 100%;
+    cursor: default;
+    border-radius: 3px;
+    padding: 1px 2px;
+    margin: 0 -2px;
+}
+.selected-step-row:hover {
+    background: rgba(26, 82, 118, 0.12);
 }
 .selected-step-row--hidden .selected-step-label {
     opacity: 0.45;
@@ -545,6 +552,23 @@ button.tool-btn.active {
     font-size: 12px;
     color: #666;
     font-style: italic;
+}
+.comment-step-tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 500;
+    color: #1a5276;
+    background: rgba(26, 82, 118, 0.12);
+    border: 1px solid rgba(26, 82, 118, 0.3);
+    border-radius: 3px;
+    padding: 1px 5px;
+    cursor: default;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.comment-step-tag:hover {
+    background: rgba(26, 82, 118, 0.25);
+    border-color: rgba(26, 82, 118, 0.6);
 }
 
 .overlay-circle {
