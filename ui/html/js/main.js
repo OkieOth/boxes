@@ -3387,9 +3387,15 @@ function createCommentLegendItem(entry) {
     label.textContent = entry.markerLabel || "Comment";
     markerRow.appendChild(label);
     const stepClasses = Array.isArray(entry.stepClasses) ? entry.stepClasses.filter(Boolean) : [];
+    if (stepClasses.length > 0) {
+        const firstIdx = parseInt(/^step_(\d+)$/.exec(stepClasses[0])?.[1] ?? "0", 10);
+        item.dataset.stepIndex = firstIdx % 8;
+    }
     stepClasses.forEach((stepClass) => {
+        const stepIdx = parseInt(/^step_(\d+)$/.exec(stepClass)?.[1] ?? "0", 10);
         const tag = document.createElement("span");
         tag.className = "comment-step-tag";
+        tag.dataset.stepIndex = stepIdx % 8;
         tag.textContent = getStepCaption(stepClass);
         tag.title = `Highlight ${tag.textContent}`;
         tag.addEventListener("mouseenter", () => {
