@@ -8,6 +8,132 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func buildBoxesWithIds() boxes.Boxes {
+	return boxes.Boxes{
+		Boxes: boxes.Layout{
+			Id: "root",
+			Horizontal: []boxes.Layout{
+				{Id: "box_a", Caption: "Box A"},
+				{Id: "box_b", Caption: "Box B"},
+				{Id: "box_c", Caption: "Box C"},
+			},
+		},
+	}
+}
+
+func buildMixinWithSteps() boxes.BoxesFileMixings {
+	destC := "box_c"
+	commentText1 := "step 1 comment"
+	commentText2 := "step 2 comment"
+	return boxes.BoxesFileMixings{
+		Steps: []boxes.ProcessStep{
+			{
+				Caption: "Step 1",
+				Connections: map[string]boxes.ConnectionCont{
+					"box_a": {Connections: []boxes.Connection{{DestId: destC}}},
+				},
+				Comments: map[string]types.Comment{
+					"box_b": {Text: commentText1},
+				},
+			},
+			{
+				Caption: "Step 2",
+				Connections: map[string]boxes.ConnectionCont{
+					"box_b": {Connections: []boxes.Connection{{DestId: destC}}},
+				},
+				Comments: map[string]types.Comment{
+					"box_b": {Text: commentText2},
+				},
+			},
+		},
+	}
+}
+
+func TestMixinThingsWithSteps_NoActiveSteps(t *testing.T) {
+	b := buildBoxesWithIds()
+	m := buildMixinWithSteps()
+
+	b.MixinThingsWithSteps(m, []int{})
+
+	require.Len(t, b.Boxes.Horizontal[0].Connections, 0, "box_a should have no connections")
+	require.Len(t, b.Boxes.Horizontal[1].Connections, 0, "box_b should have no connections")
+	require.Nil(t, b.Boxes.Horizontal[1].Comment, "box_b should have no comment")
+}
+
+func TestMixinThingsWithSteps_Step0Active(t *testing.T) {
+	b := buildBoxesWithIds()
+	m := buildMixinWithSteps()
+
+	b.MixinThingsWithSteps(m, []int{0})
+
+	require.Len(t, b.Boxes.Horizontal[0].Connections, 1, "box_a should have 1 connection from step 0")
+	require.Equal(t, "box_c", b.Boxes.Horizontal[0].Connections[0].DestId)
+	require.Len(t, b.Boxes.Horizontal[1].Connections, 0, "box_b should have no connections")
+	require.NotNil(t, b.Boxes.Horizontal[1].Comment, "box_b should have comment from step 0")
+	require.Equal(t, "step 1 comment", b.Boxes.Horizontal[1].Comment.Text)
+}
+
+func TestMixinThingsWithSteps_Step1Active(t *testing.T) {
+	b := buildBoxesWithIds()
+	m := buildMixinWithSteps()
+
+	b.MixinThingsWithSteps(m, []int{1})
+
+	require.Len(t, b.Boxes.Horizontal[0].Connections, 0, "box_a should have no connections")
+	require.Len(t, b.Boxes.Horizontal[1].Connections, 1, "box_b should have 1 connection from step 1")
+	require.Equal(t, "box_c", b.Boxes.Horizontal[1].Connections[0].DestId)
+	require.NotNil(t, b.Boxes.Horizontal[1].Comment, "box_b should have comment from step 1")
+	require.Equal(t, "step 2 comment", b.Boxes.Horizontal[1].Comment.Text)
+}
+
+func TestMixinThingsWithSteps_BothStepsActive(t *testing.T) {
+	b := buildBoxesWithIds()
+	m := buildMixinWithSteps()
+
+	b.MixinThingsWithSteps(m, []int{0, 1})
+
+	// connections from both steps
+	require.Len(t, b.Boxes.Horizontal[0].Connections, 1, "box_a should have 1 connection from step 0")
+	require.Len(t, b.Boxes.Horizontal[1].Connections, 1, "box_b should have 1 connection from step 1")
+	// step 1 comment overwrites step 0 comment (last writer wins)
+	require.NotNil(t, b.Boxes.Horizontal[1].Comment)
+	require.Equal(t, "step 2 comment", b.Boxes.Horizontal[1].Comment.Text)
+}
+
+func TestMixinThingsWithSteps_OutOfBoundsIndex(t *testing.T) {
+	b := buildBoxesWithIds()
+	m := buildMixinWithSteps()
+
+	b.MixinThingsWithSteps(m, []int{0, 99})
+
+	// only step 0 applied, out-of-bounds index silently ignored
+	require.Len(t, b.Boxes.Horizontal[0].Connections, 1)
+	require.Len(t, b.Boxes.Horizontal[1].Connections, 0)
+}
+
+func TestMixinThingsWithSteps_RootConnectionsAlwaysApplied(t *testing.T) {
+	b := buildBoxesWithIds()
+	m := boxes.BoxesFileMixings{
+		Connections: map[string]boxes.ConnectionCont{
+			"box_a": {Connections: []boxes.Connection{{DestId: "box_b"}}},
+		},
+		Steps: []boxes.ProcessStep{
+			{
+				Caption: "Step 1",
+				Connections: map[string]boxes.ConnectionCont{
+					"box_b": {Connections: []boxes.Connection{{DestId: "box_c"}}},
+				},
+			},
+		},
+	}
+
+	// activate no steps — root connection should still be applied
+	b.MixinThingsWithSteps(m, []int{})
+
+	require.Len(t, b.Boxes.Horizontal[0].Connections, 1, "root connection on box_a always applied")
+	require.Len(t, b.Boxes.Horizontal[1].Connections, 0, "step 0 connection on box_b not applied")
+}
+
 func TestLoadExternalFormats(t *testing.T) {
 	inputFormat := "../../../resources/examples_boxes/ext_formats.yaml"
 	inputLayout := "../../../resources/examples_boxes/ext_complex_horizontal_connected_pics.yaml"

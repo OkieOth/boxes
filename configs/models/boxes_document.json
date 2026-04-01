@@ -177,7 +177,7 @@
           "description": "additional comments, that can be then included in the created graphic",
           "type": "array",
           "items": {
-            "$ref": "./shared.json#/definitions/Comment"
+            "$ref": "#/definitions/DocComment"
           }
         },
         "hiddenComments": {
@@ -293,6 +293,29 @@
         "hiddenComments"
       ]
     },
+    "DocComment": {
+      "type": "object",
+      "description": "Object to define comments in the diagrams",
+      "properties": {
+        "text": {
+          "description": "text of the comment",
+          "type": "string"
+        },
+        "label": {
+          "description": "optional number or a short text, displayed in the marker of that comment",
+          "type": "string"
+        },
+        "format": {
+          "description": "format to use to render this comment",
+          "type": "string"
+        },
+        "step": {
+          "description": "what step this comment belongs to",
+          "type": "integer"
+        }
+      },
+      "required": ["text"]
+    },
     "LayoutElemContainer": {
       "type": "object",
       "properties": {
@@ -330,7 +353,7 @@
         },
         "comment": {
           "description": "additional comment, that can be then included in the created graphic",
-          "$ref": "./shared.json#/definitions/Comment"
+          "$ref": "#/definitions/DocComment"
         },
         "sourceArrow": {
           "description": "Arrow at the source box",
@@ -408,7 +431,11 @@
           "$ref": "./shared.json#/definitions/ConnRestriction"
         },
         "comment": {
-          "$ref": "./shared.json#/definitions/Comment"
+          "$ref": "#/definitions/DocComment"
+        },
+        "step": {
+          "description": "what process step this connection belongs too",
+          "type": "integer"
         }
       },
       "required": ["parts", "connectionIndex", "hiddenComments"]
@@ -455,6 +482,10 @@
         },
         "inverseDirection": {
           "type": "boolean"
+        },
+        "step": {
+          "description": "to what step belongs this connection line",
+          "type": "integer"
         }
       },
       "required": [

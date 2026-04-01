@@ -212,6 +212,36 @@ func (b *Boxes) MixinThings(additional BoxesFileMixings) {
 	}
 }
 
+// MixinThingsWithSteps applies the mixin including only the specified workflow steps
+// (by index). Root-level connections and comments are always applied as the base layer.
+// If activeSteps is empty, only root-level content is applied.
+func (b *Boxes) MixinThingsWithSteps(additional BoxesFileMixings, activeSteps []int) {
+	if len(additional.Steps) > 0 && len(activeSteps) > 0 {
+		if additional.Connections == nil {
+			additional.Connections = make(map[string]ConnectionCont)
+		}
+		if additional.Comments == nil {
+			additional.Comments = make(map[string]types.Comment)
+		}
+		for _, idx := range activeSteps {
+			if idx < 0 || idx >= len(additional.Steps) {
+				continue
+			}
+			step := additional.Steps[idx]
+			for k, v := range step.Connections {
+				if existing, ok := additional.Connections[k]; ok {
+					existing.Connections = append(existing.Connections, v.Connections...)
+					additional.Connections[k] = existing
+				} else {
+					additional.Connections[k] = v
+				}
+			}
+			maps.Copy(additional.Comments, step.Comments)
+		}
+	}
+	b.MixinThings(additional)
+}
+
 func (b *Boxes) findBoxInContWithCaption(cont []Layout, caption string) string {
 	if cont == nil {
 		return ""

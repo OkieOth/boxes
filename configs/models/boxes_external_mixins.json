@@ -70,9 +70,40 @@
       "items": {
         "$ref": "./boxes.json#/definitions/Overlay"
       }
+    },
+    "steps": {
+      "description": "additional container to allow step separation in workflows",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/ProcessStep"
+      }
     }
   },
   "definitions": {
+    "ProcessStep": {
+      "type": "object",
+      "required": ["caption"],
+      "properties": {
+        "caption": {
+          "description": "title, that's appended to the original layout title",
+          "type": "string"
+        },
+        "connections": {
+          "description": "dictionary of connection objects",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/ConnectionCont"
+          }
+        },
+        "comments": {
+          "description": "dictionary of comment objects, this comment will applied on layout objects and replace existing comments there",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "./shared.json#/definitions/Comment"
+          }
+        }
+      }
+    },
     "ConnectionCont": {
       "type": "object",
       "properties": {

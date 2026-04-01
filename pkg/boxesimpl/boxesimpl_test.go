@@ -250,7 +250,7 @@ func TestDrawBoxesRelatedToConnections(t *testing.T) {
 	for i, test := range tests {
 		b, err := types.LoadInputFromFile[boxes.Boxes](test.inputFile)
 		require.Nil(t, err, "error while loading input file for test", i)
-		svgReturn := boxesimpl.DrawBoxesRelatedToConnections(*b, []boxes.BoxesFileMixings{}, true)
+		svgReturn := boxesimpl.DrawBoxesRelatedToConnections(*b, []boxes.BoxesFileMixings{}, nil, true)
 		require.Equal(t, "", svgReturn.ErrorMsg, "error generating SVG output for test", i)
 
 		err = os.WriteFile(test.outputFile, []byte(svgReturn.SVG), 0600)
@@ -439,7 +439,7 @@ func TestDrawBoxesForUiExt(t *testing.T) {
 			mixins = append(mixins, *extFormats)
 		}
 
-		svgReturn := boxesimpl.DrawBoxesFilteredExt(*b, mixins, test.depth, test.expanded, test.blacklisted, false)
+		svgReturn := boxesimpl.DrawBoxesFilteredExt(*b, mixins, nil, test.depth, test.expanded, test.blacklisted, false)
 
 		require.Equal(t, "", svgReturn.ErrorMsg, "error generating SVG output for test", i)
 
@@ -494,7 +494,7 @@ func TestDrawBoxesWithOverlays(t *testing.T) {
 			mixins = append(mixins, *mixin)
 		}
 
-		svgReturn := boxesimpl.DrawBoxesFilteredExt(*b, mixins, test.maxdepth, test.expandedIds, []string{}, false)
+		svgReturn := boxesimpl.DrawBoxesFilteredExt(*b, mixins, nil, test.maxdepth, test.expandedIds, []string{}, false)
 
 		require.Equal(t, "", svgReturn.ErrorMsg, "error generating SVG output for test", i)
 

@@ -244,6 +244,39 @@ function getCombinedMixins() {
     return combined;
 }
 
+function loadMixinStepsForValue(value, yamlContent) {
+    if (!yamlContent || typeof window.getMixinSteps !== "function") return;
+    try {
+        const steps = JSON.parse(window.getMixinSteps(yamlContent));
+        if (Array.isArray(steps) && steps.length > 0) {
+            toolbarComboState.mixinSteps.set(value, steps);
+            if (!toolbarComboState.hiddenSteps.has(value)) {
+                toolbarComboState.hiddenSteps.set(value, new Set());
+            }
+        } else {
+            toolbarComboState.mixinSteps.delete(value);
+        }
+    } catch (e) {
+        console.warn("getMixinSteps failed for", value, e);
+    }
+}
+
+function getActiveStepsJson() {
+    const result = [];
+    if (formatMixinContent) result.push([]); // formatMixin has no steps
+    for (const value of toolbarComboState.selectedValues) {
+        if (toolbarComboState.hiddenValues.has(value)) continue;
+        const steps = toolbarComboState.mixinSteps.get(value);
+        if (!steps || steps.length === 0) {
+            result.push([]);
+        } else {
+            const hiddenSet = toolbarComboState.hiddenSteps.get(value) || new Set();
+            result.push(steps.filter(s => !hiddenSet.has(s.index)).map(s => s.index));
+        }
+    }
+    return JSON.stringify(result);
+}
+
 function normalizeCreateSvgResult(
     result,
     fallbackExpanded,
@@ -365,6 +398,7 @@ async function regenerateSvgWithConnectedOnce(expandedIds, blacklistIds) {
             arg,
             getCombinedMixins(),
             window.debug,
+            getActiveStepsJson(),
         );
         result =
             result && typeof result.then === "function" ? await result : result;
@@ -397,15 +431,23 @@ async function applySelectedMixins() {
     const seq = ++toolbarComboState.applyToken;
     const selectedValues = toolbarComboState.selectedValues.slice();
     const contents = [];
+    let stepsUpdated = false;
     for (const value of selectedValues) {
-        if (toolbarComboState.hiddenValues.has(value)) continue;
         const yamlContent = await loadYamlForComboValue(value);
         if (toolbarComboState.applyToken !== seq) {
             return;
         }
+        if (yamlContent && !toolbarComboState.mixinSteps.has(value)) {
+            loadMixinStepsForValue(value, yamlContent);
+            stepsUpdated = true;
+        }
+        if (toolbarComboState.hiddenValues.has(value)) continue;
         if (yamlContent) {
             contents.push(yamlContent);
         }
+    }
+    if (stepsUpdated) {
+        updateToolbarComboSelectedList();
     }
     mixins = contents;
     window.currentYamlFile = selectedValues.length
@@ -475,6 +517,8 @@ const toolbarComboState = {
     selectionMeta: new Map(), // value -> { label, content? }
     contentCache: new Map(), // value -> yaml content
     applyToken: 0,
+    mixinSteps: new Map(), // value -> [{index, caption}]
+    hiddenSteps: new Map(), // value -> Set<int> of hidden step indices
 };
 
 function getToolbarComboElements() {
@@ -526,9 +570,13 @@ function isToolbarComboValueSelected(value) {
 function createSelectedCollectorBadge(value, label) {
     const badge = document.createElement("div");
     const isHidden = toolbarComboState.hiddenValues.has(value);
+    const steps = toolbarComboState.mixinSteps.get(value);
+    const hasSteps = Array.isArray(steps) && steps.length > 0;
+
     badge.className =
         "selected-mixin-badge" +
-        (isHidden ? " selected-mixin-badge--hidden" : "");
+        (isHidden ? " selected-mixin-badge--hidden" : "") +
+        (hasSteps ? " selected-mixin-badge--has-steps" : "");
     badge.dataset.value = value;
 
     const text = document.createElement("span");
@@ -554,8 +602,44 @@ function createSelectedCollectorBadge(value, label) {
     btnGroup.appendChild(toggleBtn);
     btnGroup.appendChild(removeBtn);
 
-    badge.appendChild(text);
-    badge.appendChild(btnGroup);
+    if (hasSteps) {
+        const header = document.createElement("div");
+        header.className = "selected-mixin-header";
+        header.appendChild(text);
+        header.appendChild(btnGroup);
+        badge.appendChild(header);
+
+        const hiddenSet = toolbarComboState.hiddenSteps.get(value) || new Set();
+        const stepsContainer = document.createElement("div");
+        stepsContainer.className = "selected-mixin-steps";
+        for (const step of steps) {
+            const isStepHidden = hiddenSet.has(step.index);
+            const row = document.createElement("div");
+            row.className = "selected-step-row" + (isStepHidden ? " selected-step-row--hidden" : "");
+            row.dataset.stepIndex = step.index;
+
+            const stepToggle = document.createElement("button");
+            stepToggle.type = "button";
+            stepToggle.className = "selected-step-toggle";
+            stepToggle.title = isStepHidden ? `Show step: ${step.caption}` : `Hide step: ${step.caption}`;
+            stepToggle.innerHTML = isStepHidden
+                ? '<i class="fa-solid fa-eye-slash"></i>'
+                : '<i class="fa-solid fa-eye"></i>';
+
+            const stepLabel = document.createElement("span");
+            stepLabel.className = "selected-step-label";
+            stepLabel.textContent = step.caption;
+
+            row.appendChild(stepLabel);
+            row.appendChild(stepToggle);
+            stepsContainer.appendChild(row);
+        }
+        badge.appendChild(stepsContainer);
+    } else {
+        badge.appendChild(text);
+        badge.appendChild(btnGroup);
+    }
+
     return badge;
 }
 
@@ -600,6 +684,29 @@ function initSelectedCollectorInteractions() {
                 evt.preventDefault();
                 evt.stopPropagation();
                 removeToolbarComboSelection(value);
+            }
+            return;
+        }
+        const stepToggle = evt.target.closest(".selected-step-toggle");
+        if (stepToggle) {
+            const row = stepToggle.closest(".selected-step-row");
+            const badge = stepToggle.closest(".selected-mixin-badge");
+            const value = badge ? badge.dataset.value : null;
+            const stepIndex = row ? parseInt(row.dataset.stepIndex, 10) : NaN;
+            if (value && !isNaN(stepIndex)) {
+                evt.preventDefault();
+                evt.stopPropagation();
+                if (!toolbarComboState.hiddenSteps.has(value)) {
+                    toolbarComboState.hiddenSteps.set(value, new Set());
+                }
+                const hiddenSet = toolbarComboState.hiddenSteps.get(value);
+                if (hiddenSet.has(stepIndex)) {
+                    hiddenSet.delete(stepIndex);
+                } else {
+                    hiddenSet.add(stepIndex);
+                }
+                updateToolbarComboSelectedList();
+                applySelectedMixins();
             }
             return;
         }
@@ -1214,6 +1321,7 @@ async function callCreateSvgWithMode(
         blacklistIds || [],
         window.hideCommentsEnabled,
         window.debug,
+        getActiveStepsJson(),
     );
 }
 

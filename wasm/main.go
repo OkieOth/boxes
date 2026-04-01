@@ -45,7 +45,48 @@ func createSvg(boxesYaml string, defaultDepth int, expanded, blacklisted []strin
 	return ret.SVG
 }
 
-func createSvgExt(boxesYaml string, mixins []string, defaultDepth int, expanded, blacklisted []string, hideComments, debug bool) string {
+type mixinStepInfo struct {
+	Index   int    `json:"index"`
+	Caption string `json:"caption"`
+}
+
+func getMixinSteps(mixinYaml string) string {
+	var m boxes.BoxesFileMixings
+	if err := y.Unmarshal([]byte(mixinYaml), &m); err != nil {
+		fmt.Printf("getMixinSteps: error unmarshalling mixin: %v\n", err)
+		return "[]"
+	}
+	steps := make([]mixinStepInfo, 0, len(m.Steps))
+	for i, s := range m.Steps {
+		steps = append(steps, mixinStepInfo{Index: i, Caption: s.Caption})
+	}
+	out, err := json.Marshal(steps)
+	if err != nil {
+		return "[]"
+	}
+	return string(out)
+}
+
+func getMixinStepsWrapper(this js.Value, args []js.Value) interface{} {
+	if len(args) < 1 {
+		return "[]"
+	}
+	return getMixinSteps(args[0].String())
+}
+
+func parseActiveSteps(activeStepsJson string) [][]int {
+	var result [][]int
+	if activeStepsJson == "" {
+		return result
+	}
+	if err := json.Unmarshal([]byte(activeStepsJson), &result); err != nil {
+		fmt.Printf("parseActiveSteps: error parsing active steps JSON: %v\n", err)
+		return result
+	}
+	return result
+}
+
+func createSvgExt(boxesYaml string, mixins []string, activeStepsJson string, defaultDepth int, expanded, blacklisted []string, hideComments, debug bool) string {
 	var b boxes.Boxes
 	fmt.Printf("createSvgExt: hideComments=%v, debug=%v\n", hideComments, debug)
 
@@ -56,13 +97,18 @@ func createSvgExt(boxesYaml string, mixins []string, defaultDepth int, expanded,
 	if b.Version != nil {
 		b.Title += fmt.Sprintf(" [%s]", *b.Version)
 	}
+	activeSteps := parseActiveSteps(activeStepsJson)
 	for i, c := range mixins {
 		var m boxes.BoxesFileMixings
 		if err := y.Unmarshal([]byte(c), &m); err != nil {
 			fmt.Printf("error while unmarshalling external connections (%d): %v", i, err)
 			return unknownSvg
 		}
-		b.MixinThings(m)
+		var steps []int
+		if i < len(activeSteps) {
+			steps = activeSteps[i]
+		}
+		b.MixinThingsWithSteps(m, steps)
 	}
 
 	ret := boxesimpl.DrawBoxesFilteredComments(b, defaultDepth, expanded, blacklisted, hideComments, debug)
@@ -111,7 +157,7 @@ func createSvgWrapper(this js.Value, args []js.Value) interface{} {
 
 func createSvgExtWrapper(this js.Value, args []js.Value) interface{} {
 	if len(args) < 7 {
-		return "error: expected (string, string[], number, string[], string[], bool, bool)"
+		return "error: expected (string, string[], number, string[], string[], bool, bool, string?)"
 	}
 	input := args[0].String()
 	mixins, err := getArrayFromJsValue(args, 1)
@@ -129,7 +175,11 @@ func createSvgExtWrapper(this js.Value, args []js.Value) interface{} {
 	depth := args[2].Int()
 	hideComments := args[5].Bool()
 	debug := args[6].Bool()
-	return createSvgExt(input, mixins, depth, expanded, blacklisted, hideComments, debug)
+	activeStepsJson := ""
+	if len(args) > 7 && args[7].Type() == js.TypeString {
+		activeStepsJson = args[7].String()
+	}
+	return createSvgExt(input, mixins, activeStepsJson, depth, expanded, blacklisted, hideComments, debug)
 }
 
 type NewReturn struct {
@@ -146,7 +196,7 @@ func returnErrorSvg() NewReturn {
 	}
 }
 
-func createSvgForConnected(boxesYaml string, mixins []string, debug bool) NewReturn {
+func createSvgForConnected(boxesYaml string, mixins []string, activeStepsJson string, debug bool) NewReturn {
 	var b boxes.Boxes
 	fmt.Printf("createSvgForConnected: debug=%v\n", debug)
 
@@ -166,7 +216,7 @@ func createSvgForConnected(boxesYaml string, mixins []string, debug bool) NewRet
 		boxMixins = append(boxMixins, m)
 	}
 
-	ret := boxesimpl.DrawBoxesRelatedToConnections(b, boxMixins, debug)
+	ret := boxesimpl.DrawBoxesRelatedToConnections(b, boxMixins, parseActiveSteps(activeStepsJson), debug)
 	if ret.ErrorMsg != "" {
 		fmt.Println(ret.ErrorMsg)
 		return returnErrorSvg()
@@ -187,7 +237,7 @@ func sliceToJSArray(items []string) js.Value {
 
 func createSvgForConnectedWrapper(this js.Value, args []js.Value) interface{} {
 	if len(args) < 3 {
-		return "error: expected (string, string[], bool)"
+		return "error: expected (string, string[], bool, string?)"
 	}
 	input := args[0].String()
 	mixins, err := getArrayFromJsValue(args, 1)
@@ -195,7 +245,11 @@ func createSvgForConnectedWrapper(this js.Value, args []js.Value) interface{} {
 		return "error: mixins need to be an array"
 	}
 	debug := args[2].Bool()
-	result := createSvgForConnected(input, mixins, debug)
+	activeStepsJson := ""
+	if len(args) > 3 && args[3].Type() == js.TypeString {
+		activeStepsJson = args[3].String()
+	}
+	result := createSvgForConnected(input, mixins, activeStepsJson, debug)
 
 	// Create JS object
 	obj := js.Global().Get("Object").New()
@@ -235,7 +289,7 @@ func getSearchableItems(boxesYaml string, mixins []string) string {
 		if err := y.Unmarshal([]byte(c), &m); err != nil {
 			fmt.Printf("getSearchableItems: error unmarshalling mixin (%d): %v\n", i, err)
 		}
-		b.MixinThings(m)
+		b.MixinThingsWithSteps(m, []int{})
 	}
 	items := make([]searchItem, 0)
 	collectSearchItems(b.Boxes, &items)
@@ -389,6 +443,7 @@ func main() {
 	js.Global().Set("createSvgExt", js.FuncOf(createSvgExtWrapper))
 	js.Global().Set("createSvgForConnected", js.FuncOf(createSvgForConnectedWrapper))
 	js.Global().Set("getSearchableItems", js.FuncOf(getSearchableItemsWrapper))
+	js.Global().Set("getMixinSteps", js.FuncOf(getMixinStepsWrapper))
 	js.Global().Set("getSearchMixin", js.FuncOf(getSearchMixinWrapper))
 	js.Global().Set("compressString", js.FuncOf(compressStringWrapper))
 	js.Global().Set("decompressString", js.FuncOf(decompressStringWrapper))
