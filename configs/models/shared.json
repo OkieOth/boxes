@@ -20,6 +20,10 @@
         "format": {
           "description": "format to use to render this comment",
           "type": "string"
+        },
+        "step": {
+          "description": "optional step where this comment is part of, is filled via processing not by the user",
+          "type": "integer"
         }
       },
       "required": ["text"]

@@ -314,7 +314,7 @@ button.tool-btn.active {
     padding: 4px 8px;
     font-size: 12px;
     line-height: 1;
-    border-radius: 999px;
+    border-radius: 6px;
     border: 1px solid rgba(0, 0, 0, 0.08);
     background: #eef6ff;
     color: #0a3d62;
@@ -351,6 +351,63 @@ button.tool-btn.active {
 .selected-mixin-badge--hidden {
     opacity: 0.5;
     text-decoration: line-through;
+}
+.selected-mixin-badge--has-steps {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    white-space: normal;
+    gap: 0;
+}
+.selected-mixin-header {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+}
+.selected-mixin-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 4px 0 2px 16px;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    margin-top: 4px;
+}
+.selected-step-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: #1a5276;
+    width: 100%;
+    cursor: default;
+    border-radius: 3px;
+    padding: 1px 2px;
+    margin: 0 -2px;
+}
+.selected-step-row:hover {
+    background: rgba(26, 82, 118, 0.12);
+}
+.selected-step-row--hidden .selected-step-label {
+    opacity: 0.45;
+    text-decoration: line-through;
+}
+.selected-step-toggle {
+    padding: 0 4px;
+    line-height: 1;
+    font-size: 11px;
+    border: none;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-left: auto;
+}
+.selected-step-label {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 .collector-empty {
     font-size: 12px;
@@ -461,7 +518,9 @@ button.tool-btn.active {
     min-height: 0;
 }
 .comment-legend-item {
+    --step-color: none;
     border: 1px solid rgba(0, 0, 0, 0.08);
+    border-left: 4px solid rgba(0, 0, 0, 0.08);
     border-radius: 8px;
     padding: 8px 10px;
     background: #f7fbff;
@@ -469,6 +528,19 @@ button.tool-btn.active {
     flex-direction: column;
     gap: 6px;
 }
+.comment-legend-item[data-step-index] {
+    border-left: 4px solid rgba(var(--step-color), 0.60);
+    background: rgba(var(--step-color), 0.05);
+}
+/* Per-step color palette on items (must match .comment-step-tag palette) */
+.comment-legend-item[data-step-index="0"] { --step-color: 26,  82, 118; }
+.comment-legend-item[data-step-index="1"] { --step-color: 21, 117,  79; }
+.comment-legend-item[data-step-index="2"] { --step-color: 130,  59, 140; }
+.comment-legend-item[data-step-index="3"] { --step-color: 176,  96,  14; }
+.comment-legend-item[data-step-index="4"] { --step-color: 160,  50,  40; }
+.comment-legend-item[data-step-index="5"] { --step-color: 20, 118, 150; }
+.comment-legend-item[data-step-index="6"] { --step-color: 100,  90,  20; }
+.comment-legend-item[data-step-index="7"] { --step-color:  90,  90,  90; }
 .comment-legend-item-active {
     border-color: #0a84ff;
     box-shadow: 0 0 0 2px rgba(10, 132, 255, 0.15);
@@ -496,6 +568,34 @@ button.tool-btn.active {
     color: #666;
     font-style: italic;
 }
+.comment-step-tag {
+    --step-color: 26, 82, 118;
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 500;
+    color: rgb(var(--step-color));
+    background: rgba(var(--step-color), 0.10);
+    border: 1px solid rgba(var(--step-color), 0.30);
+    border-radius: 3px;
+    padding: 1px 5px;
+    cursor: default;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: background 0.1s, border-color 0.1s;
+}
+.comment-step-tag:hover {
+    background: rgba(var(--step-color), 0.22);
+    border-color: rgba(var(--step-color), 0.60);
+}
+/* Per-step color palette (cycles over 8 slots) */
+.comment-step-tag[data-step-index="0"] { --step-color: 26,  82, 118; } /* steel blue   */
+.comment-step-tag[data-step-index="1"] { --step-color: 21, 117,  79; } /* forest green */
+.comment-step-tag[data-step-index="2"] { --step-color: 130,  59, 140; } /* purple       */
+.comment-step-tag[data-step-index="3"] { --step-color: 176,  96,  14; } /* amber        */
+.comment-step-tag[data-step-index="4"] { --step-color: 160,  50,  40; } /* crimson      */
+.comment-step-tag[data-step-index="5"] { --step-color: 20, 118, 150; } /* teal         */
+.comment-step-tag[data-step-index="6"] { --step-color: 100,  90,  20; } /* olive        */
+.comment-step-tag[data-step-index="7"] { --step-color:  90,  90,  90; } /* slate grey   */
 
 .overlay-circle {
     pointer-events: none;

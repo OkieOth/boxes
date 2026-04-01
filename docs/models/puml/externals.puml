@@ -55,6 +55,7 @@ class "**Connection**" as Connection {
         BooleanType hiddenComments
         ConnRestriction connRestrictions
         StringType[] tags
+        IntegerType step
 }
 
  
@@ -145,6 +146,7 @@ class "**Comment**" as Comment {
         StringType text
         StringType label
         StringType format
+        IntegerType step
 }
 note top: Object to define comments in\nthe diagrams
 
@@ -286,6 +288,7 @@ Connection  *--  Comment
 Connection  *--  ConnRestriction
 
 
+
     
 LayoutMixin "0" *-- "n" Layout
 
@@ -345,6 +348,7 @@ OverlayFormatDef "0" *-- "n" OverlayGradation
 
 
     
+
 
 
 

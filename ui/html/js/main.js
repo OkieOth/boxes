@@ -244,6 +244,39 @@ function getCombinedMixins() {
     return combined;
 }
 
+function loadMixinStepsForValue(value, yamlContent) {
+    if (!yamlContent || typeof window.getMixinSteps !== "function") return;
+    try {
+        const steps = JSON.parse(window.getMixinSteps(yamlContent));
+        if (Array.isArray(steps) && steps.length > 0) {
+            toolbarComboState.mixinSteps.set(value, steps);
+            if (!toolbarComboState.hiddenSteps.has(value)) {
+                toolbarComboState.hiddenSteps.set(value, new Set());
+            }
+        } else {
+            toolbarComboState.mixinSteps.delete(value);
+        }
+    } catch (e) {
+        console.warn("getMixinSteps failed for", value, e);
+    }
+}
+
+function getActiveStepsJson() {
+    const result = [];
+    if (formatMixinContent) result.push([]); // formatMixin has no steps
+    for (const value of toolbarComboState.selectedValues) {
+        if (toolbarComboState.hiddenValues.has(value)) continue;
+        const steps = toolbarComboState.mixinSteps.get(value);
+        if (!steps || steps.length === 0) {
+            result.push([]);
+        } else {
+            const hiddenSet = toolbarComboState.hiddenSteps.get(value) || new Set();
+            result.push(steps.filter(s => !hiddenSet.has(s.index)).map(s => s.index));
+        }
+    }
+    return JSON.stringify(result);
+}
+
 function normalizeCreateSvgResult(
     result,
     fallbackExpanded,
@@ -365,6 +398,7 @@ async function regenerateSvgWithConnectedOnce(expandedIds, blacklistIds) {
             arg,
             getCombinedMixins(),
             window.debug,
+            getActiveStepsJson(),
         );
         result =
             result && typeof result.then === "function" ? await result : result;
@@ -397,15 +431,23 @@ async function applySelectedMixins() {
     const seq = ++toolbarComboState.applyToken;
     const selectedValues = toolbarComboState.selectedValues.slice();
     const contents = [];
+    let stepsUpdated = false;
     for (const value of selectedValues) {
-        if (toolbarComboState.hiddenValues.has(value)) continue;
         const yamlContent = await loadYamlForComboValue(value);
         if (toolbarComboState.applyToken !== seq) {
             return;
         }
+        if (yamlContent && !toolbarComboState.mixinSteps.has(value)) {
+            loadMixinStepsForValue(value, yamlContent);
+            stepsUpdated = true;
+        }
+        if (toolbarComboState.hiddenValues.has(value)) continue;
         if (yamlContent) {
             contents.push(yamlContent);
         }
+    }
+    if (stepsUpdated) {
+        updateToolbarComboSelectedList();
     }
     mixins = contents;
     window.currentYamlFile = selectedValues.length
@@ -475,6 +517,8 @@ const toolbarComboState = {
     selectionMeta: new Map(), // value -> { label, content? }
     contentCache: new Map(), // value -> yaml content
     applyToken: 0,
+    mixinSteps: new Map(), // value -> [{index, caption}]
+    hiddenSteps: new Map(), // value -> Set<int> of hidden step indices
 };
 
 function getToolbarComboElements() {
@@ -526,9 +570,13 @@ function isToolbarComboValueSelected(value) {
 function createSelectedCollectorBadge(value, label) {
     const badge = document.createElement("div");
     const isHidden = toolbarComboState.hiddenValues.has(value);
+    const steps = toolbarComboState.mixinSteps.get(value);
+    const hasSteps = Array.isArray(steps) && steps.length > 0;
+
     badge.className =
         "selected-mixin-badge" +
-        (isHidden ? " selected-mixin-badge--hidden" : "");
+        (isHidden ? " selected-mixin-badge--hidden" : "") +
+        (hasSteps ? " selected-mixin-badge--has-steps" : "");
     badge.dataset.value = value;
 
     const text = document.createElement("span");
@@ -554,8 +602,57 @@ function createSelectedCollectorBadge(value, label) {
     btnGroup.appendChild(toggleBtn);
     btnGroup.appendChild(removeBtn);
 
-    badge.appendChild(text);
-    badge.appendChild(btnGroup);
+    if (hasSteps) {
+        const header = document.createElement("div");
+        header.className = "selected-mixin-header";
+        header.appendChild(text);
+        header.appendChild(btnGroup);
+        badge.appendChild(header);
+
+        const hiddenSet = toolbarComboState.hiddenSteps.get(value) || new Set();
+        const stepsContainer = document.createElement("div");
+        stepsContainer.className = "selected-mixin-steps";
+        for (const step of steps) {
+            const isStepHidden = hiddenSet.has(step.index);
+            const row = document.createElement("div");
+            row.className = "selected-step-row" + (isStepHidden ? " selected-step-row--hidden" : "");
+            row.dataset.stepIndex = step.index;
+
+            const stepToggle = document.createElement("button");
+            stepToggle.type = "button";
+            stepToggle.className = "selected-step-toggle";
+            stepToggle.title = isStepHidden ? `Show step: ${step.caption}` : `Hide step: ${step.caption}`;
+            stepToggle.innerHTML = isStepHidden
+                ? '<i class="fa-solid fa-eye-slash"></i>'
+                : '<i class="fa-solid fa-eye"></i>';
+
+            const stepLabel = document.createElement("span");
+            stepLabel.className = "selected-step-label";
+            stepLabel.textContent = step.caption;
+
+            row.appendChild(stepLabel);
+            row.appendChild(stepToggle);
+
+            const stepClass = `step_${step.index}`;
+            row.addEventListener("mouseenter", () => {
+                if (typeof window.highlightConnectionGroup === "function") {
+                    window.highlightConnectionGroup(stepClass);
+                }
+            });
+            row.addEventListener("mouseleave", () => {
+                if (typeof window.unhighlightConnectionGroup === "function") {
+                    window.unhighlightConnectionGroup(stepClass);
+                }
+            });
+
+            stepsContainer.appendChild(row);
+        }
+        badge.appendChild(stepsContainer);
+    } else {
+        badge.appendChild(text);
+        badge.appendChild(btnGroup);
+    }
+
     return badge;
 }
 
@@ -600,6 +697,29 @@ function initSelectedCollectorInteractions() {
                 evt.preventDefault();
                 evt.stopPropagation();
                 removeToolbarComboSelection(value);
+            }
+            return;
+        }
+        const stepToggle = evt.target.closest(".selected-step-toggle");
+        if (stepToggle) {
+            const row = stepToggle.closest(".selected-step-row");
+            const badge = stepToggle.closest(".selected-mixin-badge");
+            const value = badge ? badge.dataset.value : null;
+            const stepIndex = row ? parseInt(row.dataset.stepIndex, 10) : NaN;
+            if (value && !isNaN(stepIndex)) {
+                evt.preventDefault();
+                evt.stopPropagation();
+                if (!toolbarComboState.hiddenSteps.has(value)) {
+                    toolbarComboState.hiddenSteps.set(value, new Set());
+                }
+                const hiddenSet = toolbarComboState.hiddenSteps.get(value);
+                if (hiddenSet.has(stepIndex)) {
+                    hiddenSet.delete(stepIndex);
+                } else {
+                    hiddenSet.add(stepIndex);
+                }
+                updateToolbarComboSelectedList();
+                applySelectedMixins();
             }
             return;
         }
@@ -1214,6 +1334,7 @@ async function callCreateSvgWithMode(
         blacklistIds || [],
         window.hideCommentsEnabled,
         window.debug,
+        getActiveStepsJson(),
     );
 }
 
@@ -2072,7 +2193,7 @@ async function loadSVGFromWasm() {
     // Fetch boxes.wasm with streaming fallback
     let resp;
     try {
-        resp = await fetch(window.getBasePath() + "/wasm/boxes_1.2.2.wasm", {
+        resp = await fetch(window.getBasePath() + "/wasm/boxes_1.3.0.wasm", {
             cache: "no-cache",
         });
         if (!resp.ok) throw new Error("HTTP " + resp.status);
@@ -3208,15 +3329,20 @@ function collectCommentLegendEntries() {
                 ? strokeColor
                 : "#6c7a89";
         const groupClassSet = new Set();
+        const stepClassSet = new Set();
         [circle, triplet.marker, triplet.description].forEach((node) => {
             if (!node || !node.classList) return;
             node.classList.forEach((cls) => {
                 if (/^conLine_\d+$/.test(cls)) {
                     groupClassSet.add(cls);
                 }
+                if (/^step_\d+$/.test(cls)) {
+                    stepClassSet.add(cls);
+                }
             });
         });
         const groupClasses = Array.from(groupClassSet);
+        const stepClasses = Array.from(stepClassSet);
         const sourceIds = [
             circle.id,
             triplet.marker.id,
@@ -3233,9 +3359,21 @@ function collectCommentLegendEntries() {
             color: getEffectiveFill(circle) || fallbackColor,
             sourceIds,
             groupClasses,
+            stepClasses,
         });
     });
     return entries;
+}
+
+function getStepCaption(stepClass) {
+    const m = /^step_(\d+)$/.exec(stepClass);
+    if (!m) return stepClass;
+    const idx = parseInt(m[1], 10);
+    for (const steps of toolbarComboState.mixinSteps.values()) {
+        const found = steps.find((s) => s.index === idx);
+        if (found) return found.caption;
+    }
+    return `Step ${idx + 1}`;
 }
 
 function createCommentLegendItem(entry) {
@@ -3248,6 +3386,45 @@ function createCommentLegendItem(entry) {
     label.className = "comment-legend-label";
     label.textContent = entry.markerLabel || "Comment";
     markerRow.appendChild(label);
+    const stepClasses = Array.isArray(entry.stepClasses) ? entry.stepClasses.filter(Boolean) : [];
+    if (stepClasses.length > 0) {
+        const firstIdx = parseInt(/^step_(\d+)$/.exec(stepClasses[0])?.[1] ?? "0", 10);
+        item.dataset.stepIndex = firstIdx % 8;
+    }
+    stepClasses.forEach((stepClass) => {
+        const stepIdx = parseInt(/^step_(\d+)$/.exec(stepClass)?.[1] ?? "0", 10);
+        const tag = document.createElement("span");
+        tag.className = "comment-step-tag";
+        tag.dataset.stepIndex = stepIdx % 8;
+        tag.textContent = getStepCaption(stepClass);
+        tag.title = `Highlight ${tag.textContent}`;
+        tag.addEventListener("mouseenter", () => {
+            if (typeof window.highlightConnectionGroup === "function") {
+                window.highlightConnectionGroup(stepClass);
+            }
+        });
+        tag.addEventListener("mouseleave", (e) => {
+            if (typeof window.unhighlightConnectionGroup === "function") {
+                window.unhighlightConnectionGroup(stepClass);
+            }
+            // removeHighlight() strips highlight-group from shared elements
+            // (e.g. conLine_N step_N). addHighlight() has an early-exit guard
+            // when the group is already in activeGroupHighlights, so a plain
+            // re-call is a no-op. Force re-apply by cycling unhighlight→highlight.
+            if (item.contains(e.relatedTarget)) {
+                const grps = Array.isArray(entry.groupClasses) ? entry.groupClasses.filter(Boolean) : [];
+                grps.forEach((grp) => {
+                    if (typeof window.unhighlightConnectionGroup === "function") {
+                        window.unhighlightConnectionGroup(grp);
+                    }
+                    if (typeof window.highlightConnectionGroup === "function") {
+                        window.highlightConnectionGroup(grp);
+                    }
+                });
+            }
+        });
+        markerRow.appendChild(tag);
+    });
     const body = document.createElement("div");
     body.className = "comment-legend-body";
     body.textContent = entry.body || "";

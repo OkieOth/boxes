@@ -1,3 +1,6 @@
+# v1.3.0
+* Introduce steps in the mixin approach
+
 # v1.2.1
 * UI: fix error with not handled black listed items in zipped perm links
 

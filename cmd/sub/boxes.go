@@ -34,7 +34,7 @@ var BoxesCmd = &cobra.Command{
 			mixins = append(mixins, *m)
 		}
 
-		ret := boxesimpl.DrawBoxesFilteredExt(*layout, mixins, depth, expandedIds, blacklistedIds, boxesDebug)
+		ret := boxesimpl.DrawBoxesFilteredExt(*layout, mixins, nil, depth, expandedIds, blacklistedIds, boxesDebug)
 		if ret.ErrorMsg != "" {
 			fmt.Println("Error while drawing boxes:", ret.ErrorMsg)
 			os.Exit(1)

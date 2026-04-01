@@ -270,6 +270,14 @@ func (d *BoxesDocument) replaceConnectionIds(newConnectionIndex int, indexesToRe
 	d.replaceConnectionIdsInComments(newConnectionIndex, indexesToReplace)
 }
 
+func getStepClasses(msg1, msg2 string, index int, step *int) string {
+	if step == nil {
+		return fmt.Sprintf(msg1, index)
+	} else {
+		return fmt.Sprintf(msg2, index, *step)
+	}
+}
+
 func (d *BoxesDocument) DrawMovedConnectionLines(drawingImpl types.Drawing) {
 	b := "black"
 	w := 1.0
@@ -287,7 +295,7 @@ func (d *BoxesDocument) DrawMovedConnectionLines(drawingImpl types.Drawing) {
 		}
 		offset := int(*lineFormat.Width / 2)
 		x1, y1, x2, y2 := d.adjustLineToWidth(l.StartX, l.StartY, l.EndX, l.EndY, offset, l.IsStart, l.IsEnd)
-		classNames := fmt.Sprintf("connection conLine_%d", l.ConnectionIndex)
+		classNames := getStepClasses("connection conLine_%d", "connection conLine_%d step_%d", l.ConnectionIndex, l.Step)
 		if l.InverseDirection {
 			x1, x2 = x2, x1
 		}
@@ -299,7 +307,7 @@ func (d *BoxesDocument) DrawMovedConnectionLines(drawingImpl types.Drawing) {
 		if l.Format != nil {
 			lineFormat = *l.Format
 		}
-		classNames := fmt.Sprintf("connection conLine_%d", l.ConnectionIndex)
+		classNames := getStepClasses("connection conLine_%d", "connection conLine_%d step_%d", l.ConnectionIndex, l.Step)
 		x1, y1, x2, y2 := l.StartX, l.StartY, l.EndX, l.EndY
 		if l.InverseDirection {
 			y1, y2 = y2, y1
@@ -613,7 +621,7 @@ func (doc *BoxesDocument) drawCommentMarkers(drawing types.Drawing) error {
 	for i := range doc.Comments {
 		c := doc.Comments[i]
 		if c.ConnectionIndex != nil {
-			className := fmt.Sprintf("connection conLine_%d", *c.ConnectionIndex)
+			className := getStepClasses("connection conLine_%d", "connection conLine_%d step_%d", *c.ConnectionIndex, c.Step)
 			drawing.DrawCircleWithBorderTextAndClass(c.Label, c.MarkerX, c.MarkerY, doc.CommentMarkerRadius, &c.Format.Fill, &c.Format.Line, &c.Format.FontMarker, className)
 		} else {
 			drawing.DrawCircleWithBorderAndText(c.Label, c.MarkerX, c.MarkerY, doc.CommentMarkerRadius, &c.Format.Fill, &c.Format.Line, &c.Format.FontMarker)
@@ -660,7 +668,7 @@ func (doc *BoxesDocument) drawCommentTextsCustomLabels(drawing types.Drawing, c 
 		lastLabel, lastText = c.Label, c.Text
 		className := "comment"
 		if c.ConnectionIndex != nil {
-			className = fmt.Sprintf("%s connection conLine_%d", className, *c.ConnectionIndex)
+			className = getStepClasses("comment connection conLine_%d", "comment connection conLine_%d step_%d", *c.ConnectionIndex, c.Step)
 		}
 		drawing.DrawCircleWithBorderTextAndClass(c.Label, markerX, currentY, doc.CommentMarkerRadius, &c.Format.Fill, &c.Format.Line, &c.Format.FontMarker, className)
 		c.Format.FontText.Anchor = types.FontDefAnchorEnum_left
@@ -702,7 +710,7 @@ func (doc *BoxesDocument) drawCommentTextsStdLabels(currentY int, drawing types.
 		c.Format.FontText.MaxLenBeforeBreak = doc.Boxes.Width
 		className := "comment"
 		if c.ConnectionIndex != nil {
-			className = fmt.Sprintf("%s connection conLine_%d", className, *c.ConnectionIndex)
+			className = getStepClasses("comment connection conLine_%d", "comment connection conLine_%d step_%d", *c.ConnectionIndex, c.Step)
 		}
 		drawing.DrawCircleWithBorderTextAndClass(c.Label, markerX, currentY, doc.CommentMarkerRadius, &c.Format.Fill, &c.Format.Line, &c.Format.FontMarker, className)
 		drawing.DrawText(c.Text, textX, currentY-(2*doc.CommentMarkerRadius), 0, &c.Format.FontText)

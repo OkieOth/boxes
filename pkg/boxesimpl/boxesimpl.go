@@ -329,11 +329,16 @@ func getTruncatedObject(text string, truncatedObjects map[string]TruncatedInfo) 
 func DrawBoxesFilteredExt(
 	layout boxes.Boxes,
 	mixins []boxes.BoxesFileMixings,
+	activeSteps [][]int,
 	defaultDepth int,
 	expanded, blacklisted []string,
 	debug bool) UIReturn {
-	for _, m := range mixins {
-		layout.MixinThings(m)
+	for i, m := range mixins {
+		var steps []int
+		if i < len(activeSteps) {
+			steps = activeSteps[i]
+		}
+		layout.MixinThingsWithSteps(m, steps)
 	}
 	return DrawBoxesFiltered(layout, defaultDepth, expanded, blacklisted, debug)
 }
@@ -378,9 +383,14 @@ func searchForBlacklistedCont(cont []boxes.Layout, expanded []string, blackliste
 func DrawBoxesRelatedToConnections(
 	layout boxes.Boxes,
 	mixins []boxes.BoxesFileMixings,
+	activeSteps [][]int,
 	debug bool) UIReturn2 {
-	for _, m := range mixins {
-		layout.MixinThings(m)
+	for i, m := range mixins {
+		var steps []int
+		if i < len(activeSteps) {
+			steps = activeSteps[i]
+		}
+		layout.MixinThingsWithSteps(m, steps)
 	}
 	// find all IDs that have connections
 	expanded := make([]string, 0)

@@ -357,6 +357,10 @@
           "items": {
             "type": "string"
           }
+        },
+        "step": {
+          "description": "optional step where this comment is part of, is filled via processing not by the user",
+          "type": "integer"
         }
       },
       "required": [
@@ -409,6 +413,10 @@
         },
         "comment": {
           "$ref": "./shared.json#/definitions/Comment"
+        },
+        "step": {
+          "description": "what process step this connection belongs too",
+          "type": "integer"
         }
       },
       "required": ["parts", "connectionIndex", "hiddenComments"]
@@ -455,6 +463,10 @@
         },
         "inverseDirection": {
           "type": "boolean"
+        },
+        "step": {
+          "description": "to what step belongs this connection line",
+          "type": "integer"
         }
       },
       "required": [
@@ -696,6 +708,10 @@
         },
         "connectionIndex": {
           "description": "in case this comment belongs to a connection, is here the connectionId stored",
+          "type": "integer"
+        },
+        "step": {
+          "description": "optional step where this comment is part of, is filled via processing not by the user",
           "type": "integer"
         }
       },
