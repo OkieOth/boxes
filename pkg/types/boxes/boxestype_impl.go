@@ -668,7 +668,7 @@ func (doc *BoxesDocument) drawCommentTextsCustomLabels(drawing types.Drawing, c 
 		lastLabel, lastText = c.Label, c.Text
 		className := "comment"
 		if c.ConnectionIndex != nil {
-			className = getStepClasses("comment connection conLine_%d", "connection conLine_%d step_%d", *c.ConnectionIndex, c.Step)
+			className = getStepClasses("comment connection conLine_%d", "comment connection conLine_%d step_%d", *c.ConnectionIndex, c.Step)
 		}
 		drawing.DrawCircleWithBorderTextAndClass(c.Label, markerX, currentY, doc.CommentMarkerRadius, &c.Format.Fill, &c.Format.Line, &c.Format.FontMarker, className)
 		c.Format.FontText.Anchor = types.FontDefAnchorEnum_left
@@ -710,7 +710,7 @@ func (doc *BoxesDocument) drawCommentTextsStdLabels(currentY int, drawing types.
 		c.Format.FontText.MaxLenBeforeBreak = doc.Boxes.Width
 		className := "comment"
 		if c.ConnectionIndex != nil {
-			className = getStepClasses("comment connection conLine_%d", "connection conLine_%d step_%d", *c.ConnectionIndex, c.Step)
+			className = getStepClasses("comment connection conLine_%d", "comment connection conLine_%d step_%d", *c.ConnectionIndex, c.Step)
 		}
 		drawing.DrawCircleWithBorderTextAndClass(c.Label, markerX, currentY, doc.CommentMarkerRadius, &c.Format.Fill, &c.Format.Line, &c.Format.FontMarker, className)
 		drawing.DrawText(c.Text, textX, currentY-(2*doc.CommentMarkerRadius), 0, &c.Format.FontText)
