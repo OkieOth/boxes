@@ -347,6 +347,9 @@ type ConnectionElem struct {
     ConnRestrictions *types.ConnRestriction  `yaml:"connRestrictions,omitempty"`
 
     Comment *types.Comment  `yaml:"comment,omitempty"`
+
+    // what process step this connection belongs too
+    Step *int  `yaml:"step,omitempty"`
 }
 
 func NewConnectionElem() *ConnectionElem {
@@ -373,6 +376,7 @@ func CopyConnectionElem(src *ConnectionElem) *ConnectionElem {
     ret.ConnectionIndex = src.ConnectionIndex
     ret.ConnRestrictions = types.CopyConnRestriction(src.ConnRestrictions)
     ret.Comment = types.CopyComment(src.Comment)
+    ret.Step = src.Step
 
     return &ret
 }
@@ -482,6 +486,9 @@ type ConnectionLine struct {
     IsEnd bool  `yaml:"isEnd"`
 
     InverseDirection bool  `yaml:"inverseDirection"`
+
+    // to what step belongs this connection line
+    Step *int  `yaml:"step,omitempty"`
 }
 
 
@@ -502,6 +509,7 @@ func CopyConnectionLine(src *ConnectionLine) *ConnectionLine {
     ret.IsStart = src.IsStart
     ret.IsEnd = src.IsEnd
     ret.InverseDirection = src.InverseDirection
+    ret.Step = src.Step
 
     return &ret
 }
@@ -592,6 +600,9 @@ type CommentContainer struct {
 
     // in case this comment belongs to a connection, is here the connectionId stored
     ConnectionIndex *int  `yaml:"connectionIndex,omitempty"`
+
+    // optional step where this comment is part of, is filled via processing not by the user
+    Step *int  `yaml:"step,omitempty"`
 }
 
 
@@ -611,6 +622,7 @@ func CopyCommentContainer(src *CommentContainer) *CommentContainer {
     ret.TextHeight = src.TextHeight
     ret.CustomMarker = src.CustomMarker
     ret.ConnectionIndex = src.ConnectionIndex
+    ret.Step = src.Step
 
     return &ret
 }
@@ -791,6 +803,9 @@ type LayoutElemConnection struct {
 
     // Tags to annotate the connection, tags are used to format
     Tags []string  `yaml:"tags,omitempty"`
+
+    // optional step where this comment is part of, is filled via processing not by the user
+    Step *int  `yaml:"step,omitempty"`
 }
 
 func NewLayoutElemConnection() *LayoutElemConnection {
@@ -815,6 +830,7 @@ func CopyLayoutElemConnection(src *LayoutElemConnection) *LayoutElemConnection {
     for _, e := range src.Tags {
         ret.Tags = append(ret.Tags, e)
     }
+    ret.Step = src.Step
 
     return &ret
 }

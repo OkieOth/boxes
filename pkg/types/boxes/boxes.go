@@ -459,6 +459,9 @@ type Connection struct {
 
     // Tags to annotate the connection, tags are used to format
     Tags []string  `yaml:"tags,omitempty"`
+
+    // optional step where this comment is part of, is filled via processing not by the user
+    Step *int  `yaml:"step,omitempty"`
 }
 
 func NewConnection() *Connection {
@@ -484,6 +487,7 @@ func CopyConnection(src *Connection) *Connection {
     for _, e := range src.Tags {
         ret.Tags = append(ret.Tags, e)
     }
+    ret.Step = src.Step
 
     return &ret
 }

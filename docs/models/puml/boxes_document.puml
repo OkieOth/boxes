@@ -80,6 +80,7 @@ class "**ConnectionElem**" as ConnectionElem {
         IntegerType connectionIndex
         ConnRestriction connRestrictions
         Comment comment
+        IntegerType step
 }
 
  
@@ -118,6 +119,7 @@ class "**ConnectionLine**" as ConnectionLine {
         BooleanType isStart
         BooleanType isEnd
         BooleanType inverseDirection
+        IntegerType step
 }
 
  
@@ -145,6 +147,7 @@ class "**CommentContainer**" as CommentContainer {
         IntegerType textHeight
         BooleanType customMarker
         IntegerType connectionIndex
+        IntegerType step
 }
 note top: all parameters to render the\ncomments in the graphic
 
@@ -195,6 +198,7 @@ class "**LayoutElemConnection**" as LayoutElemConnection {
         BooleanType hiddenComments
         ConnRestriction connRestrictions
         StringType[] tags
+        IntegerType step
 }
 
  
@@ -233,6 +237,7 @@ class "**Comment**" as Comment {
         StringType text
         StringType label
         StringType format
+        IntegerType step
 }
 note top: Object to define comments in\nthe diagrams
 
@@ -423,6 +428,7 @@ ConnectionElem  *--  ConnRestriction
 
 ConnectionElem  *--  Comment
 
+
     
     
 
@@ -461,6 +467,7 @@ ConnectionLine  *--  LineDef
 
 
 
+
     
 
 
@@ -472,6 +479,7 @@ ConnectionNode "0" *-- "n" ConnectionEdge
 
 
 CommentContainer  *--  CommentFormat
+
 
 
 
@@ -520,6 +528,7 @@ LayoutElemConnection  *--  LineDef
 LayoutElemConnection  *--  ConnRestriction
 
 
+
     
 CommentFormat  *--  FontDef
 
@@ -543,6 +552,7 @@ CommentFormat  *--  FillDef
 OverlayEntry  *--  BoxFormat
 
     
+
 
 
 

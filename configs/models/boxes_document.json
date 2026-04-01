@@ -177,7 +177,7 @@
           "description": "additional comments, that can be then included in the created graphic",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/DocComment"
+            "$ref": "./shared.json#/definitions/Comment"
           }
         },
         "hiddenComments": {
@@ -293,29 +293,6 @@
         "hiddenComments"
       ]
     },
-    "DocComment": {
-      "type": "object",
-      "description": "Object to define comments in the diagrams",
-      "properties": {
-        "text": {
-          "description": "text of the comment",
-          "type": "string"
-        },
-        "label": {
-          "description": "optional number or a short text, displayed in the marker of that comment",
-          "type": "string"
-        },
-        "format": {
-          "description": "format to use to render this comment",
-          "type": "string"
-        },
-        "step": {
-          "description": "what step this comment belongs to",
-          "type": "integer"
-        }
-      },
-      "required": ["text"]
-    },
     "LayoutElemContainer": {
       "type": "object",
       "properties": {
@@ -353,7 +330,7 @@
         },
         "comment": {
           "description": "additional comment, that can be then included in the created graphic",
-          "$ref": "#/definitions/DocComment"
+          "$ref": "./shared.json#/definitions/Comment"
         },
         "sourceArrow": {
           "description": "Arrow at the source box",
@@ -380,6 +357,10 @@
           "items": {
             "type": "string"
           }
+        },
+        "step": {
+          "description": "optional step where this comment is part of, is filled via processing not by the user",
+          "type": "integer"
         }
       },
       "required": [
@@ -431,7 +412,7 @@
           "$ref": "./shared.json#/definitions/ConnRestriction"
         },
         "comment": {
-          "$ref": "#/definitions/DocComment"
+          "$ref": "./shared.json#/definitions/Comment"
         },
         "step": {
           "description": "what process step this connection belongs too",
@@ -727,6 +708,10 @@
         },
         "connectionIndex": {
           "description": "in case this comment belongs to a connection, is here the connectionId stored",
+          "type": "integer"
+        },
+        "step": {
+          "description": "optional step where this comment is part of, is filled via processing not by the user",
           "type": "integer"
         }
       },

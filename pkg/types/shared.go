@@ -20,6 +20,9 @@ type Comment struct {
 
     // format to use to render this comment
     Format *string  `yaml:"format,omitempty"`
+
+    // optional step where this comment is part of, is filled via processing not by the user
+    Step *int  `yaml:"step,omitempty"`
 }
 
 
@@ -31,6 +34,7 @@ func CopyComment(src *Comment) *Comment {
     ret.Text = src.Text
     ret.Label = src.Label
     ret.Format = src.Format
+    ret.Step = src.Step
 
     return &ret
 }

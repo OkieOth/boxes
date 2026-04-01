@@ -228,15 +228,24 @@ func (b *Boxes) MixinThingsWithSteps(additional BoxesFileMixings, activeSteps []
 				continue
 			}
 			step := additional.Steps[idx]
+			stepIdx := idx
 			for k, v := range step.Connections {
+				tagged := ConnectionCont{Connections: make([]Connection, len(v.Connections))}
+				for i, c := range v.Connections {
+					c.Step = &stepIdx
+					tagged.Connections[i] = c
+				}
 				if existing, ok := additional.Connections[k]; ok {
-					existing.Connections = append(existing.Connections, v.Connections...)
+					existing.Connections = append(existing.Connections, tagged.Connections...)
 					additional.Connections[k] = existing
 				} else {
-					additional.Connections[k] = v
+					additional.Connections[k] = tagged
 				}
 			}
-			maps.Copy(additional.Comments, step.Comments)
+			for k, v := range step.Comments {
+				v.Step = &stepIdx
+				additional.Comments[k] = v
+			}
 		}
 	}
 	b.MixinThings(additional)
