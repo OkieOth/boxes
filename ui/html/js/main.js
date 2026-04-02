@@ -4236,6 +4236,7 @@ const presentationState = window.presentationState = {
 
 // IDs of UI panels/toolbar to hide while presenting
 const _PRESENT_HIDE_IDS = ["menu-wrapper", "selected-collector", "comment-legend-panel"];
+let _presentCardDragged = false;
 
 function startPresentation(startEntryId = null) {
     // Open the panel if needed so SVG comment elements are rendered
@@ -4254,6 +4255,7 @@ function startPresentation(startEntryId = null) {
         if (found >= 0) startIndex = found;
     }
 
+    _presentCardDragged = false;
     presentationState.active = true;
     presentationState.entries = entries;
     presentationState.currentIndex = -1;
@@ -4314,15 +4316,12 @@ function gotoStep(index) {
     presentationState.currentIndex = clamped;
     const entry = entries[clamped];
 
-    // Highlight new step via connection group and step classes
+    // Highlight via connection group only (conLine_N).
+    // stepClasses (step_N) are shared across all entries in a step — using them
+    // would highlight every connection in the step, not just this entry's connection.
     entry.groupClasses.forEach((grp) => {
         if (typeof window.highlightConnectionGroup === "function") {
             window.highlightConnectionGroup(grp);
-        }
-    });
-    entry.stepClasses.forEach((sc) => {
-        if (typeof window.highlightConnectionGroup === "function") {
-            window.highlightConnectionGroup(sc);
         }
     });
 
@@ -4361,11 +4360,6 @@ function _unhighlightCurrentStep() {
     prev.groupClasses.forEach((grp) => {
         if (typeof window.unhighlightConnectionGroup === "function") {
             window.unhighlightConnectionGroup(grp);
-        }
-    });
-    prev.stepClasses.forEach((sc) => {
-        if (typeof window.unhighlightConnectionGroup === "function") {
-            window.unhighlightConnectionGroup(sc);
         }
     });
 }
@@ -4446,17 +4440,12 @@ function _getBBoxForEntry(entry) {
         candidates.push(el);
     };
 
-    // Query by connection group classes (conLine_N) — finds connection lines/paths
+    // Query by connection group classes (conLine_N) — finds the specific connection elements.
+    // stepClasses (step_N) are intentionally excluded: they match ALL connections in the step,
+    // which would produce a bbox spanning the whole diagram and misplace the card.
     entry.groupClasses.forEach((grp) => {
         svg.querySelectorAll(
             `line.${grp}, path.${grp}, polyline.${grp}, rect.${grp}, circle.${grp}:not(.comment)`
-        ).forEach(addEl);
-    });
-
-    // Query by step classes (step_N) — finds all elements tagged for this step
-    entry.stepClasses.forEach((sc) => {
-        svg.querySelectorAll(
-            `line.${sc}, path.${sc}, polyline.${sc}, rect.${sc}, circle.${sc}:not(.comment)`
         ).forEach(addEl);
     });
 
@@ -4490,6 +4479,15 @@ function _updatePresentationComment(entry, index, total) {
     card.querySelector(".presentation-comment-body").textContent = entry.body || "";
     card.querySelector(".presentation-overlay-counter").textContent = `${index + 1} / ${total}`;
 
+    // Apply step color matching the comment legend panel
+    const stepClasses = Array.isArray(entry.stepClasses) ? entry.stepClasses.filter(Boolean) : [];
+    if (stepClasses.length > 0) {
+        const stepIdx = parseInt(/^step_(\d+)$/.exec(stepClasses[0])?.[1] ?? "0", 10);
+        card.dataset.stepIndex = stepIdx % 8;
+    } else {
+        delete card.dataset.stepIndex;
+    }
+
     const prevBtn = document.getElementById("btn-prev-step");
     const nextBtn = document.getElementById("btn-next-step");
     if (prevBtn) prevBtn.disabled = index === 0;
@@ -4497,6 +4495,9 @@ function _updatePresentationComment(entry, index, total) {
 
     // Make card visible first so offsetWidth/Height are accurate
     card.classList.remove("hidden");
+
+    // If the user has manually dragged the card, respect their position
+    if (_presentCardDragged) return;
 
     const canvas = getCanvas();
     const bbox = _getBBoxForEntry(entry);
@@ -4567,4 +4568,38 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("btn-stop-present")?.addEventListener("click", () => stopPresentation());
     document.getElementById("btn-prev-step")?.addEventListener("click", () => presentPrevStep());
     document.getElementById("btn-next-step")?.addEventListener("click", () => presentNextStep());
+
+    // Draggable presentation card
+    const card = document.getElementById("presentation-comment");
+    const handle = card?.querySelector(".presentation-comment-top");
+    if (card && handle) {
+        let dragOffsetX = 0, dragOffsetY = 0;
+
+        handle.addEventListener("mousedown", (e) => {
+            if (e.button !== 0) return;
+            e.preventDefault();
+            const rect = card.getBoundingClientRect();
+            dragOffsetX = e.clientX - rect.left;
+            dragOffsetY = e.clientY - rect.top;
+
+            const onMove = (e) => {
+                const margin = 10;
+                const left = Math.max(margin, Math.min(e.clientX - dragOffsetX, window.innerWidth  - card.offsetWidth  - margin));
+                const top  = Math.max(margin, Math.min(e.clientY - dragOffsetY, window.innerHeight - card.offsetHeight - margin));
+                card.style.left = left + "px";
+                card.style.top  = top  + "px";
+                _presentCardDragged = true;
+            };
+
+            const onUp = () => {
+                document.removeEventListener("mousemove", onMove);
+                document.removeEventListener("mouseup", onUp);
+                handle.style.cursor = "grab";
+            };
+
+            handle.style.cursor = "grabbing";
+            document.addEventListener("mousemove", onMove);
+            document.addEventListener("mouseup", onUp);
+        });
+    }
 });
