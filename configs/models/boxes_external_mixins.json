@@ -101,6 +101,19 @@
           "additionalProperties": {
             "$ref": "./shared.json#/definitions/Comment"
           }
+        },
+        "tags": {
+          "description": "dictionary of tag array, the additional tags will be applied on the existing layout and can be used for instance to define display formats",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/Tags"
+          }
+        },
+        "overlays": {
+          "type": "array",
+          "items": {
+            "$ref": "./boxes.json#/definitions/Overlay"
+          }
         }
       }
     },
