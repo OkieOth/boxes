@@ -847,6 +847,29 @@ line.connection.connection-dimmed {
     stroke-width: 2 !important;
 }
 
+/* ── Presentation spotlight ──────────────────────────────── */
+#svg-stage.presentation-spotlight svg rect,
+#svg-stage.presentation-spotlight svg text:not(.highlight-group),
+#svg-stage.presentation-spotlight svg tspan {
+    opacity: 0.45;
+    transition: opacity 0.25s ease;
+}
+#svg-stage.presentation-spotlight line.connection.connection-dimmed {
+    opacity: 0.35;
+    transition: opacity 0.25s ease;
+}
+#svg-stage.presentation-spotlight circle.connection-comment-dimmed,
+#svg-stage.presentation-spotlight text.connection-comment-dimmed {
+    opacity: 0.30;
+    transition: opacity 0.25s ease;
+}
+/* Highlighted elements and their connected boxes/labels stay fully visible */
+#svg-stage.presentation-spotlight svg .highlight-group,
+#svg-stage.presentation-spotlight svg .spotlight-box {
+    opacity: 1 !important;
+    transition: opacity 0.25s ease;
+}
+
 circle.connection-comment-dimmed {
     stroke: #ddd !important;
     stroke-width: 1 !important;

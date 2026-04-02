@@ -395,8 +395,19 @@ func (d *SvgDrawing) DrawPngWithAdditionalLink(x, y int, pngId, link string) err
 }
 
 // Draw renders a box with text elements
-func (d *SvgDrawing) DrawRectWithText(id, caption, text1, text2 string, x, y, width, height, textYOffset int, format types.RectWithTextFormat) error {
-	const onclickClass = "svg-clickable" // "onclick=\"window.shapeClick(event)\""
+func (d *SvgDrawing) DrawRectWithText(id, caption, text1, text2 string, x, y, width, height, textYOffset int, format types.RectWithTextFormat, isLeaf bool) error {
+	const onclickClass = "svg-clickable"
+	var classToUse string
+	if id != "" {
+		classToUse = onclickClass
+	}
+	if isLeaf {
+		if classToUse != "" {
+			classToUse += " "
+		}
+		classToUse += "leaf"
+	}
+
 	if format.Fill != nil || format.Border != nil {
 		attr := ""
 
@@ -426,9 +437,9 @@ func (d *SvgDrawing) DrawRectWithText(id, caption, text1, text2 string, x, y, wi
 		}
 		if id != "" {
 			if format.CornerRadius != nil {
-				d.canvas.RoundedRectWithIdAndClass(onclickClass, id, x, y, width, height, *format.CornerRadius, attr)
+				d.canvas.RoundedRectWithIdAndClass(classToUse, id, x, y, width, height, *format.CornerRadius, attr)
 			} else {
-				d.canvas.RectWithIdAndClass(onclickClass, id, x, y, width, height, attr)
+				d.canvas.RectWithIdAndClass(classToUse, id, x, y, width, height, attr)
 			}
 		} else {
 			if format.CornerRadius != nil {
@@ -444,7 +455,6 @@ func (d *SvgDrawing) DrawRectWithText(id, caption, text1, text2 string, x, y, wi
 	if id != "" {
 		idStr = id + "_capt"
 	}
-
 	if format.VerticalTxt {
 		currentX := x + format.Padding
 		currentY := y + (height / 2)
@@ -456,7 +466,7 @@ func (d *SvgDrawing) DrawRectWithText(id, caption, text1, text2 string, x, y, wi
 		if textYOffset > 0 {
 			currentY = y + textYOffset
 		}
-		currentY = d.DrawTextWithIdAndClass(caption, x, currentY, width, &format.FontCaption, idStr, onclickClass)
+		currentY = d.DrawTextWithIdAndClass(caption, x, currentY, width, &format.FontCaption, idStr, classToUse)
 		currentY = d.DrawText(text1, x, currentY, width, &format.FontText1)
 		currentY = d.DrawText(text2, x, currentY, width, &format.FontText2)
 	}

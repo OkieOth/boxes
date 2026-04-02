@@ -1713,6 +1713,7 @@ function initPage() {
 
         // Global click handler for SVG shapes
         window.shapeClick = function (evt) {
+            if (window.presentationState?.active) return;
             const el = evt.target;
             if (!el || !el.id) return;
 
@@ -4271,7 +4272,7 @@ function startPresentation(startEntryId = null) {
         }
     });
 
-    getStage()?.classList.add("presenting");
+    getStage()?.classList.add("presenting", "presentation-spotlight");
 
     // Wait for layout to settle (panels removed from flow) before centering
     requestAnimationFrame(() => gotoStep(startIndex));
@@ -4291,7 +4292,8 @@ function stopPresentation() {
     presentationState.hiddenByUs = null;
 
     document.getElementById("presentation-comment")?.classList.add("hidden");
-    getStage()?.classList.remove("presenting");
+    getStage()?.classList.remove("presenting", "presentation-spotlight");
+    _clearSpotlightBoxes();
 
     document.querySelectorAll(".comment-legend-item--presenting").forEach((el) => {
         el.classList.remove("comment-legend-item--presenting");
@@ -4324,6 +4326,7 @@ function gotoStep(index) {
             window.highlightConnectionGroup(grp);
         }
     });
+    _markInvolvedBoxes(entry);
 
     // Mark active item in the legend list
     document.querySelectorAll(".comment-legend-item--presenting").forEach((el) => {
@@ -4360,6 +4363,71 @@ function _unhighlightCurrentStep() {
     prev.groupClasses.forEach((grp) => {
         if (typeof window.unhighlightConnectionGroup === "function") {
             window.unhighlightConnectionGroup(grp);
+        }
+    });
+    _clearSpotlightBoxes();
+}
+
+function _clearSpotlightBoxes() {
+    const svg = getSvg();
+    if (!svg) return;
+    svg.querySelectorAll(".spotlight-box").forEach((el) => el.classList.remove("spotlight-box"));
+}
+
+function _markInvolvedBoxes(entry) {
+    const svg = getSvg();
+    if (!svg) return;
+
+    // Collect connection endpoints (SVG-space) from all highlighted connection elements
+    const endpoints = [];
+    const tol = 3; // px tolerance for point-on-border hits
+
+    entry.groupClasses.forEach((grp) => {
+        svg.querySelectorAll(`line.${grp}`).forEach((el) => {
+            endpoints.push({ x: parseFloat(el.getAttribute("x1")), y: parseFloat(el.getAttribute("y1")) });
+            endpoints.push({ x: parseFloat(el.getAttribute("x2")), y: parseFloat(el.getAttribute("y2")) });
+        });
+        svg.querySelectorAll(`polyline.${grp}`).forEach((el) => {
+            const pairs = (el.getAttribute("points") || "").trim().split(/\s+/);
+            if (pairs.length >= 1) {
+                const first = pairs[0].split(",");
+                const last  = pairs[pairs.length - 1].split(",");
+                if (first.length === 2) endpoints.push({ x: parseFloat(first[0]), y: parseFloat(first[1]) });
+                if (last.length  === 2) endpoints.push({ x: parseFloat(last[0]),  y: parseFloat(last[1])  });
+            }
+        });
+        svg.querySelectorAll(`path.${grp}`).forEach((el) => {
+            try {
+                const len = el.getTotalLength();
+                const p0  = el.getPointAtLength(0);
+                const p1  = el.getPointAtLength(len);
+                endpoints.push({ x: p0.x, y: p0.y });
+                endpoints.push({ x: p1.x, y: p1.y });
+            } catch (_) {}
+        });
+    });
+
+    if (!endpoints.length) return;
+
+    // Only consider leaf box rectangles as connection targets.
+    const leafRects = Array.from(svg.querySelectorAll("rect.leaf")).map((rect) => {
+        try {
+            const b = rect.getBBox();
+            return { rect, b };
+        } catch (_) { return null; }
+    }).filter(Boolean);
+
+    endpoints.forEach((pt) => {
+        const hit = leafRects.find(({ b }) =>
+            pt.x >= b.x - tol && pt.x <= b.x + b.width  + tol &&
+            pt.y >= b.y - tol && pt.y <= b.y + b.height + tol
+        );
+        if (!hit) return;
+        hit.rect.classList.add("spotlight-box");
+        // Find the caption text via the box id: {boxId}_capt
+        const boxId = hit.rect.id;
+        if (boxId) {
+            svg.getElementById(`${boxId}_capt`)?.classList.add("spotlight-box");
         }
     });
 }
