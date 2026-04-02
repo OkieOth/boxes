@@ -4292,6 +4292,7 @@ function stopPresentation() {
     presentationState.hiddenByUs = null;
 
     document.getElementById("presentation-comment")?.classList.add("hidden");
+    document.getElementById("presentation-toolbar")?.classList.add("hidden");
     getStage()?.classList.remove("presenting", "presentation-spotlight");
     _clearSpotlightBoxes();
 
@@ -4545,7 +4546,8 @@ function _updatePresentationComment(entry, index, total) {
 
     card.querySelector(".presentation-comment-label").textContent = entry.markerLabel || "";
     card.querySelector(".presentation-comment-body").textContent = entry.body || "";
-    card.querySelector(".presentation-overlay-counter").textContent = `${index + 1} / ${total}`;
+    const counter = document.querySelector(".presentation-overlay-counter");
+    if (counter) counter.textContent = `${index + 1} / ${total}`;
 
     const stepEl = card.querySelector(".presentation-comment-step");
     if (stepEl) {
@@ -4569,8 +4571,9 @@ function _updatePresentationComment(entry, index, total) {
     if (prevBtn) prevBtn.disabled = index === 0;
     if (nextBtn) nextBtn.disabled = index === total - 1;
 
-    // Make card visible first so offsetWidth/Height are accurate
+    // Make card and toolbar visible first so offsetWidth/Height are accurate
     card.classList.remove("hidden");
+    document.getElementById("presentation-toolbar")?.classList.remove("hidden");
 
     // If the user has manually dragged the card, respect their position
     if (_presentCardDragged) return;

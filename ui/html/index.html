@@ -311,19 +311,21 @@
             <div id="comment-legend-list" class="comment-legend-list"></div>
         </div>
 
-        <!-- Floating comment card — positioned near the highlighted object; contains all controls -->
+        <!-- Small top toolbar shown during presentation -->
+        <div id="presentation-toolbar" class="presentation-toolbar hidden">
+            <button id="btn-prev-step" class="present-nav-btn" title="Previous (&#8592;)">&lt;&lt;</button>
+            <span class="presentation-overlay-counter"></span>
+            <button id="btn-next-step" class="present-nav-btn" title="Next (&#8594;)">&gt;&gt;</button>
+            <button id="btn-stop-present" class="present-stop-btn" title="Exit presentation (Esc)">&#10005;</button>
+        </div>
+
+        <!-- Floating comment card — positioned near the highlighted object -->
         <div id="presentation-comment" class="presentation-comment hidden" aria-live="assertive" aria-atomic="true">
             <div class="presentation-comment-top">
                 <span class="presentation-comment-label"></span>
                 <span class="presentation-comment-step hidden"></span>
-                <button id="btn-stop-present" class="present-stop-btn" title="Exit presentation (Esc)">&#10005;</button>
             </div>
             <div class="presentation-comment-body"></div>
-            <div class="presentation-comment-controls">
-                <button id="btn-prev-step" class="present-nav-btn" title="Previous (&#8592;)">&lt;&lt;</button>
-                <span class="presentation-overlay-counter"></span>
-                <button id="btn-next-step" class="present-nav-btn" title="Next (&#8594;)">&gt;&gt;</button>
-            </div>
         </div>
 
         <div id="canvas">

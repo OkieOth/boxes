@@ -529,7 +529,28 @@ button.tool-btn.active {
     box-shadow: 0 0 0 4px rgba(26, 82, 118, 0.12);
 }
 
-/* Floating comment card — contains label, body, and nav controls */
+/* Small top toolbar shown during presentation */
+.presentation-toolbar {
+    --step-color: 26, 82, 118;
+    position: fixed;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2001;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.97);
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 4px 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+.presentation-toolbar.hidden {
+    display: none;
+}
+
+/* Floating comment card — contains label and body */
 .presentation-comment {
     --step-color: 26, 82, 118;
     position: fixed;
@@ -596,13 +617,6 @@ button.tool-btn.active {
     line-height: 1.4;
     color: #333;
     min-height: 1em;
-}
-.presentation-comment-controls {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding-top: 2px;
-    border-top: 1px solid rgba(0,0,0,0.10);
 }
 .presentation-overlay-counter {
     flex: 1;
