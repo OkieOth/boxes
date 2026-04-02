@@ -1138,6 +1138,9 @@ function removeToolbarComboSelection(value, options = {}) {
     if (!options.keepMeta) {
         toolbarComboState.selectionMeta.delete(value);
     }
+    toolbarComboState.mixinSteps.delete(value);
+    toolbarComboState.hiddenSteps.delete(value);
+    toolbarComboState.collapsedSteps.delete(value);
     updateToolbarComboSelectedList();
     if (toolbarComboState.isOpen) renderToolbarComboDropdown();
     if (!options.silent) {
