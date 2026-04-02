@@ -253,6 +253,7 @@ function loadMixinStepsForValue(value, yamlContent) {
             if (!toolbarComboState.hiddenSteps.has(value)) {
                 toolbarComboState.hiddenSteps.set(value, new Set());
             }
+            toolbarComboState.collapsedSteps.add(value);
         } else {
             toolbarComboState.mixinSteps.delete(value);
         }
@@ -520,6 +521,7 @@ const toolbarComboState = {
     applyToken: 0,
     mixinSteps: new Map(), // value -> [{index, caption}]
     hiddenSteps: new Map(), // value -> Set<int> of hidden step indices
+    collapsedSteps: new Set(), // values whose step list is collapsed in the UI
 };
 
 function getToolbarComboElements() {
@@ -604,15 +606,26 @@ function createSelectedCollectorBadge(value, label) {
     btnGroup.appendChild(removeBtn);
 
     if (hasSteps) {
+        const isCollapsed = toolbarComboState.collapsedSteps.has(value);
+
+        const collapseBtn = document.createElement("button");
+        collapseBtn.type = "button";
+        collapseBtn.className = "selected-steps-collapse tool-btn";
+        collapseBtn.title = isCollapsed ? "Expand steps" : "Collapse steps";
+        collapseBtn.innerHTML = isCollapsed
+            ? '<i class="fa-solid fa-chevron-right"></i>'
+            : '<i class="fa-solid fa-chevron-down"></i>';
+
         const header = document.createElement("div");
         header.className = "selected-mixin-header";
+        header.appendChild(collapseBtn);
         header.appendChild(text);
         header.appendChild(btnGroup);
         badge.appendChild(header);
 
         const hiddenSet = toolbarComboState.hiddenSteps.get(value) || new Set();
         const stepsContainer = document.createElement("div");
-        stepsContainer.className = "selected-mixin-steps";
+        stepsContainer.className = "selected-mixin-steps" + (isCollapsed ? " selected-mixin-steps--collapsed" : "");
         for (const step of steps) {
             const isStepHidden = hiddenSet.has(step.index);
             const row = document.createElement("div");
@@ -700,6 +713,22 @@ function initSelectedCollectorInteractions() {
                 evt.preventDefault();
                 evt.stopPropagation();
                 removeToolbarComboSelection(value);
+            }
+            return;
+        }
+        const collapseBtn = evt.target.closest(".selected-steps-collapse");
+        if (collapseBtn) {
+            const badge = collapseBtn.closest(".selected-mixin-badge");
+            const value = badge ? badge.dataset.value : null;
+            if (value) {
+                evt.preventDefault();
+                evt.stopPropagation();
+                if (toolbarComboState.collapsedSteps.has(value)) {
+                    toolbarComboState.collapsedSteps.delete(value);
+                } else {
+                    toolbarComboState.collapsedSteps.add(value);
+                }
+                updateToolbarComboSelectedList();
             }
             return;
         }

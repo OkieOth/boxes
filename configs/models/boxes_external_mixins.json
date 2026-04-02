@@ -114,6 +114,10 @@
           "items": {
             "$ref": "./boxes.json#/definitions/Overlay"
           }
+        },
+        "formatVariations": {
+          "description": "Set of formats that overwrites the style of boxes, if specific conditions are met",
+          "$ref": "./boxes.json#/definitions/FormatVariations"
         }
       }
     },
