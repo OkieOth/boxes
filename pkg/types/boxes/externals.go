@@ -196,12 +196,23 @@ type ProcessStep struct {
 
     // dictionary of comment objects, this comment will applied on layout objects and replace existing comments there
     Comments map[string]types.Comment  `yaml:"comments,omitempty"`
+
+    // dictionary of tag array, the additional tags will be applied on the existing layout and can be used for instance to define display formats
+    Tags map[string]Tags  `yaml:"tags,omitempty"`
+
+    Overlays []Overlay  `yaml:"overlays,omitempty"`
+
+    // Set of formats that overwrites the style of boxes, if specific conditions are met
+    FormatVariations *FormatVariations  `yaml:"formatVariations,omitempty"`
 }
 
 func NewProcessStep() *ProcessStep {
     return &ProcessStep{
         Connections: make(map[string]ConnectionCont, 0),
         Comments: make(map[string]types.Comment, 0),
+        Tags: make(map[string]Tags, 0),
+        Overlays: make([]Overlay, 0),
+        FormatVariations: NewFormatVariations(),
     }
 }
 
@@ -219,9 +230,21 @@ func CopyProcessStep(src *ProcessStep) *ProcessStep {
     for k, v := range src.Comments {
         ret.Comments[k] = v
     }
+    ret.Tags = make(map[string]Tags, 0)
+    for k, v := range src.Tags {
+        ret.Tags[k] = v
+    }
+    ret.Overlays = make([]Overlay, 0)
+    for _, e := range src.Overlays {
+        ret.Overlays = append(ret.Overlays, e)
+    }
+    ret.FormatVariations = CopyFormatVariations(src.FormatVariations)
 
     return &ret
 }
+
+
+
 
 
 

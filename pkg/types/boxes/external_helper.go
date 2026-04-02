@@ -212,40 +212,81 @@ func (b *Boxes) MixinThings(additional BoxesFileMixings) {
 	}
 }
 
+func mergeStepConnections(additional *BoxesFileMixings, step ProcessStep, stepIdx int) {
+	if additional.Connections == nil {
+		additional.Connections = make(map[string]ConnectionCont)
+	}
+	for k, v := range step.Connections {
+		tagged := ConnectionCont{Connections: make([]Connection, len(v.Connections))}
+		for i, c := range v.Connections {
+			c.Step = &stepIdx
+			tagged.Connections[i] = c
+		}
+		if existing, ok := additional.Connections[k]; ok {
+			existing.Connections = append(existing.Connections, tagged.Connections...)
+			additional.Connections[k] = existing
+		} else {
+			additional.Connections[k] = tagged
+		}
+	}
+}
+
+func mergeStepComments(additional *BoxesFileMixings, step ProcessStep, stepIdx int) {
+	if additional.Comments == nil {
+		additional.Comments = make(map[string]types.Comment)
+	}
+	for k, v := range step.Comments {
+		v.Step = &stepIdx
+		additional.Comments[k] = v
+	}
+}
+
+func mergeStepTags(additional *BoxesFileMixings, step ProcessStep) {
+	if len(step.Tags) == 0 {
+		return
+	}
+	if additional.Tags == nil {
+		additional.Tags = make(map[string]Tags)
+	}
+	for k, v := range step.Tags {
+		if existing, ok := additional.Tags[k]; ok {
+			existing.Tags = append(existing.Tags, v.Tags...)
+			additional.Tags[k] = existing
+		} else {
+			additional.Tags[k] = v
+		}
+	}
+}
+
+func mergeStepOverlays(additional *BoxesFileMixings, step ProcessStep) {
+	additional.Overlays = append(additional.Overlays, step.Overlays...)
+}
+
+func mergeStepFormatVariations(additional *BoxesFileMixings, step ProcessStep) {
+	if step.FormatVariations == nil || len(step.FormatVariations.HasTag) == 0 {
+		return
+	}
+	if additional.FormatVariations == nil {
+		additional.FormatVariations = NewFormatVariations()
+	}
+	maps.Copy(additional.FormatVariations.HasTag, step.FormatVariations.HasTag)
+}
+
 // MixinThingsWithSteps applies the mixin including only the specified workflow steps
 // (by index). Root-level connections and comments are always applied as the base layer.
 // If activeSteps is empty, only root-level content is applied.
 func (b *Boxes) MixinThingsWithSteps(additional BoxesFileMixings, activeSteps []int) {
 	if len(additional.Steps) > 0 && len(activeSteps) > 0 {
-		if additional.Connections == nil {
-			additional.Connections = make(map[string]ConnectionCont)
-		}
-		if additional.Comments == nil {
-			additional.Comments = make(map[string]types.Comment)
-		}
 		for _, idx := range activeSteps {
 			if idx < 0 || idx >= len(additional.Steps) {
 				continue
 			}
 			step := additional.Steps[idx]
-			stepIdx := idx
-			for k, v := range step.Connections {
-				tagged := ConnectionCont{Connections: make([]Connection, len(v.Connections))}
-				for i, c := range v.Connections {
-					c.Step = &stepIdx
-					tagged.Connections[i] = c
-				}
-				if existing, ok := additional.Connections[k]; ok {
-					existing.Connections = append(existing.Connections, tagged.Connections...)
-					additional.Connections[k] = existing
-				} else {
-					additional.Connections[k] = tagged
-				}
-			}
-			for k, v := range step.Comments {
-				v.Step = &stepIdx
-				additional.Comments[k] = v
-			}
+			mergeStepConnections(&additional, step, idx)
+			mergeStepComments(&additional, step, idx)
+			mergeStepTags(&additional, step)
+			mergeStepOverlays(&additional, step)
+			mergeStepFormatVariations(&additional, step)
 		}
 	}
 	b.MixinThings(additional)

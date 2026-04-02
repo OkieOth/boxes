@@ -167,6 +167,114 @@ func TestLoadExternalFormats(t *testing.T) {
 	require.Equal(t, len(b2.Images), len(b.Images))
 }
 
+func TestMixinThingsWithSteps_Tags(t *testing.T) {
+	b := buildBoxesWithIds()
+	m := boxes.BoxesFileMixings{
+		Steps: []boxes.ProcessStep{
+			{
+				Caption: "Step 1",
+				Tags: map[string]boxes.Tags{
+					"Box A": {Tags: []string{"tag1", "tag2"}},
+				},
+			},
+			{
+				Caption: "Step 2",
+				Tags: map[string]boxes.Tags{
+					"Box A": {Tags: []string{"tag3"}},
+					"Box B": {Tags: []string{"tag4"}},
+				},
+			},
+		},
+	}
+
+	b.MixinThingsWithSteps(m, []int{0, 1})
+
+	require.Equal(t, []string{"tag1", "tag2", "tag3"}, b.Boxes.Horizontal[0].Tags, "Box A should have tags from both steps")
+	require.Equal(t, []string{"tag4"}, b.Boxes.Horizontal[1].Tags, "Box B should have tag from step 1 only")
+	require.Empty(t, b.Boxes.Horizontal[2].Tags, "Box C should have no tags")
+}
+
+func TestMixinThingsWithSteps_Overlays(t *testing.T) {
+	b := buildBoxesWithIds()
+	m := boxes.BoxesFileMixings{
+		Overlays: []boxes.Overlay{{Caption: "base overlay"}},
+		Steps: []boxes.ProcessStep{
+			{Caption: "Step 1", Overlays: []boxes.Overlay{{Caption: "step 0 overlay"}}},
+			{Caption: "Step 2", Overlays: []boxes.Overlay{{Caption: "step 1 overlay"}}},
+		},
+	}
+
+	b.MixinThingsWithSteps(m, []int{0})
+
+	require.Len(t, b.Overlays, 2, "base overlay + step 0 overlay")
+	require.Equal(t, "base overlay", b.Overlays[0].Caption)
+	require.Equal(t, "step 0 overlay", b.Overlays[1].Caption)
+}
+
+func TestMixinThingsWithSteps_FormatVariations(t *testing.T) {
+	b := buildBoxesWithIds()
+	fmtRef := "highlight"
+	m := boxes.BoxesFileMixings{
+		Steps: []boxes.ProcessStep{
+			{
+				Caption: "Step 1",
+				FormatVariations: &boxes.FormatVariations{
+					HasTag: map[string]boxes.FormatVariation{
+						"active": {FormatRef: &fmtRef},
+					},
+				},
+			},
+			{
+				Caption: "Step 2",
+				FormatVariations: &boxes.FormatVariations{
+					HasTag: map[string]boxes.FormatVariation{
+						"inactive": {FormatRef: &fmtRef},
+					},
+				},
+			},
+		},
+	}
+
+	b.MixinThingsWithSteps(m, []int{0, 1})
+
+	require.NotNil(t, b.FormatVariations)
+	require.Len(t, b.FormatVariations.HasTag, 2, "both step format variations should be merged")
+	require.Contains(t, b.FormatVariations.HasTag, "active")
+	require.Contains(t, b.FormatVariations.HasTag, "inactive")
+}
+
+func TestMixinThingsWithSteps_FormatVariations_OnlyActiveStep(t *testing.T) {
+	b := buildBoxesWithIds()
+	fmtRef := "highlight"
+	m := boxes.BoxesFileMixings{
+		Steps: []boxes.ProcessStep{
+			{
+				Caption: "Step 1",
+				FormatVariations: &boxes.FormatVariations{
+					HasTag: map[string]boxes.FormatVariation{
+						"active": {FormatRef: &fmtRef},
+					},
+				},
+			},
+			{
+				Caption: "Step 2",
+				FormatVariations: &boxes.FormatVariations{
+					HasTag: map[string]boxes.FormatVariation{
+						"inactive": {FormatRef: &fmtRef},
+					},
+				},
+			},
+		},
+	}
+
+	b.MixinThingsWithSteps(m, []int{0})
+
+	require.NotNil(t, b.FormatVariations)
+	require.Len(t, b.FormatVariations.HasTag, 1)
+	require.Contains(t, b.FormatVariations.HasTag, "active")
+	require.NotContains(t, b.FormatVariations.HasTag, "inactive")
+}
+
 func TestLoadExternalConnections(t *testing.T) {
 	input := "../../../resources/examples_boxes/ext_complex_horizontal_connected_pics.yaml"
 	inputConnections := "../../../resources/examples_boxes/ext_connections.yaml"

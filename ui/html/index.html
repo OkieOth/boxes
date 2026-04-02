@@ -9,7 +9,7 @@
             window.formatMixin = "default_formats.yaml";
             window.defaultDepth = 2;
             window.uiVersion = "v1";
-            window.renderingVersion = "v1.3.0";
+            window.renderingVersion = "v1.4.0";
         </script>
 
         <script src="./js/htmx_1.9.12.min.js"></script>
@@ -305,8 +305,27 @@
             aria-live="polite"
             aria-hidden="true"
         >
-            <div class="title">Comment Legend</div>
+            <div class="title">
+                Comment Legend
+            </div>
             <div id="comment-legend-list" class="comment-legend-list"></div>
+        </div>
+
+        <!-- Small top toolbar shown during presentation -->
+        <div id="presentation-toolbar" class="presentation-toolbar hidden">
+            <button id="btn-prev-step" class="present-nav-btn" title="Previous (&#8592;)">&lt;&lt;</button>
+            <span class="presentation-overlay-counter"></span>
+            <button id="btn-next-step" class="present-nav-btn" title="Next (&#8594;)">&gt;&gt;</button>
+            <button id="btn-stop-present" class="present-stop-btn" title="Exit presentation (Esc)">&#10005;</button>
+        </div>
+
+        <!-- Floating comment card — positioned near the highlighted object -->
+        <div id="presentation-comment" class="presentation-comment hidden" aria-live="assertive" aria-atomic="true">
+            <div class="presentation-comment-top">
+                <span class="presentation-comment-label"></span>
+                <span class="presentation-comment-step hidden"></span>
+            </div>
+            <div class="presentation-comment-body"></div>
         </div>
 
         <div id="canvas">
@@ -929,6 +948,7 @@
 
                 // Use mouseover/mouseout with delegation; avoid flicker by checking relatedTarget
                 canvas.addEventListener("mouseover", function (e) {
+                    if (window.presentationState?.active) return;
                     const t = e.target;
                     if (!isHighlightableTarget(t)) return;
                     const grp = getGroupClass(t);
@@ -936,6 +956,7 @@
                 });
 
                 canvas.addEventListener("mouseout", function (e) {
+                    if (window.presentationState?.active) return;
                     const t = e.target;
                     if (!isHighlightableTarget(t)) return;
                     const grp = getGroupClass(t);
