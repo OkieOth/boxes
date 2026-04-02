@@ -496,6 +496,7 @@ let mixins = [];
 let collectorPanelVisible = false;
 let collectorVisibilityGuardAttached = false;
 let commentLegendPanelVisible = false;
+let _commentLegendEntries = [];
 let connectionAnimationEnabled = false;
 let connectedModeActive = false;
 const commentLegendState = {
@@ -635,11 +636,13 @@ function createSelectedCollectorBadge(value, label) {
 
             const stepClass = `step_${step.index}`;
             row.addEventListener("mouseenter", () => {
+                if (presentationState.active) return;
                 if (typeof window.highlightConnectionGroup === "function") {
                     window.highlightConnectionGroup(stepClass);
                 }
             });
             row.addEventListener("mouseleave", () => {
+                if (presentationState.active) return;
                 if (typeof window.unhighlightConnectionGroup === "function") {
                     window.unhighlightConnectionGroup(stepClass);
                 }
@@ -3160,6 +3163,7 @@ function attachCommentLegendHover(element, entry) {
         : [];
     if (!groups.length) return;
     const handleEnter = () => {
+        if (presentationState.active) return;
         groups.forEach((grp) => {
             if (typeof window.highlightConnectionGroup === "function") {
                 window.highlightConnectionGroup(grp);
@@ -3167,6 +3171,7 @@ function attachCommentLegendHover(element, entry) {
         });
     };
     const handleLeave = () => {
+        if (presentationState.active) return;
         groups.forEach((grp) => {
             if (typeof window.unhighlightConnectionGroup === "function") {
                 window.unhighlightConnectionGroup(grp);
@@ -3399,11 +3404,13 @@ function createCommentLegendItem(entry) {
         tag.textContent = getStepCaption(stepClass);
         tag.title = `Highlight ${tag.textContent}`;
         tag.addEventListener("mouseenter", () => {
+            if (presentationState.active) return;
             if (typeof window.highlightConnectionGroup === "function") {
                 window.highlightConnectionGroup(stepClass);
             }
         });
         tag.addEventListener("mouseleave", (e) => {
+            if (presentationState.active) return;
             if (typeof window.unhighlightConnectionGroup === "function") {
                 window.unhighlightConnectionGroup(stepClass);
             }
@@ -3425,6 +3432,16 @@ function createCommentLegendItem(entry) {
         });
         markerRow.appendChild(tag);
     });
+    const presentBtn = document.createElement("button");
+    presentBtn.className = "comment-legend-present-btn";
+    presentBtn.textContent = ">>";
+    presentBtn.title = "Start presentation from here";
+    presentBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        startPresentation(entry.id);
+    });
+    markerRow.appendChild(presentBtn);
+
     const body = document.createElement("div");
     body.className = "comment-legend-body";
     body.textContent = entry.body || "";
@@ -3439,6 +3456,7 @@ function updateCommentLegendPanel() {
     if (!list || !panel) return;
     resetCommentLegendState();
     const entries = collectCommentLegendEntries();
+    _commentLegendEntries = entries;
     list.innerHTML = "";
     if (!entries.length) {
         const empty = document.createElement("div");
@@ -4142,6 +4160,29 @@ function updateBlacklistUI() {
 
 // Space key enables temporary pan + NEW: Ctrl/Cmd+Z undo
 function onKeyDown(e) {
+    // Presentation mode keys
+    if (presentationState.active) {
+        if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+            presentNextStep();
+            e.preventDefault();
+            return;
+        }
+        if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+            presentPrevStep();
+            e.preventDefault();
+            return;
+        }
+        if (e.key === "Escape") {
+            stopPresentation();
+            e.preventDefault();
+            return;
+        }
+        if (e.key === "p" || e.key === "P") {
+            stopPresentation();
+            e.preventDefault();
+            return;
+        }
+    }
     // NEW: Ctrl/Cmd+Z -> undo last click action
     if (
         (e.ctrlKey || e.metaKey) &&
@@ -4183,3 +4224,347 @@ window.onHideCommentsChanged = function (enabled) {
         // no-op
     }
 };
+
+// ─── Presentation mode ───────────────────────────────────────────────────────
+
+const presentationState = window.presentationState = {
+    active: false,
+    entries: [],
+    currentIndex: -1,
+    savedTransform: null, // { scale, tx, ty } restored on exit
+};
+
+// IDs of UI panels/toolbar to hide while presenting
+const _PRESENT_HIDE_IDS = ["menu-wrapper", "selected-collector", "comment-legend-panel"];
+
+function startPresentation(startEntryId = null) {
+    // Open the panel if needed so SVG comment elements are rendered
+    if (!commentLegendPanelVisible) {
+        setCommentLegendPanelVisibility(true);
+    }
+    // Use the entries that were used to build the panel, not a fresh re-collection.
+    // Re-collecting is unsafe because bringToFront() reorders SVG DOM elements when
+    // hovering, which changes the querySelectorAll order and shifts the fallback IDs.
+    const entries = _commentLegendEntries;
+    if (!entries.length) return;
+
+    let startIndex = 0;
+    if (startEntryId !== null) {
+        const found = entries.findIndex((e) => e.id === startEntryId);
+        if (found >= 0) startIndex = found;
+    }
+
+    presentationState.active = true;
+    presentationState.entries = entries;
+    presentationState.currentIndex = -1;
+    presentationState.savedTransform = { scale: state.scale, tx: state.tx, ty: state.ty };
+
+    // Hide toolbar + panels; record which were already hidden
+    presentationState.hiddenByUs = new Set();
+    _PRESENT_HIDE_IDS.forEach((id) => {
+        const el = document.getElementById(id);
+        if (el && !el.classList.contains("hidden")) {
+            el.classList.add("hidden");
+            presentationState.hiddenByUs.add(id);
+        }
+    });
+
+    getStage()?.classList.add("presenting");
+
+    // Wait for layout to settle (panels removed from flow) before centering
+    requestAnimationFrame(() => gotoStep(startIndex));
+}
+
+function stopPresentation() {
+    if (!presentationState.active) return;
+
+    presentationState.active = false;
+
+    _unhighlightCurrentStep();
+
+    // Restore panels we hid
+    (presentationState.hiddenByUs || new Set()).forEach((id) => {
+        document.getElementById(id)?.classList.remove("hidden");
+    });
+    presentationState.hiddenByUs = null;
+
+    document.getElementById("presentation-comment")?.classList.add("hidden");
+    getStage()?.classList.remove("presenting");
+
+    document.querySelectorAll(".comment-legend-item--presenting").forEach((el) => {
+        el.classList.remove("comment-legend-item--presenting");
+    });
+
+    if (presentationState.savedTransform) {
+        const { scale, tx, ty } = presentationState.savedTransform;
+        state.scale = scale;
+        state.tx = tx;
+        state.ty = ty;
+        applyTransform();
+    }
+}
+
+function gotoStep(index) {
+    const entries = presentationState.entries;
+    if (!entries.length) return;
+    const clamped = Math.max(0, Math.min(index, entries.length - 1));
+
+    _unhighlightCurrentStep();
+
+    presentationState.currentIndex = clamped;
+    const entry = entries[clamped];
+
+    // Highlight new step via connection group and step classes
+    entry.groupClasses.forEach((grp) => {
+        if (typeof window.highlightConnectionGroup === "function") {
+            window.highlightConnectionGroup(grp);
+        }
+    });
+    entry.stepClasses.forEach((sc) => {
+        if (typeof window.highlightConnectionGroup === "function") {
+            window.highlightConnectionGroup(sc);
+        }
+    });
+
+    // Mark active item in the legend list
+    document.querySelectorAll(".comment-legend-item--presenting").forEach((el) => {
+        el.classList.remove("comment-legend-item--presenting");
+    });
+    const list = document.getElementById("comment-legend-list");
+    if (list) {
+        const items = list.querySelectorAll(".comment-legend-item");
+        if (items[clamped]) {
+            items[clamped].classList.add("comment-legend-item--presenting");
+            items[clamped].scrollIntoView({ block: "nearest", behavior: "smooth" });
+        }
+    }
+
+    // Pan if any element is outside the viewport
+    _centerOnEntry(entry);
+
+    // Position and populate the floating comment card (includes counter update)
+    _updatePresentationComment(entry, clamped, entries.length);
+}
+
+function presentNextStep() {
+    const next = presentationState.currentIndex + 1;
+    if (next < presentationState.entries.length) gotoStep(next);
+}
+
+function presentPrevStep() {
+    gotoStep(presentationState.currentIndex - 1);
+}
+
+function _unhighlightCurrentStep() {
+    const prev = presentationState.entries[presentationState.currentIndex];
+    if (!prev) return;
+    prev.groupClasses.forEach((grp) => {
+        if (typeof window.unhighlightConnectionGroup === "function") {
+            window.unhighlightConnectionGroup(grp);
+        }
+    });
+    prev.stepClasses.forEach((sc) => {
+        if (typeof window.unhighlightConnectionGroup === "function") {
+            window.unhighlightConnectionGroup(sc);
+        }
+    });
+}
+
+function _centerOnEntry(entry) {
+    const canvas = getCanvas();
+    if (!canvas) return;
+
+    const bbox = _getBBoxForEntry(entry);
+    if (!bbox) return;
+    const { minX, minY, maxX, maxY } = bbox;
+
+    // Sync stage to current canvas dimensions before measuring screen positions
+    // (important for the first step where panels were just hidden).
+    applyTransform();
+
+    const canvasW = canvas.clientWidth;
+    const canvasH = canvas.clientHeight;
+    const PADDING = 40; // px margin at all edges
+
+    const s = state.scale;
+    const { tx: effTx, ty: effTy } = getEffectiveTxTy();
+
+    // Convert SVG bbox to canvas-relative screen coordinates
+    const sMinX = minX * s + effTx;
+    const sMaxX = maxX * s + effTx;
+    const sMinY = minY * s + effTy;
+    const sMaxY = maxY * s + effTy;
+
+    const topEdge    = PADDING;
+    const bottomEdge = canvasH - PADDING;
+    const usableH    = bottomEdge - topEdge;
+
+    // If the whole bbox is already within the padded viewport, do nothing
+    if (sMinX >= PADDING && sMaxX <= canvasW - PADDING &&
+        sMinY >= topEdge && sMaxY <= bottomEdge) {
+        return;
+    }
+
+    // Minimum shift to make the bbox fully visible; center only when it
+    // exceeds the available dimension.
+    let dx = 0, dy = 0;
+
+    if (sMaxX - sMinX > canvasW - 2 * PADDING) {
+        dx = canvasW / 2 - (sMinX + sMaxX) / 2;
+    } else if (sMinX < PADDING) {
+        dx = PADDING - sMinX;
+    } else if (sMaxX > canvasW - PADDING) {
+        dx = (canvasW - PADDING) - sMaxX;
+    }
+
+    if (sMaxY - sMinY > usableH) {
+        dy = (topEdge + bottomEdge) / 2 - (sMinY + sMaxY) / 2;
+    } else if (sMinY < topEdge) {
+        dy = topEdge - sMinY;
+    } else if (sMaxY > bottomEdge) {
+        dy = bottomEdge - sMaxY;
+    }
+
+    if (dx === 0 && dy === 0) return;
+
+    state.tx += dx;
+    state.ty += dy;
+    applyTransform();
+}
+
+// Shared: collect SVG candidates for an entry and return their union bbox in SVG space.
+// Returns { minX, minY, maxX, maxY } or null if nothing found.
+function _getBBoxForEntry(entry) {
+    const svg = getSvg();
+    if (!svg) return null;
+    const seen = new Set();
+    const candidates = [];
+
+    const addEl = (el) => {
+        if (!el || seen.has(el)) return;
+        seen.add(el);
+        candidates.push(el);
+    };
+
+    // Query by connection group classes (conLine_N) — finds connection lines/paths
+    entry.groupClasses.forEach((grp) => {
+        svg.querySelectorAll(
+            `line.${grp}, path.${grp}, polyline.${grp}, rect.${grp}, circle.${grp}:not(.comment)`
+        ).forEach(addEl);
+    });
+
+    // Query by step classes (step_N) — finds all elements tagged for this step
+    entry.stepClasses.forEach((sc) => {
+        svg.querySelectorAll(
+            `line.${sc}, path.${sc}, polyline.${sc}, rect.${sc}, circle.${sc}:not(.comment)`
+        ).forEach(addEl);
+    });
+
+    // Fallback: use the comment marker circle (sourceIds[0]) which is positioned
+    // near the relevant box/connection in the diagram — it will always have the right position.
+    if (!candidates.length && entry.sourceIds.length) {
+        const markerId = entry.sourceIds[0];
+        if (markerId) {
+            const el = svg.getElementById(markerId) || document.getElementById(markerId);
+            if (el) addEl(el);
+        }
+    }
+
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    candidates.forEach((el) => {
+        try {
+            const b = el.getBBox();
+            if (b.width === 0 && b.height === 0) return;
+            minX = Math.min(minX, b.x);           minY = Math.min(minY, b.y);
+            maxX = Math.max(maxX, b.x + b.width); maxY = Math.max(maxY, b.y + b.height);
+        } catch (_) {}
+    });
+    return isFinite(minX) ? { minX, minY, maxX, maxY } : null;
+}
+
+function _updatePresentationComment(entry, index, total) {
+    const card = document.getElementById("presentation-comment");
+    if (!card) return;
+
+    card.querySelector(".presentation-comment-label").textContent = entry.markerLabel || "";
+    card.querySelector(".presentation-comment-body").textContent = entry.body || "";
+    card.querySelector(".presentation-overlay-counter").textContent = `${index + 1} / ${total}`;
+
+    const prevBtn = document.getElementById("btn-prev-step");
+    const nextBtn = document.getElementById("btn-next-step");
+    if (prevBtn) prevBtn.disabled = index === 0;
+    if (nextBtn) nextBtn.disabled = index === total - 1;
+
+    // Make card visible first so offsetWidth/Height are accurate
+    card.classList.remove("hidden");
+
+    const canvas = getCanvas();
+    const bbox = _getBBoxForEntry(entry);
+    const { tx: effTx, ty: effTy } = getEffectiveTxTy();
+    const s = state.scale;
+    const canvasRect = canvas
+        ? canvas.getBoundingClientRect()
+        : { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight };
+
+    const cardW = card.offsetWidth || 280;
+    const cardH = card.offsetHeight || 90;
+    const gap = 8;
+    const margin = 10;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+    if (!bbox) {
+        card.style.left = Math.max(margin, (vw - cardW) / 2) + "px";
+        card.style.top  = margin + "px";
+        return;
+    }
+
+    // Convert SVG bbox to screen coordinates
+    const sMinX = bbox.minX * s + effTx + canvasRect.left;
+    const sMaxX = bbox.maxX * s + effTx + canvasRect.left;
+    const sMinY = bbox.minY * s + effTy + canvasRect.top;
+    const sMaxY = bbox.maxY * s + effTy + canvasRect.top;
+    const sCx   = (sMinX + sMaxX) / 2;
+    const sCy   = (sMinY + sMaxY) / 2;
+    const bboxW = sMaxX - sMinX;
+    const bboxH = sMaxY - sMinY;
+
+    const topBound    = margin;
+    const bottomBound = vh - margin;
+    const leftBound   = margin;
+    const rightBound  = vw - margin;
+
+    let left, top;
+
+    if (bboxH > bboxW) {
+        // Vertical connection — place card left or right
+        const spaceRight = rightBound - sMaxX - gap;
+        const spaceLeft  = sMinX - gap - leftBound;
+        left = (spaceRight >= cardW || spaceRight >= spaceLeft)
+            ? sMaxX + gap
+            : sMinX - gap - cardW;
+        top = Math.max(topBound, Math.min(sCy - cardH / 2, bottomBound - cardH));
+    } else {
+        // Horizontal connection — place card above or below
+        const spaceBelow = bottomBound - sMaxY - gap;
+        const spaceAbove = sMinY - gap - topBound;
+        top = (spaceBelow >= cardH || spaceBelow >= spaceAbove)
+            ? sMaxY + gap
+            : sMinY - gap - cardH;
+        left = Math.max(leftBound, Math.min(sCx - cardW / 2, rightBound - cardW));
+    }
+
+    // Final clamp
+    left = Math.max(leftBound, Math.min(left, rightBound - cardW));
+    top  = Math.max(topBound,  Math.min(top,  bottomBound - cardH));
+
+    card.style.left = left + "px";
+    card.style.top  = top  + "px";
+}
+
+// Wire up presentation controls once DOM is ready
+document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("btn-stop-present")?.addEventListener("click", () => stopPresentation());
+    document.getElementById("btn-prev-step")?.addEventListener("click", () => presentPrevStep());
+    document.getElementById("btn-next-step")?.addEventListener("click", () => presentNextStep());
+});

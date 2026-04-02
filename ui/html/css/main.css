@@ -32,6 +32,9 @@
     box-shadow: none;
     overflow: hidden;
 }
+#menu-wrapper.hidden {
+    display: none;
+}
 #toolbar-collapse-handle {
     align-self: center;
     width: 42px;
@@ -185,6 +188,10 @@ button.tool-btn.active {
     will-change: transform;
     /* Simple hardware acceleration - universally supported */
     transform: translate3d(0, 0, 0);
+    transition: none; /* overridden during presentation */
+}
+#svg-stage.presenting {
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 /* Cursor styles for pan */
 #svg-stage.pan-enabled {
@@ -508,6 +515,113 @@ button.tool-btn.active {
     font-size: 14px;
     margin-bottom: 8px;
     color: #333;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ── Presentation mode controls ─────────────────────────── */
+
+/* Active step in the legend list */
+.comment-legend-item--presenting {
+    outline: 2px solid rgba(26, 82, 118, 0.7);
+    outline-offset: 1px;
+    box-shadow: 0 0 0 4px rgba(26, 82, 118, 0.12);
+}
+
+/* Floating comment card — contains label, body, and nav controls */
+.presentation-comment {
+    position: fixed;
+    min-width: 220px;
+    max-width: 360px;
+    background: rgba(10, 20, 40, 0.92);
+    color: #f0f4ff;
+    border-radius: 8px;
+    padding: 10px 12px 8px;
+    z-index: 1999;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.50);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    user-select: none;
+}
+.presentation-comment.hidden {
+    display: none;
+}
+.presentation-comment-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+.presentation-comment-label {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+.presentation-comment-body {
+    font-size: 13px;
+    line-height: 1.4;
+    opacity: 0.85;
+    min-height: 1em;
+}
+.presentation-comment-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding-top: 2px;
+    border-top: 1px solid rgba(255,255,255,0.10);
+}
+.presentation-overlay-counter {
+    flex: 1;
+    text-align: center;
+    font-size: 11px;
+    color: rgba(240,244,255,0.50);
+    white-space: nowrap;
+}
+.present-nav-btn {
+    font-size: 11px;
+    width: 26px;
+    height: 24px;
+    border-radius: 4px;
+    border: 1px solid rgba(255,255,255,0.25);
+    background: transparent;
+    color: rgba(240,244,255,0.7);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    padding: 0;
+    line-height: 1;
+}
+.present-nav-btn:hover:not(:disabled) {
+    background: rgba(255,255,255,0.10);
+    color: #f0f4ff;
+}
+.present-nav-btn:disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+.present-stop-btn {
+    font-size: 12px;
+    width: 26px;
+    height: 24px;
+    border-radius: 4px;
+    border: 1px solid rgba(255,255,255,0.25);
+    background: transparent;
+    color: rgba(240,244,255,0.7);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    padding: 0;
+    line-height: 1;
+}
+.present-stop-btn:hover {
+    background: rgba(255,255,255,0.10);
+    color: #f0f4ff;
 }
 .comment-legend-list {
     display: flex;
@@ -550,6 +664,22 @@ button.tool-btn.active {
     align-items: center;
     gap: 8px;
     font-weight: 600;
+    color: #0a3d62;
+}
+.comment-legend-present-btn {
+    margin-left: auto;
+    flex-shrink: 0;
+    font-size: 10px;
+    padding: 1px 5px;
+    border: 1px solid rgba(0,0,0,0.18);
+    border-radius: 3px;
+    background: transparent;
+    color: rgba(10,61,98,0.55);
+    cursor: pointer;
+    line-height: 1.4;
+}
+.comment-legend-present-btn:hover {
+    background: rgba(10,61,98,0.08);
     color: #0a3d62;
 }
 .comment-legend-label {
