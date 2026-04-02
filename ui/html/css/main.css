@@ -576,6 +576,21 @@ button.tool-btn.active {
     letter-spacing: 0.02em;
     color: #0a3d62;
 }
+.presentation-comment-step {
+    font-size: 11px;
+    font-weight: 500;
+    color: rgb(var(--step-color));
+    letter-spacing: 0.01em;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: center;
+}
+.presentation-comment-step.hidden {
+    display: none;
+}
 .presentation-comment-body {
     font-size: 13px;
     line-height: 1.4;

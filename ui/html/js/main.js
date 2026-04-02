@@ -4479,6 +4479,14 @@ function _updatePresentationComment(entry, index, total) {
     card.querySelector(".presentation-comment-body").textContent = entry.body || "";
     card.querySelector(".presentation-overlay-counter").textContent = `${index + 1} / ${total}`;
 
+    const stepEl = card.querySelector(".presentation-comment-step");
+    if (stepEl) {
+        const sc = Array.isArray(entry.stepClasses) && entry.stepClasses[0];
+        const caption = sc ? getStepCaption(sc) : "";
+        stepEl.textContent = caption;
+        stepEl.classList.toggle("hidden", !caption);
+    }
+
     // Apply step color matching the comment legend panel
     const stepClasses = Array.isArray(entry.stepClasses) ? entry.stepClasses.filter(Boolean) : [];
     if (stepClasses.length > 0) {
