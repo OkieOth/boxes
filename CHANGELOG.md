@@ -1,3 +1,8 @@
+# v1.4.0
+* UI: improved steps view in the UI
+* UI: presentation mode
+* Extended steps (overlays, tags)
+
 # v1.3.0
 * Introduce steps in the mixin approach
 
