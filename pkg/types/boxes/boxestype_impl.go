@@ -270,10 +270,18 @@ func (d *BoxesDocument) replaceConnectionIds(newConnectionIndex int, indexesToRe
 	d.replaceConnectionIdsInComments(newConnectionIndex, indexesToReplace)
 }
 
+func getStepClasses(msg1, msg2 string, index int, step *int) string {
+	if step == nil {
+		return fmt.Sprintf(msg1, index)
+	} else {
+		return fmt.Sprintf(msg2, index, *step)
+	}
+}
+
 func (d *BoxesDocument) DrawMovedConnectionLines(drawingImpl types.Drawing) {
 	b := "black"
 	w := 1.0
-	s := types.LineDefStyleEnum_dashed
+	s := types.StyleDashed // LineDefStyleEnum_dashed
 	format := types.LineDef{
 		Width: &w,
 		Color: &b,
@@ -287,7 +295,7 @@ func (d *BoxesDocument) DrawMovedConnectionLines(drawingImpl types.Drawing) {
 		}
 		offset := int(*lineFormat.Width / 2)
 		x1, y1, x2, y2 := d.adjustLineToWidth(l.StartX, l.StartY, l.EndX, l.EndY, offset, l.IsStart, l.IsEnd)
-		classNames := fmt.Sprintf("connection conLine_%d", l.ConnectionIndex)
+		classNames := getStepClasses("connection conLine_%d", "connection conLine_%d step_%d", l.ConnectionIndex, l.Step)
 		if l.InverseDirection {
 			x1, x2 = x2, x1
 		}
@@ -299,7 +307,7 @@ func (d *BoxesDocument) DrawMovedConnectionLines(drawingImpl types.Drawing) {
 		if l.Format != nil {
 			lineFormat = *l.Format
 		}
-		classNames := fmt.Sprintf("connection conLine_%d", l.ConnectionIndex)
+		classNames := getStepClasses("connection conLine_%d", "connection conLine_%d step_%d", l.ConnectionIndex, l.Step)
 		x1, y1, x2, y2 := l.StartX, l.StartY, l.EndX, l.EndY
 		if l.InverseDirection {
 			y1, y2 = y2, y1
@@ -336,7 +344,7 @@ func (doc *BoxesDocument) GetTitleFormat() types.FontDef {
 			format2Use = titleFormat.FontCaption
 		}
 	}
-	format2Use.Anchor = types.FontDefAnchorEnum_left
+	format2Use.Anchor = types.AnchorLeft //FontDefAnchorEnum_left
 	return format2Use
 }
 
@@ -360,7 +368,7 @@ func (doc *BoxesDocument) DrawLegend(drawing types.Drawing, c types.TextDimensio
 					format2Use = legendFormat.FontCaption
 				}
 			}
-			format2Use.Anchor = types.FontDefAnchorEnum_left
+			format2Use.Anchor = types.AnchorLeft // FontDefAnchorEnum_left
 			currentX := doc.GlobalPadding
 			lineW := 0.5
 			lineC := "#9a9a9a"
@@ -467,7 +475,8 @@ func (b *LayoutElement) Draw(drawing types.Drawing) error {
 		if b.Image != nil {
 			textYOffset = (b.Image.Y - b.Y) + b.Image.Height + b.Image.MarginTopBottom
 		}
-		if err := drawing.DrawRectWithText(b.Id, b.Caption, b.Text1, b.Text2, b.X, b.Y, b.Width, b.Height, textYOffset, f); err != nil {
+		isLeaf := b.Vertical == nil && b.Horizontal == nil
+		if err := drawing.DrawRectWithText(b.Id, b.Caption, b.Text1, b.Text2, b.X, b.Y, b.Width, b.Height, textYOffset, f, isLeaf); err != nil {
 			return fmt.Errorf("Error drawing element %s: %w", b.Id, err)
 		}
 	}
@@ -599,7 +608,7 @@ func (doc *BoxesDocument) DrawOverlays(drawing types.Drawing, c types.TextDimens
 					}
 					labelFont := types.InitFontDef(nil, "sans", size, true, false, 0)
 					labelFont.Color = *oe.Format.Fill.Color
-					labelFont.Anchor = types.FontDefAnchorEnum_middle
+					labelFont.Anchor = types.AnchorMiddle // FontDefAnchorEnum_middle
 					_, h := c.Dimensions(label, &labelFont)
 					drawing.DrawText(label, oe.X, oe.Y-(h/2), 0, &labelFont)
 				}
@@ -613,7 +622,7 @@ func (doc *BoxesDocument) drawCommentMarkers(drawing types.Drawing) error {
 	for i := range doc.Comments {
 		c := doc.Comments[i]
 		if c.ConnectionIndex != nil {
-			className := fmt.Sprintf("connection conLine_%d", *c.ConnectionIndex)
+			className := getStepClasses("connection conLine_%d", "connection conLine_%d step_%d", *c.ConnectionIndex, c.Step)
 			drawing.DrawCircleWithBorderTextAndClass(c.Label, c.MarkerX, c.MarkerY, doc.CommentMarkerRadius, &c.Format.Fill, &c.Format.Line, &c.Format.FontMarker, className)
 		} else {
 			drawing.DrawCircleWithBorderAndText(c.Label, c.MarkerX, c.MarkerY, doc.CommentMarkerRadius, &c.Format.Fill, &c.Format.Line, &c.Format.FontMarker)
@@ -660,10 +669,10 @@ func (doc *BoxesDocument) drawCommentTextsCustomLabels(drawing types.Drawing, c 
 		lastLabel, lastText = c.Label, c.Text
 		className := "comment"
 		if c.ConnectionIndex != nil {
-			className = fmt.Sprintf("%s connection conLine_%d", className, *c.ConnectionIndex)
+			className = getStepClasses("comment connection conLine_%d", "comment connection conLine_%d step_%d", *c.ConnectionIndex, c.Step)
 		}
 		drawing.DrawCircleWithBorderTextAndClass(c.Label, markerX, currentY, doc.CommentMarkerRadius, &c.Format.Fill, &c.Format.Line, &c.Format.FontMarker, className)
-		c.Format.FontText.Anchor = types.FontDefAnchorEnum_left
+		c.Format.FontText.Anchor = types.AnchorLeft // FontDefAnchorEnum_left
 		c.Format.FontText.MaxLenBeforeBreak = doc.Boxes.Width
 		drawing.DrawText(c.Text, textX, currentY-(2*doc.CommentMarkerRadius), 0, &c.Format.FontText)
 		currentY += getMax(c.TextHeight, neededMarkerSpace)
@@ -698,11 +707,11 @@ func (doc *BoxesDocument) drawCommentTextsStdLabels(currentY int, drawing types.
 		if c.Text == "" {
 			continue
 		}
-		c.Format.FontText.Anchor = types.FontDefAnchorEnum_left
+		c.Format.FontText.Anchor = types.AnchorLeft // FontDefAnchorEnum_left
 		c.Format.FontText.MaxLenBeforeBreak = doc.Boxes.Width
 		className := "comment"
 		if c.ConnectionIndex != nil {
-			className = fmt.Sprintf("%s connection conLine_%d", className, *c.ConnectionIndex)
+			className = getStepClasses("comment connection conLine_%d", "comment connection conLine_%d step_%d", *c.ConnectionIndex, c.Step)
 		}
 		drawing.DrawCircleWithBorderTextAndClass(c.Label, markerX, currentY, doc.CommentMarkerRadius, &c.Format.Fill, &c.Format.Line, &c.Format.FontMarker, className)
 		drawing.DrawText(c.Text, textX, currentY-(2*doc.CommentMarkerRadius), 0, &c.Format.FontText)

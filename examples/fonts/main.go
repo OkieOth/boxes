@@ -31,8 +31,8 @@ func main() {
 	styleInfo := "text-anchor:start;font-size:8px;fill:black"
 
 	dc := svgdrawing.NewSvgTextDimensionCalculator()
-	wb := types.FontDefWeightEnum_bold
-	si := types.FontDefTypeEnum_italic
+	wb := types.WeightBold
+	si := types.TypeItalic
 
 	for i := 0; i <= 10; i++ {
 		y := 20 * (i + 1)

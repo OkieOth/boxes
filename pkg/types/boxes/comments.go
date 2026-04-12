@@ -63,6 +63,7 @@ func (doc *BoxesDocument) collectCommentFromConnectionsImpl(c *ConnectionElem, c
 				} else {
 					label, customMarker := doc.newLabel(c.Comment.Label)
 					cc := doc.newCommentContainer(c.Comment.Text, label, c.Comment.Format, x, y, false, dimensionsCalc, customMarker, &l.ConnectionIndex)
+					cc.Step = c.Step
 					doc.Comments = append(doc.Comments, cc)
 				}
 				return true
@@ -91,6 +92,7 @@ func (doc *BoxesDocument) collectCommentFromConnectionsImpl(c *ConnectionElem, c
 				} else {
 					label, customMarker := doc.newLabel(c.Comment.Label)
 					cc := doc.newCommentContainer(c.Comment.Text, label, c.Comment.Format, x, y, false, dimensionsCalc, customMarker, &l.ConnectionIndex)
+					cc.Step = c.Step
 					doc.Comments = append(doc.Comments, cc)
 				}
 				return true
@@ -207,6 +209,7 @@ func (doc *BoxesDocument) collectCommentsFromLayout(l *LayoutElement, dimensions
 		comment := l.Comments[i]
 		label, customMarker := doc.newLabel(comment.Label)
 		c := doc.newCommentContainer(comment.Text, label, comment.Format, currentX, l.Y+4, false, dimensionsCalc, customMarker, nil)
+		c.Step = comment.Step
 		doc.Comments = append(doc.Comments, c)
 		currentX -= (2 * c.MarkerTextWidth) + doc.GlobalPadding + 2
 		if i > 7 {

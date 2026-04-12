@@ -33,6 +33,7 @@ func initConnections(l []boxes.Connection, inputFormats map[string]boxes.BoxForm
 		conn.HiddenComments = elem.HiddenComments
 		conn.Tags = elem.Tags
 		conn.ConnRestrictions = elem.ConnRestrictions
+		conn.Step = elem.Step
 		if elem.Format != nil {
 			if formatInst, ok := inputFormats[*elem.Format]; ok {
 				conn.Format = formatInst.Line
@@ -48,7 +49,7 @@ func initConnections(l []boxes.Connection, inputFormats map[string]boxes.BoxForm
 func initFontFormatAnchorInCase(f *types.FontDef) {
 	if f != nil {
 		if f.Anchor == "" {
-			f.Anchor = types.FontDefAnchorEnum_middle
+			f.Anchor = types.AnchorMiddle
 		}
 	}
 }
@@ -56,7 +57,7 @@ func initFontFormatAnchorInCase(f *types.FontDef) {
 func initFontFormatAnchorLeftInCase(f *types.FontDef) {
 	if f != nil {
 		if f.Anchor == "" {
-			f.Anchor = types.FontDefAnchorEnum_left
+			f.Anchor = types.AnchorLeft
 		}
 	}
 }

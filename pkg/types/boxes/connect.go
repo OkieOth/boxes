@@ -264,6 +264,7 @@ func (doc *BoxesDocument) createAConnectionPath(path []ConnectionNode, c *Layout
 		connElem.Format = c.Format
 	}
 	connElem.Comment = c.Comment
+	connElem.Step = c.Step
 
 	var lastX, lastY int
 	pathElemCount := len(pathToDraw) - 1
@@ -278,6 +279,7 @@ func (doc *BoxesDocument) createAConnectionPath(path []ConnectionNode, c *Layout
 				line.DestLayoutId = &destId
 			}
 			line.ConnectionIndex = connElem.ConnectionIndex
+			line.Step = c.Step
 			connElem.Parts = append(connElem.Parts, line)
 		}
 		lastX = p.X

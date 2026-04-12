@@ -2,11 +2,11 @@ package types
 
 func InitFontDef(l *FontDef, defaultFont string, defaultSize int, defaultBold, defaultItalic bool, spaceTop int) FontDef {
 	var f FontDef
-	typeNormal := FontDefTypeEnum_normal
-	typeItalic := FontDefTypeEnum_italic
-	weightNormal := FontDefWeightEnum_normal
-	weightBold := FontDefWeightEnum_bold
-	alignedCenter := FontDefAlignedEnum_center
+	typeNormal := TypeNormal       // FontDefTypeEnum_normal
+	typeItalic := TypeItalic       // FontDefTypeEnum_italic
+	weightNormal := WeightNormal   // FontDefWeightEnum_normal
+	weightBold := WeightBold       // FontDefWeightEnum_bold
+	alignedCenter := AlignedCenter // FontDefAlignedEnum_center
 
 	if l != nil {
 		if l.Font != "" {
@@ -50,7 +50,7 @@ func InitFontDef(l *FontDef, defaultFont string, defaultSize int, defaultBold, d
 		if l.Anchor != "" {
 			f.Anchor = l.Anchor
 		} else {
-			f.Anchor = FontDefAnchorEnum_middle
+			f.Anchor = AnchorMiddle // FontDefAnchorEnum_middle
 		}
 		if l.Aligned != nil {
 			f.Aligned = l.Aligned
@@ -83,7 +83,7 @@ func InitFontDef(l *FontDef, defaultFont string, defaultSize int, defaultBold, d
 		f.LineHeight = 1.5
 		f.Color = "black"
 		f.Aligned = &alignedCenter
-		f.Anchor = FontDefAnchorEnum_middle
+		f.Anchor = AnchorMiddle // FontDefAnchorEnum_middle
 		f.SpaceTop = spaceTop
 		f.SpaceBottom = 0
 		f.MaxLenBeforeBreak = 90
@@ -93,7 +93,7 @@ func InitFontDef(l *FontDef, defaultFont string, defaultSize int, defaultBold, d
 
 func InitLineDef(l *LineDef) *LineDef {
 	wDef := 0.5
-	sDef := LineDefStyleEnum_solid
+	sDef := StyleSolid // LineDefStyleEnum_solid
 	cDef := "black"
 	oDef := 1.0
 
@@ -128,7 +128,7 @@ func InitLineDef(l *LineDef) *LineDef {
 
 func InitLineDef2(cDef string, oDef float64) *LineDef {
 	wDef := 0.5
-	sDef := LineDefStyleEnum_solid
+	sDef := StyleSolid // LineDefStyleEnum_solid
 
 	w := &wDef
 	o := &oDef

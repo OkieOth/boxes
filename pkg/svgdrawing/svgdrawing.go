@@ -92,7 +92,7 @@ func (s *SvgTextDimensionCalculator) SplitTxtWithMaxWidth(txt string, format *ty
 		fontSize = 10
 	}
 
-	bold := format.Weight != nil && *format.Weight == types.FontDefWeightEnum_bold
+	bold := format.Weight != nil && *format.Weight == types.WeightBold
 	lineHeight := format.LineHeight
 	if lineHeight == 0 {
 		lineHeight = 1.2
@@ -291,11 +291,11 @@ func (d *SvgDrawing) textFormat(fontDef *types.FontDef) string {
 	txtFormat := fmt.Sprintf("text-anchor:%s;font-family:%s;font-size:%dpx;fill:%s",
 		anchor, font, fontDef.Size, fontDef.Color)
 
-	if fontDef.Weight != nil && *fontDef.Weight == types.FontDefWeightEnum_bold {
+	if fontDef.Weight != nil && *fontDef.Weight == types.WeightBold {
 		txtFormat += ";font-weight:bold"
 	}
 
-	if fontDef.Type != nil && *fontDef.Type == types.FontDefTypeEnum_italic {
+	if fontDef.Type != nil && *fontDef.Type == types.TypeItalic {
 		txtFormat += ";font-style:italic"
 	}
 
@@ -395,8 +395,19 @@ func (d *SvgDrawing) DrawPngWithAdditionalLink(x, y int, pngId, link string) err
 }
 
 // Draw renders a box with text elements
-func (d *SvgDrawing) DrawRectWithText(id, caption, text1, text2 string, x, y, width, height, textYOffset int, format types.RectWithTextFormat) error {
-	const onclickClass = "svg-clickable" // "onclick=\"window.shapeClick(event)\""
+func (d *SvgDrawing) DrawRectWithText(id, caption, text1, text2 string, x, y, width, height, textYOffset int, format types.RectWithTextFormat, isLeaf bool) error {
+	const onclickClass = "svg-clickable"
+	var classToUse string
+	if id != "" {
+		classToUse = onclickClass
+	}
+	if isLeaf {
+		if classToUse != "" {
+			classToUse += " "
+		}
+		classToUse += "leaf"
+	}
+
 	if format.Fill != nil || format.Border != nil {
 		attr := ""
 
@@ -426,9 +437,9 @@ func (d *SvgDrawing) DrawRectWithText(id, caption, text1, text2 string, x, y, wi
 		}
 		if id != "" {
 			if format.CornerRadius != nil {
-				d.canvas.RoundedRectWithIdAndClass(onclickClass, id, x, y, width, height, *format.CornerRadius, attr)
+				d.canvas.RoundedRectWithIdAndClass(classToUse, id, x, y, width, height, *format.CornerRadius, attr)
 			} else {
-				d.canvas.RectWithIdAndClass(onclickClass, id, x, y, width, height, attr)
+				d.canvas.RectWithIdAndClass(classToUse, id, x, y, width, height, attr)
 			}
 		} else {
 			if format.CornerRadius != nil {
@@ -456,18 +467,18 @@ func (d *SvgDrawing) DrawRectWithText(id, caption, text1, text2 string, x, y, wi
 		if textYOffset > 0 {
 			currentY = y + textYOffset
 		}
-		currentY = d.DrawTextWithIdAndClass(caption, x, currentY, width, &format.FontCaption, idStr, onclickClass)
+		currentY = d.DrawTextWithIdAndClass(caption, x, currentY, width, &format.FontCaption, idStr, classToUse)
 		currentY = d.DrawText(text1, x, currentY, width, &format.FontText1)
 		currentY = d.DrawText(text2, x, currentY, width, &format.FontText2)
 	}
 	return nil
 }
 
-func lineStyleForType(style types.LineDefStyleEnum) string {
+func lineStyleForType(style types.Style) string {
 	switch style {
-	case types.LineDefStyleEnum_dashed:
+	case types.StyleDashed:
 		return `stroke-dasharray:10 2;`
-	case types.LineDefStyleEnum_dotted:
+	case types.StyleDotted:
 		return `stroke-dasharray:"1 10;"`
 	default:
 		return ""

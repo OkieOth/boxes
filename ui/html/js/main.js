@@ -106,7 +106,7 @@ async function triggerToolbarComboUpload() {
             showUploadRefreshToast(
                 upload.label
                     ? `Updated: ${upload.label}`
-                    : "Uploaded mixin updated"
+                    : "Uploaded mixin updated",
             );
         } else {
             addToolbarComboSelection(uploadedVal);
@@ -209,9 +209,7 @@ let formatMixinLoadPromise = null;
 
 async function ensureFormatMixinLoaded() {
     const name =
-        typeof window.formatMixin === "string"
-            ? window.formatMixin.trim()
-            : "";
+        typeof window.formatMixin === "string" ? window.formatMixin.trim() : "";
     if (!name) {
         formatMixinLoaded = true;
         formatMixinContent = "";
@@ -246,7 +244,45 @@ function getCombinedMixins() {
     return combined;
 }
 
-function normalizeCreateSvgResult(result, fallbackExpanded, fallbackBlacklisted) {
+function loadMixinStepsForValue(value, yamlContent) {
+    if (!yamlContent || typeof window.getMixinSteps !== "function") return;
+    try {
+        const steps = JSON.parse(window.getMixinSteps(yamlContent));
+        if (Array.isArray(steps) && steps.length > 0) {
+            toolbarComboState.mixinSteps.set(value, steps);
+            if (!toolbarComboState.hiddenSteps.has(value)) {
+                toolbarComboState.hiddenSteps.set(value, new Set());
+            }
+            toolbarComboState.collapsedSteps.add(value);
+        } else {
+            toolbarComboState.mixinSteps.delete(value);
+        }
+    } catch (e) {
+        console.warn("getMixinSteps failed for", value, e);
+    }
+}
+
+function getActiveStepsJson() {
+    const result = [];
+    if (formatMixinContent) result.push([]); // formatMixin has no steps
+    for (const value of toolbarComboState.selectedValues) {
+        if (toolbarComboState.hiddenValues.has(value)) continue;
+        const steps = toolbarComboState.mixinSteps.get(value);
+        if (!steps || steps.length === 0) {
+            result.push([]);
+        } else {
+            const hiddenSet = toolbarComboState.hiddenSteps.get(value) || new Set();
+            result.push(steps.filter(s => !hiddenSet.has(s.index)).map(s => s.index));
+        }
+    }
+    return JSON.stringify(result);
+}
+
+function normalizeCreateSvgResult(
+    result,
+    fallbackExpanded,
+    fallbackBlacklisted,
+) {
     let svgStr = "";
     let expanded = fallbackExpanded;
     let blacklisted = fallbackBlacklisted;
@@ -304,19 +340,20 @@ async function regenerateSvgWithState(expandedIds, blacklistIds) {
         "blacklist ids: ",
         blacklistIds,
         "comments hidden: ",
-        window.hideCommentsEnabled
+        window.hideCommentsEnabled,
     );
     try {
         let result = await callCreateSvgWithMode(
             arg,
             expandedIds,
-            blacklistIds
+            blacklistIds,
         );
-        result = result && typeof result.then === "function" ? await result : result;
+        result =
+            result && typeof result.then === "function" ? await result : result;
         const normalized = normalizeCreateSvgResult(
             result,
             expandedIds,
-            blacklistIds
+            blacklistIds,
         );
         if (
             typeof normalized.svgStr !== "string" ||
@@ -331,7 +368,7 @@ async function regenerateSvgWithState(expandedIds, blacklistIds) {
         canvas.dispatchEvent(evtSwap);
         applyExpandedAndBlacklistState(
             normalized.expanded,
-            normalized.blacklisted
+            normalized.blacklisted,
         );
     } catch (err) {
         console.error("Error updating SVG via createSvg:", err);
@@ -354,20 +391,22 @@ async function regenerateSvgWithConnectedOnce(expandedIds, blacklistIds) {
         "blacklist ids: ",
         blacklistIds,
         "comments hidden: ",
-        window.hideCommentsEnabled
+        window.hideCommentsEnabled,
     );
     try {
         await ensureFormatMixinLoaded();
         let result = window.createSvgForConnected(
             arg,
             getCombinedMixins(),
-            window.debug
+            window.debug,
+            getActiveStepsJson(),
         );
-        result = result && typeof result.then === "function" ? await result : result;
+        result =
+            result && typeof result.then === "function" ? await result : result;
         const normalized = normalizeCreateSvgResult(
             result,
             expandedIds,
-            blacklistIds
+            blacklistIds,
         );
         if (
             typeof normalized.svgStr !== "string" ||
@@ -382,7 +421,7 @@ async function regenerateSvgWithConnectedOnce(expandedIds, blacklistIds) {
         canvas.dispatchEvent(evtSwap);
         applyExpandedAndBlacklistState(
             normalized.expanded,
-            normalized.blacklisted
+            normalized.blacklisted,
         );
     } catch (err) {
         console.error("Error updating SVG via createSvg:", err);
@@ -393,28 +432,47 @@ async function applySelectedMixins() {
     const seq = ++toolbarComboState.applyToken;
     const selectedValues = toolbarComboState.selectedValues.slice();
     const contents = [];
+    let stepsUpdated = false;
     for (const value of selectedValues) {
-        if (toolbarComboState.hiddenValues.has(value)) continue;
         const yamlContent = await loadYamlForComboValue(value);
         if (toolbarComboState.applyToken !== seq) {
             return;
         }
+        if (yamlContent && !toolbarComboState.mixinSteps.has(value)) {
+            loadMixinStepsForValue(value, yamlContent);
+            stepsUpdated = true;
+        }
+        if (toolbarComboState.hiddenValues.has(value)) continue;
         if (yamlContent) {
             contents.push(yamlContent);
         }
     }
+    if (stepsUpdated) {
+        updateToolbarComboSelectedList();
+    }
     mixins = contents;
-    window.currentYamlFile = selectedValues.length ? selectedValues.join(",") : undefined;
+    window.currentYamlFile = selectedValues.length
+        ? selectedValues.join(",")
+        : undefined;
     if (!getActiveCreateSvgFunction()) {
         return;
     }
     const savedBadgeState = collectBadgeIds("badge-list");
-    const savedBlacklistState = collectBadgeIds("blacklist-list");
+    const domBlacklistState = collectBadgeIds("blacklist-list");
+    const savedBlacklistState =
+        domBlacklistState.length > 0
+            ? domBlacklistState
+            : window.blacklist && Array.isArray(window.blacklist)
+              ? window.blacklist.slice()
+              : [];
     if (toolbarComboState.applyToken !== seq) {
         return;
     }
     if (connectedModeActive) {
-        await regenerateSvgWithConnectedOnce(savedBadgeState, savedBlacklistState);
+        await regenerateSvgWithConnectedOnce(
+            savedBadgeState,
+            savedBlacklistState,
+        );
     } else {
         await regenerateSvgWithState(savedBadgeState, savedBlacklistState);
     }
@@ -439,6 +497,7 @@ let mixins = [];
 let collectorPanelVisible = false;
 let collectorVisibilityGuardAttached = false;
 let commentLegendPanelVisible = false;
+let _commentLegendEntries = [];
 let connectionAnimationEnabled = false;
 let connectedModeActive = false;
 const commentLegendState = {
@@ -460,6 +519,9 @@ const toolbarComboState = {
     selectionMeta: new Map(), // value -> { label, content? }
     contentCache: new Map(), // value -> yaml content
     applyToken: 0,
+    mixinSteps: new Map(), // value -> [{index, caption}]
+    hiddenSteps: new Map(), // value -> Set<int> of hidden step indices
+    collapsedSteps: new Set(), // values whose step list is collapsed in the UI
 };
 
 function getToolbarComboElements() {
@@ -511,7 +573,13 @@ function isToolbarComboValueSelected(value) {
 function createSelectedCollectorBadge(value, label) {
     const badge = document.createElement("div");
     const isHidden = toolbarComboState.hiddenValues.has(value);
-    badge.className = "selected-mixin-badge" + (isHidden ? " selected-mixin-badge--hidden" : "");
+    const steps = toolbarComboState.mixinSteps.get(value);
+    const hasSteps = Array.isArray(steps) && steps.length > 0;
+
+    badge.className =
+        "selected-mixin-badge" +
+        (isHidden ? " selected-mixin-badge--hidden" : "") +
+        (hasSteps ? " selected-mixin-badge--has-steps" : "");
     badge.dataset.value = value;
 
     const text = document.createElement("span");
@@ -537,8 +605,70 @@ function createSelectedCollectorBadge(value, label) {
     btnGroup.appendChild(toggleBtn);
     btnGroup.appendChild(removeBtn);
 
-    badge.appendChild(text);
-    badge.appendChild(btnGroup);
+    if (hasSteps) {
+        const isCollapsed = toolbarComboState.collapsedSteps.has(value);
+
+        const collapseBtn = document.createElement("button");
+        collapseBtn.type = "button";
+        collapseBtn.className = "selected-steps-collapse tool-btn";
+        collapseBtn.title = isCollapsed ? "Expand steps" : "Collapse steps";
+        collapseBtn.innerHTML = isCollapsed
+            ? '<i class="fa-solid fa-chevron-right"></i>'
+            : '<i class="fa-solid fa-chevron-down"></i>';
+
+        const header = document.createElement("div");
+        header.className = "selected-mixin-header";
+        header.appendChild(collapseBtn);
+        header.appendChild(text);
+        header.appendChild(btnGroup);
+        badge.appendChild(header);
+
+        const hiddenSet = toolbarComboState.hiddenSteps.get(value) || new Set();
+        const stepsContainer = document.createElement("div");
+        stepsContainer.className = "selected-mixin-steps" + (isCollapsed ? " selected-mixin-steps--collapsed" : "");
+        for (const step of steps) {
+            const isStepHidden = hiddenSet.has(step.index);
+            const row = document.createElement("div");
+            row.className = "selected-step-row" + (isStepHidden ? " selected-step-row--hidden" : "");
+            row.dataset.stepIndex = step.index;
+
+            const stepToggle = document.createElement("button");
+            stepToggle.type = "button";
+            stepToggle.className = "selected-step-toggle";
+            stepToggle.title = isStepHidden ? `Show step: ${step.caption}` : `Hide step: ${step.caption}`;
+            stepToggle.innerHTML = isStepHidden
+                ? '<i class="fa-solid fa-eye-slash"></i>'
+                : '<i class="fa-solid fa-eye"></i>';
+
+            const stepLabel = document.createElement("span");
+            stepLabel.className = "selected-step-label";
+            stepLabel.textContent = step.caption;
+
+            row.appendChild(stepLabel);
+            row.appendChild(stepToggle);
+
+            const stepClass = `step_${step.index}`;
+            row.addEventListener("mouseenter", () => {
+                if (presentationState.active) return;
+                if (typeof window.highlightConnectionGroup === "function") {
+                    window.highlightConnectionGroup(stepClass);
+                }
+            });
+            row.addEventListener("mouseleave", () => {
+                if (presentationState.active) return;
+                if (typeof window.unhighlightConnectionGroup === "function") {
+                    window.unhighlightConnectionGroup(stepClass);
+                }
+            });
+
+            stepsContainer.appendChild(row);
+        }
+        badge.appendChild(stepsContainer);
+    } else {
+        badge.appendChild(text);
+        badge.appendChild(btnGroup);
+    }
+
     return badge;
 }
 
@@ -564,7 +694,7 @@ function updateToolbarComboSelectedList() {
     if (panel) {
         panel.setAttribute(
             "aria-hidden",
-            panel.classList.contains("hidden") ? "true" : "false"
+            panel.classList.contains("hidden") ? "true" : "false",
         );
     }
     positionBlacklistCollector();
@@ -583,6 +713,45 @@ function initSelectedCollectorInteractions() {
                 evt.preventDefault();
                 evt.stopPropagation();
                 removeToolbarComboSelection(value);
+            }
+            return;
+        }
+        const collapseBtn = evt.target.closest(".selected-steps-collapse");
+        if (collapseBtn) {
+            const badge = collapseBtn.closest(".selected-mixin-badge");
+            const value = badge ? badge.dataset.value : null;
+            if (value) {
+                evt.preventDefault();
+                evt.stopPropagation();
+                if (toolbarComboState.collapsedSteps.has(value)) {
+                    toolbarComboState.collapsedSteps.delete(value);
+                } else {
+                    toolbarComboState.collapsedSteps.add(value);
+                }
+                updateToolbarComboSelectedList();
+            }
+            return;
+        }
+        const stepToggle = evt.target.closest(".selected-step-toggle");
+        if (stepToggle) {
+            const row = stepToggle.closest(".selected-step-row");
+            const badge = stepToggle.closest(".selected-mixin-badge");
+            const value = badge ? badge.dataset.value : null;
+            const stepIndex = row ? parseInt(row.dataset.stepIndex, 10) : NaN;
+            if (value && !isNaN(stepIndex)) {
+                evt.preventDefault();
+                evt.stopPropagation();
+                if (!toolbarComboState.hiddenSteps.has(value)) {
+                    toolbarComboState.hiddenSteps.set(value, new Set());
+                }
+                const hiddenSet = toolbarComboState.hiddenSteps.get(value);
+                if (hiddenSet.has(stepIndex)) {
+                    hiddenSet.delete(stepIndex);
+                } else {
+                    hiddenSet.add(stepIndex);
+                }
+                updateToolbarComboSelectedList();
+                applySelectedMixins();
             }
             return;
         }
@@ -672,9 +841,15 @@ function renderToolbarComboDropdown() {
                 evt.preventDefault();
                 toggleToolbarComboValue(opt.value);
             });
-            row.setAttribute("aria-selected", checkbox.checked ? "true" : "false");
+            row.setAttribute(
+                "aria-selected",
+                checkbox.checked ? "true" : "false",
+            );
         }
-        row.classList.toggle("active", idx === toolbarComboState.highlightedIndex);
+        row.classList.toggle(
+            "active",
+            idx === toolbarComboState.highlightedIndex,
+        );
         row.addEventListener("mouseenter", () => {
             toolbarComboState.highlightedIndex = idx;
             updateToolbarComboActiveOption();
@@ -731,8 +906,10 @@ function positionToolbarComboDropdown() {
     const anchor = getToolbarComboAnchorElement();
     if (!dropdown || !anchor) return;
     const rect = anchor.getBoundingClientRect();
-    const viewportWidth = document.documentElement.clientWidth || window.innerWidth || 0;
-    const viewportHeight = document.documentElement.clientHeight || window.innerHeight || 0;
+    const viewportWidth =
+        document.documentElement.clientWidth || window.innerWidth || 0;
+    const viewportHeight =
+        document.documentElement.clientHeight || window.innerHeight || 0;
     const margin = 8;
     let width = rect.width;
     if (!Number.isFinite(width) || width <= 0) {
@@ -755,7 +932,10 @@ function positionToolbarComboDropdown() {
         if (!toolbarComboState.isOpen) return;
         const dropdownHeight = dropdown.offsetHeight;
         if (!dropdownHeight) return;
-        if (top + dropdownHeight > viewportHeight - margin && rect.top - 6 - dropdownHeight >= margin) {
+        if (
+            top + dropdownHeight > viewportHeight - margin &&
+            rect.top - 6 - dropdownHeight >= margin
+        ) {
             const aboveTop = Math.max(rect.top - 6 - dropdownHeight, margin);
             dropdown.style.top = `${Math.round(aboveTop)}px`;
             dropdown.dataset.placement = "above";
@@ -834,14 +1014,18 @@ function handleToolbarComboKeydown(evt) {
         case "ArrowDown":
             evt.preventDefault();
             if (!toolbarComboState.isOpen) {
-                openToolbarComboDropdown({ filterText: toolbarComboState.filterText });
+                openToolbarComboDropdown({
+                    filterText: toolbarComboState.filterText,
+                });
             }
             moveToolbarComboHighlight(1);
             break;
         case "ArrowUp":
             evt.preventDefault();
             if (!toolbarComboState.isOpen) {
-                openToolbarComboDropdown({ filterText: toolbarComboState.filterText });
+                openToolbarComboDropdown({
+                    filterText: toolbarComboState.filterText,
+                });
             }
             moveToolbarComboHighlight(-1);
             break;
@@ -851,7 +1035,10 @@ function handleToolbarComboKeydown(evt) {
                 return;
             }
             evt.preventDefault();
-            const choice = toolbarComboState.filteredOptions[toolbarComboState.highlightedIndex];
+            const choice =
+                toolbarComboState.filteredOptions[
+                    toolbarComboState.highlightedIndex
+                ];
             if (choice) {
                 if (choice.value === "__upload__") {
                     triggerToolbarComboUpload();
@@ -951,6 +1138,9 @@ function removeToolbarComboSelection(value, options = {}) {
     if (!options.keepMeta) {
         toolbarComboState.selectionMeta.delete(value);
     }
+    toolbarComboState.mixinSteps.delete(value);
+    toolbarComboState.hiddenSteps.delete(value);
+    toolbarComboState.collapsedSteps.delete(value);
     updateToolbarComboSelectedList();
     if (toolbarComboState.isOpen) renderToolbarComboDropdown();
     if (!options.silent) {
@@ -986,12 +1176,17 @@ window.getToolbarComboSelectionValues = function () {
 function getFirstSelectableComboValue() {
     const { select } = getToolbarComboElements();
     if (!select) return null;
-    const opt = Array.from(select.options).find((o) => o.value && o.value !== "__upload__");
+    const opt = Array.from(select.options).find(
+        (o) => o.value && o.value !== "__upload__",
+    );
     return opt ? opt.value : null;
 }
 
 function getDefaultComboSelectionValues() {
-    if (Array.isArray(window.queryComboValues) && window.queryComboValues.length) {
+    if (
+        Array.isArray(window.queryComboValues) &&
+        window.queryComboValues.length
+    ) {
         return window.queryComboValues.slice();
     }
     const first = getFirstSelectableComboValue();
@@ -1023,7 +1218,8 @@ function upsertUploadedMixin(id, title, content) {
     const list = getUploadedMixins();
     const idx = list.findIndex((x) => x && x.id === id);
     const entry = { id, title: title || id, content: content || "" };
-    if (idx >= 0) list[idx] = entry; else list.push(entry);
+    if (idx >= 0) list[idx] = entry;
+    else list.push(entry);
     setUploadedMixins(list);
     return entry;
 }
@@ -1037,7 +1233,10 @@ function parseTitleFromYaml(text, fallback) {
             const m = clean.match(/^title\s*:\s*(.+)$/i);
             if (m) {
                 let val = m[1].trim();
-                if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+                if (
+                    (val.startsWith('"') && val.endsWith('"')) ||
+                    (val.startsWith("'") && val.endsWith("'"))
+                ) {
                     val = val.slice(1, -1);
                 }
                 return val || fallback || "Uploaded";
@@ -1052,9 +1251,15 @@ function parseTitleFromYaml(text, fallback) {
 function ensureUploadOptionsInCombo(sel) {
     if (!sel) return;
     // Remove stale uploaded options that are no longer in storage
-    const current = new Set(getUploadedMixins().map((u) => `uploaded::${u.id}`));
+    const current = new Set(
+        getUploadedMixins().map((u) => `uploaded::${u.id}`),
+    );
     Array.from(sel.querySelectorAll("option")).forEach((opt) => {
-        if (opt && typeof opt.value === "string" && opt.value.startsWith("uploaded::")) {
+        if (
+            opt &&
+            typeof opt.value === "string" &&
+            opt.value.startsWith("uploaded::")
+        ) {
             if (!current.has(opt.value)) opt.remove();
         }
     });
@@ -1062,7 +1267,9 @@ function ensureUploadOptionsInCombo(sel) {
     const uploaded = getUploadedMixins();
     for (const u of uploaded) {
         const val = `uploaded::${u.id}`;
-        const existing = sel.querySelector(`option[value='${CSS.escape(val)}']`);
+        const existing = sel.querySelector(
+            `option[value='${CSS.escape(val)}']`,
+        );
         if (!existing) {
             const opt = document.createElement("option");
             opt.value = val;
@@ -1075,7 +1282,9 @@ function ensureUploadOptionsInCombo(sel) {
     }
     // Always ensure the upload sentinel exists as last option
     const sentinelVal = "__upload__";
-    let sentinel = sel.querySelector(`option[value='${CSS.escape(sentinelVal)}']`);
+    let sentinel = sel.querySelector(
+        `option[value='${CSS.escape(sentinelVal)}']`,
+    );
     if (!sentinel) {
         sentinel = document.createElement("option");
         sentinel.value = sentinelVal;
@@ -1138,10 +1347,17 @@ function installCreateSvgSpinnerWrapper(fnName) {
 }
 
 function getActiveCreateSvgFunction() {
-    return typeof window.createSvgExt === "function" ? window.createSvgExt : null;
+    return typeof window.createSvgExt === "function"
+        ? window.createSvgExt
+        : null;
 }
 
-async function callCreateSvgWithMode(arg, filterTexts, blacklistIds, depthOverride) {
+async function callCreateSvgWithMode(
+    arg,
+    filterTexts,
+    blacklistIds,
+    depthOverride,
+) {
     const fn = getActiveCreateSvgFunction();
     if (!fn) return null;
     await ensureFormatMixinLoaded();
@@ -1152,7 +1368,8 @@ async function callCreateSvgWithMode(arg, filterTexts, blacklistIds, depthOverri
         filterTexts || [],
         blacklistIds || [],
         window.hideCommentsEnabled,
-        window.debug
+        window.debug,
+        getActiveStepsJson(),
     );
 }
 
@@ -1202,9 +1419,15 @@ function initPage() {
         const doneBtn = document.getElementById("uploads-done");
         const clearAllBtn = document.getElementById("uploads-clear-all");
         const connectedBtn = document.getElementById("btn-connected");
-        const clearExpandedLink = document.getElementById("link-clear-expanded");
-        const clearBlacklistLink = document.getElementById("link-clear-blacklist");
-        const toolbarHandle = document.getElementById("toolbar-collapse-handle");
+        const clearExpandedLink = document.getElementById(
+            "link-clear-expanded",
+        );
+        const clearBlacklistLink = document.getElementById(
+            "link-clear-blacklist",
+        );
+        const toolbarHandle = document.getElementById(
+            "toolbar-collapse-handle",
+        );
         const menuWrapper = document.getElementById("menu-wrapper");
 
         function refreshComboAfterStorageChange(removedId) {
@@ -1213,7 +1436,7 @@ function initPage() {
             ensureUploadOptionsInCombo(sel);
 
             const storedUploaded = new Set(
-                getUploadedMixins().map((u) => `uploaded::${u.id}`)
+                getUploadedMixins().map((u) => `uploaded::${u.id}`),
             );
 
             Array.from(toolbarComboState.contentCache.keys()).forEach((key) => {
@@ -1229,14 +1452,16 @@ function initPage() {
             }
 
             const available = new Set(
-                Array.from(sel.options).map((o) => o.value)
+                Array.from(sel.options).map((o) => o.value),
             );
-            const filtered = toolbarComboState.selectedValues.filter((value) => {
-                if (value.startsWith("uploaded::")) {
-                    return storedUploaded.has(value);
-                }
-                return available.has(value);
-            });
+            const filtered = toolbarComboState.selectedValues.filter(
+                (value) => {
+                    if (value.startsWith("uploaded::")) {
+                        return storedUploaded.has(value);
+                    }
+                    return available.has(value);
+                },
+            );
             if (filtered.length !== toolbarComboState.selectedValues.length) {
                 setToolbarComboSelections(filtered, { silent: true });
             }
@@ -1317,11 +1542,12 @@ function initPage() {
         if (manageBtn) manageBtn.addEventListener("click", showUploadsPopup);
         if (closeBtn) closeBtn.addEventListener("click", hideUploadsPopup);
         if (doneBtn) doneBtn.addEventListener("click", hideUploadsPopup);
-        if (clearAllBtn) clearAllBtn.addEventListener("click", () => {
-            clearUploadedMixins();
-            populateUploadsPopup();
-            refreshComboAfterStorageChange(null);
-        });
+        if (clearAllBtn)
+            clearAllBtn.addEventListener("click", () => {
+                clearUploadedMixins();
+                populateUploadsPopup();
+                refreshComboAfterStorageChange(null);
+            });
         if (connectedBtn) {
             connectedBtn.addEventListener("click", () => {
                 if (typeof window.createSvgForConnected !== "function") {
@@ -1333,19 +1559,28 @@ function initPage() {
                 const savedBadgeState = collectBadgeIds("badge-list");
                 const savedBlacklistState = collectBadgeIds("blacklist-list");
                 if (connectedModeActive) {
-                    regenerateSvgWithConnectedOnce(savedBadgeState, savedBlacklistState);
+                    regenerateSvgWithConnectedOnce(
+                        savedBadgeState,
+                        savedBlacklistState,
+                    );
                 } else {
-                    regenerateSvgWithState(savedBadgeState, savedBlacklistState);
+                    regenerateSvgWithState(
+                        savedBadgeState,
+                        savedBlacklistState,
+                    );
                 }
             });
         }
         if (toolbarHandle && menuWrapper) {
             const toggleToolbar = () => {
-                const collapsed = menuWrapper.classList.toggle("toolbar-collapsed");
-                toolbarHandle.title = collapsed ? "Expand Toolbar" : "Collapse Toolbar";
+                const collapsed =
+                    menuWrapper.classList.toggle("toolbar-collapsed");
+                toolbarHandle.title = collapsed
+                    ? "Expand Toolbar"
+                    : "Collapse Toolbar";
                 toolbarHandle.setAttribute(
                     "aria-label",
-                    collapsed ? "Expand Toolbar" : "Collapse Toolbar"
+                    collapsed ? "Expand Toolbar" : "Collapse Toolbar",
                 );
             };
             toolbarHandle.addEventListener("click", toggleToolbar);
@@ -1385,7 +1620,11 @@ function initPage() {
                 if (e.key === "Escape") hideUploadsPopup();
             });
             document.addEventListener("mousedown", function (e) {
-                if (!popup.classList.contains("hidden") && !popup.contains(e.target) && e.target !== manageBtn) {
+                if (
+                    !popup.classList.contains("hidden") &&
+                    !popup.contains(e.target) &&
+                    e.target !== manageBtn
+                ) {
                     hideUploadsPopup();
                 }
             });
@@ -1399,7 +1638,9 @@ function initPage() {
     });
     const selectedPanel = document.getElementById("selected-collector");
     if (selectedPanel) {
-        const selectedObserver = new MutationObserver(positionBlacklistCollector);
+        const selectedObserver = new MutationObserver(
+            positionBlacklistCollector,
+        );
         selectedObserver.observe(selectedPanel, {
             childList: true,
             subtree: true,
@@ -1473,7 +1714,7 @@ function initPage() {
                 collectTextsFromNode(container, acc);
             } else {
                 const related = svg.querySelectorAll(
-                    `[id^="${CSS.escape(boxId)}"]`
+                    `[id^="${CSS.escape(boxId)}"]`,
                 );
                 related.forEach((node) => collectTextsFromNode(node, acc));
             }
@@ -1481,7 +1722,7 @@ function initPage() {
             // If nothing collected, include element-level text arrays across related nodes
             if (acc.size === 0) {
                 const related = svg.querySelectorAll(
-                    `[id^="${CSS.escape(boxId)}"]`
+                    `[id^="${CSS.escape(boxId)}"]`,
                 );
                 related.forEach((node) => {
                     getTextContentArray(node).forEach((t) => acc.add(t));
@@ -1493,7 +1734,7 @@ function initPage() {
 
             // As last resort, include ids to make filters stable
             const relatedIds = svg.querySelectorAll(
-                `[id^="${CSS.escape(boxId)}"]`
+                `[id^="${CSS.escape(boxId)}"]`,
             );
             relatedIds.forEach((node) => acc.add(node.id));
 
@@ -1504,6 +1745,7 @@ function initPage() {
 
         // Global click handler for SVG shapes
         window.shapeClick = function (evt) {
+            if (window.presentationState?.active) return;
             const el = evt.target;
             if (!el || !el.id) return;
 
@@ -1523,7 +1765,7 @@ function initPage() {
             if (anyBadgeIsChildOf(clickedHid)) {
                 console.log(
                     "Ignoring parent click because a child is already selected:",
-                    el.id
+                    el.id,
                 );
                 return;
             }
@@ -1549,7 +1791,7 @@ function initPage() {
             if (selected) {
                 el.setAttribute(
                     "stroke-width",
-                    el.getAttribute("data-original-stroke-width") || "3"
+                    el.getAttribute("data-original-stroke-width") || "3",
                 );
                 el.removeAttribute("filter");
             } else {
@@ -1557,15 +1799,15 @@ function initPage() {
                 if (!el.hasAttribute("data-original-stroke-width")) {
                     el.setAttribute(
                         "data-original-stroke-width",
-                        el.getAttribute("stroke-width") || "3"
+                        el.getAttribute("stroke-width") || "3",
                     );
                 }
                 el.setAttribute(
                     "stroke-width",
                     String(
                         Number(el.getAttribute("data-original-stroke-width")) +
-                            2
-                    )
+                            2,
+                    ),
                 );
             }
             console.log("Clicked item:", el.id);
@@ -1638,12 +1880,12 @@ function initPage() {
                         "blacklist ids: ",
                         blacklistIds,
                         "comments hidden: ",
-                        window.hideCommentsEnabled
+                        window.hideCommentsEnabled,
                     );
                     let svgStr = await callCreateSvgWithMode(
                         arg,
                         filterTexts,
-                        blacklistIds
+                        blacklistIds,
                     );
                     svgStr =
                         svgStr && typeof svgStr.then === "function"
@@ -1655,7 +1897,7 @@ function initPage() {
                         !svgStr.trim().startsWith("<svg")
                     ) {
                         console.error(
-                            "createSvg did not return a valid SVG string."
+                            "createSvg did not return a valid SVG string.",
                         );
                         console.error(svgStr);
                         return;
@@ -1722,7 +1964,7 @@ function initPage() {
                 if (!clone.getAttribute("xmlns:xlink")) {
                     clone.setAttribute(
                         "xmlns:xlink",
-                        "http://www.w3.org/1999/xlink"
+                        "http://www.w3.org/1999/xlink",
                     );
                 }
                 // Preserve viewBox if available; fallback to width/height
@@ -1752,7 +1994,7 @@ function initPage() {
                 mmWrap.style.display = minimapVisible ? "flex" : "none";
                 mmWrap.setAttribute(
                     "aria-hidden",
-                    minimapVisible ? "false" : "true"
+                    minimapVisible ? "false" : "true",
                 );
                 if (minimapVisible) {
                     initMinimap();
@@ -1834,7 +2076,7 @@ function initPage() {
                         if (!el.hasAttribute("onclick")) {
                             el.setAttribute(
                                 "onclick",
-                                "window.shapeClick(event)"
+                                "window.shapeClick(event)",
                             );
                         }
                     });
@@ -1846,48 +2088,64 @@ function initPage() {
             }
         });
 
-// Attach click handlers to .additionalLink elements inside the current SVG
-function attachAdditionalLinkHandlers() {
-    const svg = getSvg();
-    if (!svg) return;
-    const nodes = svg.querySelectorAll(".additionalLink");
-    nodes.forEach((node) => {
-        try {
-            node.style.cursor = "pointer";
-        } catch {}
-        if (node.__additionalLinkBound) return;
-        node.__additionalLinkBound = true;
-        node.addEventListener(
-            "click",
-            function (evt) {
+        // Attach click handlers to .additionalLink elements inside the current SVG
+        function attachAdditionalLinkHandlers() {
+            const svg = getSvg();
+            if (!svg) return;
+            const nodes = svg.querySelectorAll(".additionalLink");
+            nodes.forEach((node) => {
                 try {
-                    let el = evt.target;
-                    while (
-                        el &&
-                        el !== svg &&
-                        !(el.classList && el.classList.contains("additionalLink"))
-                    ) {
-                        el = el.parentNode;
-                    }
-                    const url = el && el.getAttribute ? el.getAttribute("data-link") : null;
-                    if (url && typeof url === "string") {
-                        window.open(url, "_blank", "noopener,noreferrer");
-                    } else {
-                        console.warn("additionalLink clicked without data-link URL", el);
-                    }
-                } catch (err) {
-                    console.error("Failed to handle additionalLink click:", err);
-                } finally {
-                    if (evt) {
-                        evt.preventDefault();
-                        evt.stopPropagation();
-                    }
-                }
-            },
-            { capture: true }
-        );
-    });
-}
+                    node.style.cursor = "pointer";
+                } catch {}
+                if (node.__additionalLinkBound) return;
+                node.__additionalLinkBound = true;
+                node.addEventListener(
+                    "click",
+                    function (evt) {
+                        try {
+                            let el = evt.target;
+                            while (
+                                el &&
+                                el !== svg &&
+                                !(
+                                    el.classList &&
+                                    el.classList.contains("additionalLink")
+                                )
+                            ) {
+                                el = el.parentNode;
+                            }
+                            const url =
+                                el && el.getAttribute
+                                    ? el.getAttribute("data-link")
+                                    : null;
+                            if (url && typeof url === "string") {
+                                window.open(
+                                    url,
+                                    "_blank",
+                                    "noopener,noreferrer",
+                                );
+                            } else {
+                                console.warn(
+                                    "additionalLink clicked without data-link URL",
+                                    el,
+                                );
+                            }
+                        } catch (err) {
+                            console.error(
+                                "Failed to handle additionalLink click:",
+                                err,
+                            );
+                        } finally {
+                            if (evt) {
+                                evt.preventDefault();
+                                evt.stopPropagation();
+                            }
+                        }
+                    },
+                    { capture: true },
+                );
+            });
+        }
 
         // Keep centered and minimap in sync on resize
         window.addEventListener("resize", function () {
@@ -1916,7 +2174,7 @@ async function loadYamlInput() {
     try {
         if (location.protocol === "file:") {
             console.error(
-                "YAML must be served over HTTP(S). Use a local web server to host this page."
+                "YAML must be served over HTTP(S). Use a local web server to host this page.",
             );
             window.input = "";
             window.inputLoaded = Promise.resolve();
@@ -1925,9 +2183,12 @@ async function loadYamlInput() {
         }
         const yamlFile = window.queryInput;
         const p = (async () => {
-            const resp = await fetch(window.getBasePath() + "/data/" + yamlFile, {
-                cache: "no-cache",
-            });
+            const resp = await fetch(
+                window.getBasePath() + "/data/" + yamlFile,
+                {
+                    cache: "no-cache",
+                },
+            );
             if (!resp.ok) throw new Error("HTTP " + resp.status);
             window.input = await resp.text();
             window.currentYamlFile = yamlFile;
@@ -1951,14 +2212,14 @@ async function loadSVGFromWasm() {
 
     if (typeof Go !== "function") {
         console.error(
-            "Go runtime not available. Ensure ./wasm_exec.js is loaded before this script."
+            "Go runtime not available. Ensure ./wasm_exec.js is loaded before this script.",
         );
         return;
     }
     // Warn if running from file:// which cannot fetch WASM
     if (location.protocol === "file:") {
         console.error(
-            "WASM must be served over HTTP(S). Use a local web server to host this page."
+            "WASM must be served over HTTP(S). Use a local web server to host this page.",
         );
         return;
     }
@@ -1968,7 +2229,7 @@ async function loadSVGFromWasm() {
     // Fetch boxes.wasm with streaming fallback
     let resp;
     try {
-        resp = await fetch(window.getBasePath() + "/wasm/boxes_1.1.2.wasm", {
+        resp = await fetch(window.getBasePath() + "/wasm/boxes_1.4.0.wasm", {
             cache: "no-cache",
         });
         if (!resp.ok) throw new Error("HTTP " + resp.status);
@@ -1983,20 +2244,20 @@ async function loadSVGFromWasm() {
             try {
                 ({ instance } = await WebAssembly.instantiateStreaming(
                     resp,
-                    go.importObject
+                    go.importObject,
                 ));
             } catch {
                 const buf = await resp.arrayBuffer();
                 ({ instance } = await WebAssembly.instantiate(
                     buf,
-                    go.importObject
+                    go.importObject,
                 ));
             }
         } else {
             const buf = await resp.arrayBuffer();
             ({ instance } = await WebAssembly.instantiate(
                 buf,
-                go.importObject
+                go.importObject,
             ));
         }
     } catch (e) {
@@ -2016,7 +2277,7 @@ async function loadSVGFromWasm() {
     ) {
         if (Date.now() - start > timeoutMs) {
             console.error(
-                'createSvgExt/createSvgForConnected not exposed by boxes.wasm within timeout. Ensure js.Global().Set("createSvgExt", fn) or js.Global().Set("createSvgForConnected", fn).'
+                'createSvgExt/createSvgForConnected not exposed by boxes.wasm within timeout. Ensure js.Global().Set("createSvgExt", fn) or js.Global().Set("createSvgForConnected", fn).',
             );
             return;
         }
@@ -2048,9 +2309,24 @@ async function loadSVGFromWasm() {
         }
         // Get current expanded and blacklisted IDs
         const badgeList = document.getElementById("badge-list");
-        const filterTexts = badgeList ? Array.from(badgeList.querySelectorAll(".badge")).map(b => b.dataset.hid).filter(Boolean) : [];
+        const filterTexts = badgeList
+            ? Array.from(badgeList.querySelectorAll(".badge"))
+                  .map((b) => b.dataset.hid)
+                  .filter(Boolean)
+            : [];
         // Use window.blacklist if set, otherwise fallback to DOM
-        const blacklistIds = (window.blacklist && Array.isArray(window.blacklist)) ? window.blacklist : (document.getElementById("blacklist-list") ? Array.from(document.getElementById("blacklist-list").querySelectorAll(".badge")).map(b => b.dataset.hid).filter(Boolean) : []);
+        const blacklistIds =
+            window.blacklist && Array.isArray(window.blacklist)
+                ? window.blacklist
+                : document.getElementById("blacklist-list")
+                  ? Array.from(
+                        document
+                            .getElementById("blacklist-list")
+                            .querySelectorAll(".badge"),
+                    )
+                        .map((b) => b.dataset.hid)
+                        .filter(Boolean)
+                  : [];
         const initialArg =
             typeof window.input === "string" && window.input.length > 0
                 ? window.input
@@ -2061,23 +2337,24 @@ async function loadSVGFromWasm() {
             "blacklist ids: ",
             blacklistIds,
             "comments hidden: ",
-            window.hideCommentsEnabled
+            window.hideCommentsEnabled,
         );
         const res = await callCreateSvgWithMode(
             initialArg,
             filterTexts,
-            blacklistIds
+            blacklistIds,
         );
-        const resolved = res && typeof res.then === "function" ? await res : res;
+        const resolved =
+            res && typeof res.then === "function" ? await res : res;
         const normalized = normalizeCreateSvgResult(
             resolved,
             filterTexts,
-            blacklistIds
+            blacklistIds,
         );
         svgStr = normalized.svgStr;
         applyExpandedAndBlacklistState(
             normalized.expanded,
-            normalized.blacklisted
+            normalized.blacklisted,
         );
     } catch (e) {
         console.error("Error calling createSvg:", e);
@@ -2155,21 +2432,27 @@ function applyQueryParams(params) {
 
     // Expanded IDs (badges) — works before and after DOMContentLoaded
     if (params.has("expandedIds")) {
-        const expandedIds = params.get("expandedIds").split(",").map(s => s.trim()).filter(Boolean);
+        const expandedIds = params
+            .get("expandedIds")
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean);
         const applyExpanded = function () {
             const list = document.getElementById("badge-list");
             if (list && expandedIds.length) {
                 list.innerHTML = "";
-                expandedIds.forEach(hid => {
+                expandedIds.forEach((hid) => {
                     const span = document.createElement("span");
                     span.className = "badge";
                     span.dataset.hid = hid;
                     const label = document.createElement("span");
-                    label.textContent = (window.getCaptionForId ? window.getCaptionForId(hid) : hid);
+                    label.textContent = window.getCaptionForId
+                        ? window.getCaptionForId(hid)
+                        : hid;
                     span.appendChild(label);
                     list.appendChild(span);
                 });
-                requestAnimationFrame(window.refitAllBadges || (()=>{}));
+                requestAnimationFrame(window.refitAllBadges || (() => {}));
             }
         };
         if (document.readyState === "loading") {
@@ -2181,7 +2464,11 @@ function applyQueryParams(params) {
 
     // Blacklisted IDs
     if (params.has("blacklistedIds")) {
-        const blacklistedIds = params.get("blacklistedIds").split(",").map(s => s.trim()).filter(Boolean);
+        const blacklistedIds = params
+            .get("blacklistedIds")
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean);
         if (document.readyState === "loading") {
             document.addEventListener("DOMContentLoaded", function () {
                 window.blacklist = blacklistedIds;
@@ -2193,7 +2480,11 @@ function applyQueryParams(params) {
 
     // Search IDs
     if (params.has("search_ids")) {
-        window.querySearchIds = params.get("search_ids").split(",").map(s => s.trim()).filter(Boolean);
+        window.querySearchIds = params
+            .get("search_ids")
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean);
     } else {
         window.querySearchIds = [];
     }
@@ -2243,7 +2534,8 @@ window.loadComboOptionsFromYaml = async function () {
         const src = window.queryOptions;
         if (!src) {
             // Even if no remote options source, still ensure upload entries are present
-            const { select: selNoSrc, root: comboRoot } = getToolbarComboElements();
+            const { select: selNoSrc, root: comboRoot } =
+                getToolbarComboElements();
             if (comboRoot) comboRoot.style.display = "";
             if (selNoSrc) {
                 ensureUploadOptionsInCombo(selNoSrc);
@@ -2254,7 +2546,9 @@ window.loadComboOptionsFromYaml = async function () {
             console.error("Options YAML must be served over HTTP(S).");
             return;
         }
-        const resp = await fetch(window.getBasePath() + "/data/" + src, { cache: "no-cache" });
+        const resp = await fetch(window.getBasePath() + "/data/" + src, {
+            cache: "no-cache",
+        });
         if (!resp.ok) throw new Error("HTTP " + resp.status);
         const text = await resp.text();
         // Parse a simple YAML mapping: label: value (labels may be quoted)
@@ -2297,11 +2591,17 @@ function parseSimpleYamlMapping(text) {
         let key = m[1].trim();
         let val = m[2].trim();
         // Remove surrounding quotes from key
-        if ((key.startsWith('"') && key.endsWith('"')) || (key.startsWith("'") && key.endsWith("'"))) {
+        if (
+            (key.startsWith('"') && key.endsWith('"')) ||
+            (key.startsWith("'") && key.endsWith("'"))
+        ) {
             key = key.slice(1, -1);
         }
         // Remove surrounding quotes from value
-        if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+        if (
+            (val.startsWith('"') && val.endsWith('"')) ||
+            (val.startsWith("'") && val.endsWith("'"))
+        ) {
             val = val.slice(1, -1);
         }
         out.push([key, val]);
@@ -2327,7 +2627,7 @@ function attachBadgeRemoval() {
                 el.setAttribute("data-selected", "false");
                 el.setAttribute(
                     "stroke-width",
-                    el.getAttribute("data-original-stroke-width") || "3"
+                    el.getAttribute("data-original-stroke-width") || "3",
                 );
                 el.removeAttribute("filter");
             }
@@ -2439,7 +2739,7 @@ function deselectElementByHid(hid) {
         el.setAttribute("data-selected", "false");
         el.setAttribute(
             "stroke-width",
-            el.getAttribute("data-original-stroke-width") || "3"
+            el.getAttribute("data-original-stroke-width") || "3",
         );
         el.removeAttribute("filter");
     }
@@ -2518,7 +2818,10 @@ async function reloadSvgFromBadgesImpl(forceAllExpanded) {
         // NEW: preserve current zoom/pan state before reload
         const preservedState = { ...state };
 
-        if (window.inputLoaded && typeof window.inputLoaded.then === "function") {
+        if (
+            window.inputLoaded &&
+            typeof window.inputLoaded.then === "function"
+        ) {
             await window.inputLoaded;
         }
 
@@ -2527,34 +2830,40 @@ async function reloadSvgFromBadgesImpl(forceAllExpanded) {
         if (forceAllExpanded) {
             // Instead of collecting all box IDs, set maxDepth to 100 to expand all
             maxDepth = 100;
-        }
-        else {
+        } else {
             // Use badges in the collector
             const list = document.getElementById("badge-list");
             if (list) {
-                expandedIds = Array.from(list.querySelectorAll(".badge")).map(b => b.dataset.hid).filter(Boolean);
+                expandedIds = Array.from(list.querySelectorAll(".badge"))
+                    .map((b) => b.dataset.hid)
+                    .filter(Boolean);
             }
         }
         // Extract ids from blacklisted badges (elements in blacklist)
         const blacklistIds = getAllBadgeCaptions("blacklist-list");
         // Use input YAML filename or fallback
-        const arg = (typeof window.input === "string" && window.input.length > 0) ? window.input : "1";
+        const arg =
+            typeof window.input === "string" && window.input.length > 0
+                ? window.input
+                : "1";
         console.log(
             "Refreshing SVG: ",
             expandedIds,
             "blacklist ids: ",
             blacklistIds,
             "comments hidden: ",
-            window.hideCommentsEnabled
+            window.hideCommentsEnabled,
         );
         let svgStr = await callCreateSvgWithMode(
             arg,
             expandedIds,
             blacklistIds,
-            maxDepth
+            maxDepth,
         );
-        svgStr = svgStr && typeof svgStr.then === "function" ? await svgStr : svgStr;
-        if (typeof svgStr !== "string" || !svgStr.trim().startsWith("<svg")) return;
+        svgStr =
+            svgStr && typeof svgStr.then === "function" ? await svgStr : svgStr;
+        if (typeof svgStr !== "string" || !svgStr.trim().startsWith("<svg"))
+            return;
 
         canvas.innerHTML = svgStr;
 
@@ -2779,7 +3088,9 @@ function getStrokeColor(el) {
 function clearConnectionRunners(targetSvg) {
     const svg = targetSvg || getSvg();
     if (!svg) return;
-    svg.querySelectorAll(".connection-runner-dot").forEach((runner) => runner.remove());
+    svg.querySelectorAll(".connection-runner-dot").forEach((runner) =>
+        runner.remove(),
+    );
 }
 
 function installConnectionRunners() {
@@ -2799,7 +3110,7 @@ function installConnectionRunners() {
     }
 
     const connections = svg.querySelectorAll(
-        "line.connection, path.connection, polyline.connection"
+        "line.connection, path.connection, polyline.connection",
     );
     connections.forEach((conn) => {
         if (!conn.parentNode) return;
@@ -2832,7 +3143,10 @@ function installConnectionRunners() {
         motion.setAttribute("path", pathData);
         motion.setAttribute("rotate", "auto");
         if (Math.random() > 0.5) {
-            motion.setAttribute("begin", `${(-Math.random() * duration).toFixed(2)}s`);
+            motion.setAttribute(
+                "begin",
+                `${(-Math.random() * duration).toFixed(2)}s`,
+            );
         }
         runner.appendChild(motion);
 
@@ -2882,6 +3196,7 @@ function attachCommentLegendHover(element, entry) {
         : [];
     if (!groups.length) return;
     const handleEnter = () => {
+        if (presentationState.active) return;
         groups.forEach((grp) => {
             if (typeof window.highlightConnectionGroup === "function") {
                 window.highlightConnectionGroup(grp);
@@ -2889,6 +3204,7 @@ function attachCommentLegendHover(element, entry) {
         });
     };
     const handleLeave = () => {
+        if (presentationState.active) return;
         groups.forEach((grp) => {
             if (typeof window.unhighlightConnectionGroup === "function") {
                 window.unhighlightConnectionGroup(grp);
@@ -2937,7 +3253,11 @@ function hasCommentClass(el) {
     if (!el) return false;
     if (el.classList && el.classList.length) {
         for (const cls of el.classList) {
-            if (String(cls || "").toLowerCase().includes("comment")) {
+            if (
+                String(cls || "")
+                    .toLowerCase()
+                    .includes("comment")
+            ) {
                 return true;
             }
         }
@@ -2955,7 +3275,11 @@ function hasCommentClass(el) {
 }
 
 function isSvgTextElement(el) {
-    return !!el && typeof el.tagName === "string" && el.tagName.toLowerCase() === "text";
+    return (
+        !!el &&
+        typeof el.tagName === "string" &&
+        el.tagName.toLowerCase() === "text"
+    );
 }
 
 function getTrimmedSvgText(el) {
@@ -2963,11 +3287,21 @@ function getTrimmedSvgText(el) {
     return (el.textContent || "").replace(/\s+/g, " ").trim();
 }
 
-function findNextLegendSibling(list, startIndex, predicate, processed, maxDistance) {
+function findNextLegendSibling(
+    list,
+    startIndex,
+    predicate,
+    processed,
+    maxDistance,
+) {
     if (!Array.isArray(list)) return null;
     let steps = 0;
     for (let i = startIndex; i < list.length; i++) {
-        if (typeof maxDistance === "number" && maxDistance >= 0 && steps > maxDistance) {
+        if (
+            typeof maxDistance === "number" &&
+            maxDistance >= 0 &&
+            steps > maxDistance
+        ) {
             break;
         }
         const candidate = list[i];
@@ -2990,7 +3324,7 @@ function resolveLegendTripletFromList(circle, list, processed, maxDistance) {
         idx + 1,
         (el) => isSvgTextElement(el) && hasCommentClass(el),
         processed,
-        maxDistance
+        maxDistance,
     );
     if (!marker) return null;
     const description = findNextLegendSibling(
@@ -2998,7 +3332,7 @@ function resolveLegendTripletFromList(circle, list, processed, maxDistance) {
         marker.index + 1,
         (el) => isSvgTextElement(el),
         processed,
-        maxDistance
+        maxDistance,
     );
     if (!description) return null;
     return { marker: marker.node, description: description.node };
@@ -3013,7 +3347,8 @@ function collectCommentLegendEntries() {
     const orderedNodes = Array.from(svg.querySelectorAll("circle, text"));
     const circles = svg.querySelectorAll("circle");
     circles.forEach((circle) => {
-        if (!circle || processed.has(circle) || !hasCommentClass(circle)) return;
+        if (!circle || processed.has(circle) || !hasCommentClass(circle))
+            return;
         const parentList = circle.parentElement
             ? Array.from(circle.parentElement.children || [])
             : [];
@@ -3026,20 +3361,31 @@ function collectCommentLegendEntries() {
         processed.add(triplet.description);
         const strokeColor = circle.getAttribute("stroke");
         const fallbackColor =
-            strokeColor && typeof strokeColor === "string" && strokeColor.toLowerCase() !== "none"
+            strokeColor &&
+            typeof strokeColor === "string" &&
+            strokeColor.toLowerCase() !== "none"
                 ? strokeColor
                 : "#6c7a89";
         const groupClassSet = new Set();
+        const stepClassSet = new Set();
         [circle, triplet.marker, triplet.description].forEach((node) => {
             if (!node || !node.classList) return;
             node.classList.forEach((cls) => {
                 if (/^conLine_\d+$/.test(cls)) {
                     groupClassSet.add(cls);
                 }
+                if (/^step_\d+$/.test(cls)) {
+                    stepClassSet.add(cls);
+                }
             });
         });
         const groupClasses = Array.from(groupClassSet);
-        const sourceIds = [circle.id, triplet.marker.id, triplet.description.id].filter(Boolean);
+        const stepClasses = Array.from(stepClassSet);
+        const sourceIds = [
+            circle.id,
+            triplet.marker.id,
+            triplet.description.id,
+        ].filter(Boolean);
         entries.push({
             id:
                 circle.id ||
@@ -3051,9 +3397,21 @@ function collectCommentLegendEntries() {
             color: getEffectiveFill(circle) || fallbackColor,
             sourceIds,
             groupClasses,
+            stepClasses,
         });
     });
     return entries;
+}
+
+function getStepCaption(stepClass) {
+    const m = /^step_(\d+)$/.exec(stepClass);
+    if (!m) return stepClass;
+    const idx = parseInt(m[1], 10);
+    for (const steps of toolbarComboState.mixinSteps.values()) {
+        const found = steps.find((s) => s.index === idx);
+        if (found) return found.caption;
+    }
+    return `Step ${idx + 1}`;
 }
 
 function createCommentLegendItem(entry) {
@@ -3066,6 +3424,57 @@ function createCommentLegendItem(entry) {
     label.className = "comment-legend-label";
     label.textContent = entry.markerLabel || "Comment";
     markerRow.appendChild(label);
+    const stepClasses = Array.isArray(entry.stepClasses) ? entry.stepClasses.filter(Boolean) : [];
+    if (stepClasses.length > 0) {
+        const firstIdx = parseInt(/^step_(\d+)$/.exec(stepClasses[0])?.[1] ?? "0", 10);
+        item.dataset.stepIndex = firstIdx % 8;
+    }
+    stepClasses.forEach((stepClass) => {
+        const stepIdx = parseInt(/^step_(\d+)$/.exec(stepClass)?.[1] ?? "0", 10);
+        const tag = document.createElement("span");
+        tag.className = "comment-step-tag";
+        tag.dataset.stepIndex = stepIdx % 8;
+        tag.textContent = getStepCaption(stepClass);
+        tag.title = `Highlight ${tag.textContent}`;
+        tag.addEventListener("mouseenter", () => {
+            if (presentationState.active) return;
+            if (typeof window.highlightConnectionGroup === "function") {
+                window.highlightConnectionGroup(stepClass);
+            }
+        });
+        tag.addEventListener("mouseleave", (e) => {
+            if (presentationState.active) return;
+            if (typeof window.unhighlightConnectionGroup === "function") {
+                window.unhighlightConnectionGroup(stepClass);
+            }
+            // removeHighlight() strips highlight-group from shared elements
+            // (e.g. conLine_N step_N). addHighlight() has an early-exit guard
+            // when the group is already in activeGroupHighlights, so a plain
+            // re-call is a no-op. Force re-apply by cycling unhighlight→highlight.
+            if (item.contains(e.relatedTarget)) {
+                const grps = Array.isArray(entry.groupClasses) ? entry.groupClasses.filter(Boolean) : [];
+                grps.forEach((grp) => {
+                    if (typeof window.unhighlightConnectionGroup === "function") {
+                        window.unhighlightConnectionGroup(grp);
+                    }
+                    if (typeof window.highlightConnectionGroup === "function") {
+                        window.highlightConnectionGroup(grp);
+                    }
+                });
+            }
+        });
+        markerRow.appendChild(tag);
+    });
+    const presentBtn = document.createElement("button");
+    presentBtn.className = "comment-legend-present-btn";
+    presentBtn.textContent = ">>";
+    presentBtn.title = "Start presentation from here";
+    presentBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        startPresentation(entry.id);
+    });
+    markerRow.appendChild(presentBtn);
+
     const body = document.createElement("div");
     body.className = "comment-legend-body";
     body.textContent = entry.body || "";
@@ -3080,6 +3489,7 @@ function updateCommentLegendPanel() {
     if (!list || !panel) return;
     resetCommentLegendState();
     const entries = collectCommentLegendEntries();
+    _commentLegendEntries = entries;
     list.innerHTML = "";
     if (!entries.length) {
         const empty = document.createElement("div");
@@ -3181,12 +3591,12 @@ function observeCaptionAndRefresh(el) {
                     "blacklist ids: ",
                     blacklistIds,
                     "comments hidden: ",
-                    window.hideCommentsEnabled
+                    window.hideCommentsEnabled,
                 );
                 let svgStr = await callCreateSvgWithMode(
                     arg,
                     filterTexts,
-                    blacklistIds
+                    blacklistIds,
                 );
 
                 svgStr =
@@ -3288,7 +3698,7 @@ function findBadgesByBoxId(boxId) {
     if (!list || !boxId) return [];
     // Use [data-hid] to uniquely identify badges per box
     return Array.from(
-        list.querySelectorAll(`.badge[data-hid="${CSS.escape(boxId)}"]`)
+        list.querySelectorAll(`.badge[data-hid="${CSS.escape(boxId)}"]`),
     );
 }
 
@@ -3385,7 +3795,8 @@ function positionBlacklistCollector() {
             return;
         }
         panel.style.top = currentTop + "px";
-        const height = panel.offsetHeight || panel.getBoundingClientRect().height || 0;
+        const height =
+            panel.offsetHeight || panel.getBoundingClientRect().height || 0;
         currentTop += (height || 0) + gap;
     });
 }
@@ -3617,11 +4028,15 @@ function updateMinimap() {
         h;
     vp.setAttribute(
         "x",
-        String(Math.max(parseFloat(scene.getAttribute("x")), Math.min(x, maxX)))
+        String(
+            Math.max(parseFloat(scene.getAttribute("x")), Math.min(x, maxX)),
+        ),
     );
     vp.setAttribute(
         "y",
-        String(Math.max(parseFloat(scene.getAttribute("y")), Math.min(y, maxY)))
+        String(
+            Math.max(parseFloat(scene.getAttribute("y")), Math.min(y, maxY)),
+        ),
     );
     vp.setAttribute("width", String(Math.max(1, w)));
     vp.setAttribute("height", String(Math.max(1, h)));
@@ -3685,10 +4100,16 @@ function updateToolButtons() {
         btnHideComments.classList.toggle("active", enabled);
     }
     if (btnCommentLegend) {
-        btnCommentLegend.classList.toggle("active", !!commentLegendPanelVisible);
+        btnCommentLegend.classList.toggle(
+            "active",
+            !!commentLegendPanelVisible,
+        );
     }
     if (btnConnectionAnim) {
-        btnConnectionAnim.classList.toggle("active", !!connectionAnimationEnabled);
+        btnConnectionAnim.classList.toggle(
+            "active",
+            !!connectionAnimationEnabled,
+        );
     }
 }
 
@@ -3725,7 +4146,10 @@ function updateBlacklistUI() {
     if (!list) return;
     list.innerHTML = "";
     // Use window.blacklist if set, otherwise fallback to local blacklist
-    const ids = (window.blacklist && Array.isArray(window.blacklist)) ? window.blacklist : blacklist;
+    const ids =
+        window.blacklist && Array.isArray(window.blacklist)
+            ? window.blacklist
+            : blacklist;
     ids.forEach((boxId) => {
         // Try to find the SVG element for color extraction
         const el =
@@ -3752,13 +4176,16 @@ function updateBlacklistUI() {
         badge.onclick = function () {
             // Remove from window.blacklist if present, else from local blacklist
             if (window.blacklist && Array.isArray(window.blacklist)) {
-                window.blacklist = window.blacklist.filter(id => id !== boxId);
+                window.blacklist = window.blacklist.filter(
+                    (id) => id !== boxId,
+                );
             } else {
-                blacklist = blacklist.filter(id => id !== boxId);
+                blacklist = blacklist.filter((id) => id !== boxId);
             }
             updateBlacklistUI();
             // Also reload the SVG to reflect the change
-            if (typeof reloadSvgFromBadges === "function") reloadSvgFromBadges();
+            if (typeof reloadSvgFromBadges === "function")
+                reloadSvgFromBadges();
         };
         list.appendChild(badge);
     });
@@ -3766,6 +4193,29 @@ function updateBlacklistUI() {
 
 // Space key enables temporary pan + NEW: Ctrl/Cmd+Z undo
 function onKeyDown(e) {
+    // Presentation mode keys
+    if (presentationState.active) {
+        if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+            presentNextStep();
+            e.preventDefault();
+            return;
+        }
+        if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+            presentPrevStep();
+            e.preventDefault();
+            return;
+        }
+        if (e.key === "Escape") {
+            stopPresentation();
+            e.preventDefault();
+            return;
+        }
+        if (e.key === "p" || e.key === "P") {
+            stopPresentation();
+            e.preventDefault();
+            return;
+        }
+    }
     // NEW: Ctrl/Cmd+Z -> undo last click action
     if (
         (e.ctrlKey || e.metaKey) &&
@@ -3807,3 +4257,460 @@ window.onHideCommentsChanged = function (enabled) {
         // no-op
     }
 };
+
+// ─── Presentation mode ───────────────────────────────────────────────────────
+
+const presentationState = window.presentationState = {
+    active: false,
+    entries: [],
+    currentIndex: -1,
+    savedTransform: null, // { scale, tx, ty } restored on exit
+};
+
+// IDs of UI panels/toolbar to hide while presenting
+const _PRESENT_HIDE_IDS = ["menu-wrapper", "selected-collector", "comment-legend-panel"];
+let _presentCardDragged = false;
+
+function startPresentation(startEntryId = null) {
+    // Open the panel if needed so SVG comment elements are rendered
+    if (!commentLegendPanelVisible) {
+        setCommentLegendPanelVisibility(true);
+    }
+    // Use the entries that were used to build the panel, not a fresh re-collection.
+    // Re-collecting is unsafe because bringToFront() reorders SVG DOM elements when
+    // hovering, which changes the querySelectorAll order and shifts the fallback IDs.
+    const entries = _commentLegendEntries;
+    if (!entries.length) return;
+
+    let startIndex = 0;
+    if (startEntryId !== null) {
+        const found = entries.findIndex((e) => e.id === startEntryId);
+        if (found >= 0) startIndex = found;
+    }
+
+    _presentCardDragged = false;
+    presentationState.active = true;
+    presentationState.entries = entries;
+    presentationState.currentIndex = -1;
+    presentationState.savedTransform = { scale: state.scale, tx: state.tx, ty: state.ty };
+
+    // Hide toolbar + panels; record which were already hidden
+    presentationState.hiddenByUs = new Set();
+    _PRESENT_HIDE_IDS.forEach((id) => {
+        const el = document.getElementById(id);
+        if (el && !el.classList.contains("hidden")) {
+            el.classList.add("hidden");
+            presentationState.hiddenByUs.add(id);
+        }
+    });
+
+    getStage()?.classList.add("presenting", "presentation-spotlight");
+
+    // Wait for layout to settle (panels removed from flow) before centering
+    requestAnimationFrame(() => gotoStep(startIndex));
+}
+
+function stopPresentation() {
+    if (!presentationState.active) return;
+
+    presentationState.active = false;
+
+    _unhighlightCurrentStep();
+
+    // Restore panels we hid
+    (presentationState.hiddenByUs || new Set()).forEach((id) => {
+        document.getElementById(id)?.classList.remove("hidden");
+    });
+    presentationState.hiddenByUs = null;
+
+    document.getElementById("presentation-comment")?.classList.add("hidden");
+    document.getElementById("presentation-toolbar")?.classList.add("hidden");
+    getStage()?.classList.remove("presenting", "presentation-spotlight");
+    _clearSpotlightBoxes();
+
+    document.querySelectorAll(".comment-legend-item--presenting").forEach((el) => {
+        el.classList.remove("comment-legend-item--presenting");
+    });
+
+    if (presentationState.savedTransform) {
+        const { scale, tx, ty } = presentationState.savedTransform;
+        state.scale = scale;
+        state.tx = tx;
+        state.ty = ty;
+        applyTransform();
+    }
+}
+
+function gotoStep(index) {
+    const entries = presentationState.entries;
+    if (!entries.length) return;
+    const clamped = Math.max(0, Math.min(index, entries.length - 1));
+
+    _unhighlightCurrentStep();
+
+    presentationState.currentIndex = clamped;
+    const entry = entries[clamped];
+
+    // Highlight via connection group only (conLine_N).
+    // stepClasses (step_N) are shared across all entries in a step — using them
+    // would highlight every connection in the step, not just this entry's connection.
+    entry.groupClasses.forEach((grp) => {
+        if (typeof window.highlightConnectionGroup === "function") {
+            window.highlightConnectionGroup(grp);
+        }
+    });
+    _markInvolvedBoxes(entry);
+
+    // Mark active item in the legend list
+    document.querySelectorAll(".comment-legend-item--presenting").forEach((el) => {
+        el.classList.remove("comment-legend-item--presenting");
+    });
+    const list = document.getElementById("comment-legend-list");
+    if (list) {
+        const items = list.querySelectorAll(".comment-legend-item");
+        if (items[clamped]) {
+            items[clamped].classList.add("comment-legend-item--presenting");
+            items[clamped].scrollIntoView({ block: "nearest", behavior: "smooth" });
+        }
+    }
+
+    // Pan if any element is outside the viewport
+    _centerOnEntry(entry);
+
+    // Position and populate the floating comment card (includes counter update)
+    _updatePresentationComment(entry, clamped, entries.length);
+}
+
+function presentNextStep() {
+    const next = presentationState.currentIndex + 1;
+    if (next < presentationState.entries.length) gotoStep(next);
+}
+
+function presentPrevStep() {
+    gotoStep(presentationState.currentIndex - 1);
+}
+
+function _unhighlightCurrentStep() {
+    const prev = presentationState.entries[presentationState.currentIndex];
+    if (!prev) return;
+    prev.groupClasses.forEach((grp) => {
+        if (typeof window.unhighlightConnectionGroup === "function") {
+            window.unhighlightConnectionGroup(grp);
+        }
+    });
+    _clearSpotlightBoxes();
+}
+
+function _clearSpotlightBoxes() {
+    const svg = getSvg();
+    if (!svg) return;
+    svg.querySelectorAll(".spotlight-box").forEach((el) => el.classList.remove("spotlight-box"));
+}
+
+function _markInvolvedBoxes(entry) {
+    const svg = getSvg();
+    if (!svg) return;
+
+    // Collect connection endpoints (SVG-space) from all highlighted connection elements
+    const endpoints = [];
+    const tol = 3; // px tolerance for point-on-border hits
+
+    entry.groupClasses.forEach((grp) => {
+        svg.querySelectorAll(`line.${grp}`).forEach((el) => {
+            endpoints.push({ x: parseFloat(el.getAttribute("x1")), y: parseFloat(el.getAttribute("y1")) });
+            endpoints.push({ x: parseFloat(el.getAttribute("x2")), y: parseFloat(el.getAttribute("y2")) });
+        });
+        svg.querySelectorAll(`polyline.${grp}`).forEach((el) => {
+            const pairs = (el.getAttribute("points") || "").trim().split(/\s+/);
+            if (pairs.length >= 1) {
+                const first = pairs[0].split(",");
+                const last  = pairs[pairs.length - 1].split(",");
+                if (first.length === 2) endpoints.push({ x: parseFloat(first[0]), y: parseFloat(first[1]) });
+                if (last.length  === 2) endpoints.push({ x: parseFloat(last[0]),  y: parseFloat(last[1])  });
+            }
+        });
+        svg.querySelectorAll(`path.${grp}`).forEach((el) => {
+            try {
+                const len = el.getTotalLength();
+                const p0  = el.getPointAtLength(0);
+                const p1  = el.getPointAtLength(len);
+                endpoints.push({ x: p0.x, y: p0.y });
+                endpoints.push({ x: p1.x, y: p1.y });
+            } catch (_) {}
+        });
+    });
+
+    if (!endpoints.length) return;
+
+    // Only consider leaf box rectangles as connection targets.
+    const leafRects = Array.from(svg.querySelectorAll("rect.leaf")).map((rect) => {
+        try {
+            const b = rect.getBBox();
+            return { rect, b };
+        } catch (_) { return null; }
+    }).filter(Boolean);
+
+    endpoints.forEach((pt) => {
+        const hit = leafRects.find(({ b }) =>
+            pt.x >= b.x - tol && pt.x <= b.x + b.width  + tol &&
+            pt.y >= b.y - tol && pt.y <= b.y + b.height + tol
+        );
+        if (!hit) return;
+        hit.rect.classList.add("spotlight-box");
+        // Find the caption text via the box id: {boxId}_capt
+        const boxId = hit.rect.id;
+        if (boxId) {
+            svg.getElementById(`${boxId}_capt`)?.classList.add("spotlight-box");
+        }
+    });
+}
+
+function _centerOnEntry(entry) {
+    const canvas = getCanvas();
+    if (!canvas) return;
+
+    const bbox = _getBBoxForEntry(entry);
+    if (!bbox) return;
+    const { minX, minY, maxX, maxY } = bbox;
+
+    // Sync stage to current canvas dimensions before measuring screen positions
+    // (important for the first step where panels were just hidden).
+    applyTransform();
+
+    const canvasW = canvas.clientWidth;
+    const canvasH = canvas.clientHeight;
+    const PADDING = 40; // px margin at all edges
+
+    const s = state.scale;
+    const { tx: effTx, ty: effTy } = getEffectiveTxTy();
+
+    // Convert SVG bbox to canvas-relative screen coordinates
+    const sMinX = minX * s + effTx;
+    const sMaxX = maxX * s + effTx;
+    const sMinY = minY * s + effTy;
+    const sMaxY = maxY * s + effTy;
+
+    const topEdge    = PADDING;
+    const bottomEdge = canvasH - PADDING;
+    const usableH    = bottomEdge - topEdge;
+
+    // If the whole bbox is already within the padded viewport, do nothing
+    if (sMinX >= PADDING && sMaxX <= canvasW - PADDING &&
+        sMinY >= topEdge && sMaxY <= bottomEdge) {
+        return;
+    }
+
+    // Minimum shift to make the bbox fully visible; center only when it
+    // exceeds the available dimension.
+    let dx = 0, dy = 0;
+
+    if (sMaxX - sMinX > canvasW - 2 * PADDING) {
+        dx = canvasW / 2 - (sMinX + sMaxX) / 2;
+    } else if (sMinX < PADDING) {
+        dx = PADDING - sMinX;
+    } else if (sMaxX > canvasW - PADDING) {
+        dx = (canvasW - PADDING) - sMaxX;
+    }
+
+    if (sMaxY - sMinY > usableH) {
+        dy = (topEdge + bottomEdge) / 2 - (sMinY + sMaxY) / 2;
+    } else if (sMinY < topEdge) {
+        dy = topEdge - sMinY;
+    } else if (sMaxY > bottomEdge) {
+        dy = bottomEdge - sMaxY;
+    }
+
+    if (dx === 0 && dy === 0) return;
+
+    state.tx += dx;
+    state.ty += dy;
+    applyTransform();
+}
+
+// Shared: collect SVG candidates for an entry and return their union bbox in SVG space.
+// Returns { minX, minY, maxX, maxY } or null if nothing found.
+function _getBBoxForEntry(entry) {
+    const svg = getSvg();
+    if (!svg) return null;
+    const seen = new Set();
+    const candidates = [];
+
+    const addEl = (el) => {
+        if (!el || seen.has(el)) return;
+        seen.add(el);
+        candidates.push(el);
+    };
+
+    // Query by connection group classes (conLine_N) — finds the specific connection elements.
+    // stepClasses (step_N) are intentionally excluded: they match ALL connections in the step,
+    // which would produce a bbox spanning the whole diagram and misplace the card.
+    entry.groupClasses.forEach((grp) => {
+        svg.querySelectorAll(
+            `line.${grp}, path.${grp}, polyline.${grp}, rect.${grp}, circle.${grp}:not(.comment)`
+        ).forEach(addEl);
+    });
+
+    // Fallback: use the comment marker circle (sourceIds[0]) which is positioned
+    // near the relevant box/connection in the diagram — it will always have the right position.
+    if (!candidates.length && entry.sourceIds.length) {
+        const markerId = entry.sourceIds[0];
+        if (markerId) {
+            const el = svg.getElementById(markerId) || document.getElementById(markerId);
+            if (el) addEl(el);
+        }
+    }
+
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    candidates.forEach((el) => {
+        try {
+            const b = el.getBBox();
+            if (b.width === 0 && b.height === 0) return;
+            minX = Math.min(minX, b.x);           minY = Math.min(minY, b.y);
+            maxX = Math.max(maxX, b.x + b.width); maxY = Math.max(maxY, b.y + b.height);
+        } catch (_) {}
+    });
+    return isFinite(minX) ? { minX, minY, maxX, maxY } : null;
+}
+
+function _updatePresentationComment(entry, index, total) {
+    const card = document.getElementById("presentation-comment");
+    if (!card) return;
+
+    card.querySelector(".presentation-comment-label").textContent = entry.markerLabel || "";
+    card.querySelector(".presentation-comment-body").textContent = entry.body || "";
+    const counter = document.querySelector(".presentation-overlay-counter");
+    if (counter) counter.textContent = `${index + 1} / ${total}`;
+
+    const stepEl = card.querySelector(".presentation-comment-step");
+    if (stepEl) {
+        const sc = Array.isArray(entry.stepClasses) && entry.stepClasses[0];
+        const caption = sc ? getStepCaption(sc) : "";
+        stepEl.textContent = caption;
+        stepEl.classList.toggle("hidden", !caption);
+    }
+
+    // Apply step color matching the comment legend panel
+    const stepClasses = Array.isArray(entry.stepClasses) ? entry.stepClasses.filter(Boolean) : [];
+    if (stepClasses.length > 0) {
+        const stepIdx = parseInt(/^step_(\d+)$/.exec(stepClasses[0])?.[1] ?? "0", 10);
+        card.dataset.stepIndex = stepIdx % 8;
+    } else {
+        delete card.dataset.stepIndex;
+    }
+
+    const prevBtn = document.getElementById("btn-prev-step");
+    const nextBtn = document.getElementById("btn-next-step");
+    if (prevBtn) prevBtn.disabled = index === 0;
+    if (nextBtn) nextBtn.disabled = index === total - 1;
+
+    // Make card and toolbar visible first so offsetWidth/Height are accurate
+    card.classList.remove("hidden");
+    document.getElementById("presentation-toolbar")?.classList.remove("hidden");
+
+    // If the user has manually dragged the card, respect their position
+    if (_presentCardDragged) return;
+
+    const canvas = getCanvas();
+    const bbox = _getBBoxForEntry(entry);
+    const { tx: effTx, ty: effTy } = getEffectiveTxTy();
+    const s = state.scale;
+    const canvasRect = canvas
+        ? canvas.getBoundingClientRect()
+        : { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight };
+
+    const cardW = card.offsetWidth || 280;
+    const cardH = card.offsetHeight || 90;
+    const gap = 8;
+    const margin = 10;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+    if (!bbox) {
+        card.style.left = Math.max(margin, (vw - cardW) / 2) + "px";
+        card.style.top  = margin + "px";
+        return;
+    }
+
+    // Convert SVG bbox to screen coordinates
+    const sMinX = bbox.minX * s + effTx + canvasRect.left;
+    const sMaxX = bbox.maxX * s + effTx + canvasRect.left;
+    const sMinY = bbox.minY * s + effTy + canvasRect.top;
+    const sMaxY = bbox.maxY * s + effTy + canvasRect.top;
+    const sCx   = (sMinX + sMaxX) / 2;
+    const sCy   = (sMinY + sMaxY) / 2;
+    const bboxW = sMaxX - sMinX;
+    const bboxH = sMaxY - sMinY;
+
+    const topBound    = margin;
+    const bottomBound = vh - margin;
+    const leftBound   = margin;
+    const rightBound  = vw - margin;
+
+    let left, top;
+
+    if (bboxH > bboxW) {
+        // Vertical connection — place card left or right
+        const spaceRight = rightBound - sMaxX - gap;
+        const spaceLeft  = sMinX - gap - leftBound;
+        left = (spaceRight >= cardW || spaceRight >= spaceLeft)
+            ? sMaxX + gap
+            : sMinX - gap - cardW;
+        top = Math.max(topBound, Math.min(sCy - cardH / 2, bottomBound - cardH));
+    } else {
+        // Horizontal connection — place card above or below
+        const spaceBelow = bottomBound - sMaxY - gap;
+        const spaceAbove = sMinY - gap - topBound;
+        top = (spaceBelow >= cardH || spaceBelow >= spaceAbove)
+            ? sMaxY + gap
+            : sMinY - gap - cardH;
+        left = Math.max(leftBound, Math.min(sCx - cardW / 2, rightBound - cardW));
+    }
+
+    // Final clamp
+    left = Math.max(leftBound, Math.min(left, rightBound - cardW));
+    top  = Math.max(topBound,  Math.min(top,  bottomBound - cardH));
+
+    card.style.left = left + "px";
+    card.style.top  = top  + "px";
+}
+
+// Wire up presentation controls once DOM is ready
+document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("btn-stop-present")?.addEventListener("click", () => stopPresentation());
+    document.getElementById("btn-prev-step")?.addEventListener("click", () => presentPrevStep());
+    document.getElementById("btn-next-step")?.addEventListener("click", () => presentNextStep());
+
+    // Draggable presentation card
+    const card = document.getElementById("presentation-comment");
+    const handle = card?.querySelector(".presentation-comment-top");
+    if (card && handle) {
+        let dragOffsetX = 0, dragOffsetY = 0;
+
+        handle.addEventListener("mousedown", (e) => {
+            if (e.button !== 0) return;
+            e.preventDefault();
+            const rect = card.getBoundingClientRect();
+            dragOffsetX = e.clientX - rect.left;
+            dragOffsetY = e.clientY - rect.top;
+
+            const onMove = (e) => {
+                const margin = 10;
+                const left = Math.max(margin, Math.min(e.clientX - dragOffsetX, window.innerWidth  - card.offsetWidth  - margin));
+                const top  = Math.max(margin, Math.min(e.clientY - dragOffsetY, window.innerHeight - card.offsetHeight - margin));
+                card.style.left = left + "px";
+                card.style.top  = top  + "px";
+                _presentCardDragged = true;
+            };
+
+            const onUp = () => {
+                document.removeEventListener("mousemove", onMove);
+                document.removeEventListener("mouseup", onUp);
+                handle.style.cursor = "grab";
+            };
+
+            handle.style.cursor = "grabbing";
+            document.addEventListener("mousemove", onMove);
+            document.addEventListener("mouseup", onUp);
+        });
+    }
+});

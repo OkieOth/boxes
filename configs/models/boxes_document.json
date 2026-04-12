@@ -3,7 +3,42 @@
   "title": "BoxesDocument",
   "description": "Internal model to describe the layout if the boxes chart",
   "type": "object",
-  "x-domain": "implementation",
+  "x-namespace": "boxes.doc",
+  "x-codegen-tasks": [
+    {
+      "description": "generate plantuml types overview",
+      "singleFileTask": {
+        "template": "plantuml:default.v1",
+        "destFile": "{modelDir}/../../docs/models/puml/boxes_document.gen.puml"
+      }
+    },
+    {
+      "description": "generate types",
+      "blackListed": [
+        {
+          "text": "boxes.shared",
+          "kind": "namespace"
+        },
+        {
+          "text": "boxes",
+          "kind": "namespace"
+        }
+      ],
+      "singleFileTask": {
+        "template": "golang:default.v1",
+        "destFile": "{modelDir}/../../pkg/types/boxes/boxes_document.gen.go",
+        "templateParams": [
+          { "name": "serialization", "value": "yaml" },
+          { "name": "namespace", "value": "boxes" },
+          { "name": "packages", "valueMap": { "boxes.shared": "types" } },
+          {
+            "name": "imports",
+            "valueList": ["github.com/okieoth/boxes/pkg/types"]
+          }
+        ]
+      }
+    }
+  ],
   "properties": {
     "title": {
       "description": "Title of the document",
@@ -357,6 +392,10 @@
           "items": {
             "type": "string"
           }
+        },
+        "step": {
+          "description": "optional step where this comment is part of, is filled via processing not by the user",
+          "type": "integer"
         }
       },
       "required": [
@@ -409,6 +448,10 @@
         },
         "comment": {
           "$ref": "./shared.json#/definitions/Comment"
+        },
+        "step": {
+          "description": "what process step this connection belongs too",
+          "type": "integer"
         }
       },
       "required": ["parts", "connectionIndex", "hiddenComments"]
@@ -455,6 +498,10 @@
         },
         "inverseDirection": {
           "type": "boolean"
+        },
+        "step": {
+          "description": "to what step belongs this connection line",
+          "type": "integer"
         }
       },
       "required": [
@@ -696,6 +743,10 @@
         },
         "connectionIndex": {
           "description": "in case this comment belongs to a connection, is here the connectionId stored",
+          "type": "integer"
+        },
+        "step": {
+          "description": "optional step where this comment is part of, is filled via processing not by the user",
           "type": "integer"
         }
       },

@@ -109,7 +109,10 @@ YAML input
   └─► output SVG
 ```
 
-The type system is **model-driven**: Go structs in `pkg/types/` are generated from JSON schemas in `configs/models/` via [YACG](https://github.com/OkieOth/yacg). Hand-written implementation lives in separate files, never touched by codegen.
+The type system is **model-driven**: Go structs in `pkg/types/` are generated from JSON schemas in `configs/models/` via [rjsp](https://codeberg.org/okieoth/rjsp). Hand-written implementation lives in separate files, never touched by codegen.
+
+To run the codegen locally `rjsp` (>= v0.7.0) needs to be installed on the local
+system. `cargo install oth_rjsp`
 
 ---
 

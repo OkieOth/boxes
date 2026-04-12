@@ -1,3 +1,14 @@
+# v1.4.0
+* UI: improved steps view in the UI
+* UI: presentation mode
+* Extended steps (overlays, tags)
+
+# v1.3.0
+* Introduce steps in the mixin approach
+
+# v1.2.1
+* UI: fix error with not handled black listed items in zipped perm links
+
 # v1.2.0
 * UI: introduce zipped perm links
 
