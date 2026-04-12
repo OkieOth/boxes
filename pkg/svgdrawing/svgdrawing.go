@@ -455,7 +455,6 @@ func (d *SvgDrawing) DrawRectWithText(id, caption, text1, text2 string, x, y, wi
 	if id != "" {
 		idStr = id + "_capt"
 	}
-
 	if format.VerticalTxt {
 		currentX := x + format.Padding
 		currentY := y + (height / 2)
