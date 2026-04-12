@@ -281,7 +281,7 @@ func getStepClasses(msg1, msg2 string, index int, step *int) string {
 func (d *BoxesDocument) DrawMovedConnectionLines(drawingImpl types.Drawing) {
 	b := "black"
 	w := 1.0
-	s := types.LineDefStyleEnum_dashed
+	s := types.StyleDashed // LineDefStyleEnum_dashed
 	format := types.LineDef{
 		Width: &w,
 		Color: &b,
@@ -344,7 +344,7 @@ func (doc *BoxesDocument) GetTitleFormat() types.FontDef {
 			format2Use = titleFormat.FontCaption
 		}
 	}
-	format2Use.Anchor = types.FontDefAnchorEnum_left
+	format2Use.Anchor = types.AnchorLeft //FontDefAnchorEnum_left
 	return format2Use
 }
 
@@ -368,7 +368,7 @@ func (doc *BoxesDocument) DrawLegend(drawing types.Drawing, c types.TextDimensio
 					format2Use = legendFormat.FontCaption
 				}
 			}
-			format2Use.Anchor = types.FontDefAnchorEnum_left
+			format2Use.Anchor = types.AnchorLeft // FontDefAnchorEnum_left
 			currentX := doc.GlobalPadding
 			lineW := 0.5
 			lineC := "#9a9a9a"
@@ -608,7 +608,7 @@ func (doc *BoxesDocument) DrawOverlays(drawing types.Drawing, c types.TextDimens
 					}
 					labelFont := types.InitFontDef(nil, "sans", size, true, false, 0)
 					labelFont.Color = *oe.Format.Fill.Color
-					labelFont.Anchor = types.FontDefAnchorEnum_middle
+					labelFont.Anchor = types.AnchorMiddle // FontDefAnchorEnum_middle
 					_, h := c.Dimensions(label, &labelFont)
 					drawing.DrawText(label, oe.X, oe.Y-(h/2), 0, &labelFont)
 				}
@@ -672,7 +672,7 @@ func (doc *BoxesDocument) drawCommentTextsCustomLabels(drawing types.Drawing, c 
 			className = getStepClasses("comment connection conLine_%d", "comment connection conLine_%d step_%d", *c.ConnectionIndex, c.Step)
 		}
 		drawing.DrawCircleWithBorderTextAndClass(c.Label, markerX, currentY, doc.CommentMarkerRadius, &c.Format.Fill, &c.Format.Line, &c.Format.FontMarker, className)
-		c.Format.FontText.Anchor = types.FontDefAnchorEnum_left
+		c.Format.FontText.Anchor = types.AnchorLeft // FontDefAnchorEnum_left
 		c.Format.FontText.MaxLenBeforeBreak = doc.Boxes.Width
 		drawing.DrawText(c.Text, textX, currentY-(2*doc.CommentMarkerRadius), 0, &c.Format.FontText)
 		currentY += getMax(c.TextHeight, neededMarkerSpace)
@@ -707,7 +707,7 @@ func (doc *BoxesDocument) drawCommentTextsStdLabels(currentY int, drawing types.
 		if c.Text == "" {
 			continue
 		}
-		c.Format.FontText.Anchor = types.FontDefAnchorEnum_left
+		c.Format.FontText.Anchor = types.AnchorLeft // FontDefAnchorEnum_left
 		c.Format.FontText.MaxLenBeforeBreak = doc.Boxes.Width
 		className := "comment"
 		if c.ConnectionIndex != nil {

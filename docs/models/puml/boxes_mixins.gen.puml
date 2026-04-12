@@ -1,0 +1,374 @@
+@startuml Boxes file mixings
+
+hide empty methods
+skinparam noteBackgroundColor #EAEAEA
+skinparam classAttributeIconSize 0
+skinparam class {
+    BackgroundColor White
+    BorderColor Black
+}
+
+
+
+
+class Comment {
+    +**text** String
+    +label? String
+    +format? String
+    +step? Integer
+}
+
+
+note top of Comment
+Object to define comments in
+the diagrams
+end note
+    
+class ConnRestriction {
+    +source? ConnRestrItem
+    +dest? ConnRestrItem
+}
+ConnRestriction o-- ConnRestrItem
+
+
+note top of ConnRestriction
+container to define closer how
+a connection should be routed
+end note
+    
+class ConnRestrItem {
+    +**noTop** Boolean
+    +**noBottom** Boolean
+    +**noLeft** Boolean
+    +**noRight** Boolean
+}
+
+
+note top of ConnRestrItem
+possible options to restrict a
+connection start or end
+end note
+    
+class Legend {
+    +entries? List<LegendEntry>
+    +format? String
+}
+Legend --> "0..*" LegendEntry
+
+
+note top of Legend
+Definition of the output for
+the legend
+end note
+    
+class LegendEntry {
+    +**text** String
+    +**format** String
+}
+
+
+note top of LegendEntry
+Definition of one legend entry
+end note
+    
+class Layout {
+    +**id** String
+    +**caption** String
+    +**text1** String
+    +**text2** String
+    +comment? Comment
+    +image? String
+    +**expand** Boolean
+    +extVertical? String
+    +vertical? List<Layout>
+    +extHorizontal? String
+    +horizontal? List<Layout>
+    +tags? List<String>
+    +connections? List<Connection>
+    +format? String
+    +dontBlockConPaths? Boolean
+    +dataLink? String
+    +**hiddenComments** Boolean
+}
+Layout o-- Comment
+Layout --> "0..*" Layout
+Layout --> "0..*" Connection
+
+
+class LayoutMixin {
+    +horizontal? List<Layout>
+    +vertical? List<Layout>
+}
+LayoutMixin --> "0..*" Layout
+
+
+note top of LayoutMixin
+container to extend the layouts
+of a given layout element
+via mixins
+end note
+    
+class Connection {
+    +**dest** String
+    +**destId** String
+    +comment? Comment
+    +**sourceArrow** Boolean
+    +**destArrow** Boolean
+    +format? String
+    +**hiddenComments** Boolean
+    +connRestrictions? ConnRestriction
+    +**tags** List<String>
+    +step? Integer
+}
+Connection o-- Comment
+Connection o-- ConnRestriction
+
+
+enum Type {
+    normal,
+    italic,
+}
+
+
+enum Weight {
+    normal,
+    bold,
+}
+
+
+enum Aligned {
+    left,
+    center,
+    right,
+}
+
+
+enum Anchor {
+    middle,
+    left,
+    right,
+}
+
+
+class FontDef {
+    +**size** Integer
+    +**font** String
+    +type? Type
+    +weight? Weight
+    +**lineHeight** Double
+    +**color** String
+    +aligned? Aligned
+    +**spaceTop** Integer
+    +**spaceBottom** Integer
+    +**maxLenBeforeBreak** Integer
+    +**anchor** Anchor
+}
+FontDef o-- Type
+FontDef o-- Weight
+FontDef o-- Aligned
+FontDef o-- Anchor
+
+
+note top of FontDef
+Defines the font a text
+end note
+    
+enum Style {
+    solid,
+    dotted,
+    dashed,
+}
+
+
+class LineDef {
+    +width? Double
+    +style? Style
+    +color? String
+    +opacity? Double
+}
+LineDef o-- Style
+
+
+note top of LineDef
+Defines how the border of
+the box looks like
+end note
+    
+class FillDef {
+    +color? String
+    +opacity? Double
+}
+
+
+note top of FillDef
+Defines the fill of the
+box
+end note
+    
+class ImageDef {
+    +description? String
+    +**width** Integer
+    +**height** Integer
+    +base64? String
+    +marginTopBottom? Integer
+    +marginLeftRight? Integer
+    +base64Src? String
+}
+
+
+note top of ImageDef
+parameters of an image to
+be displayed in the SVG
+end note
+    
+class Format {
+    +widthOfParent? Boolean
+    +fixedWidth? Integer
+    +fixedHeight? Integer
+    +verticalTxt? Boolean
+    +fontCaption? FontDef
+    +fontText1? FontDef
+    +fontText2? FontDef
+    +fontComment? FontDef
+    +fontCommentMarker? FontDef
+    +line? LineDef
+    +fill? FillDef
+    +padding? Integer
+    +boxMargin? Integer
+    +cornerRadius? Integer
+}
+Format o-- FontDef
+Format o-- LineDef
+Format o-- FillDef
+
+
+class FormatVariations {
+    +hasTag? Map<String,FormatVariation>
+}
+FormatVariations --> "0..*" FormatVariation
+
+
+class FormatVariation {
+    +formatRef? String
+    +**format** Format
+    +**priority** Integer
+}
+FormatVariation o-- Format
+
+
+class Overlay {
+    +**caption** String
+    +**refValue** Double
+    +refRadius? Double
+    +**centerXOffset** Double
+    +**centerYOffset** Double
+    +**printValue** Boolean
+    +**layouts** Map<String,Double>
+    +radiusDefs? OverlayRadiusDef
+    +formats? OverlayFormatDef
+}
+Overlay o-- OverlayRadiusDef
+Overlay o-- OverlayFormatDef
+
+
+note top of Overlay
+Definition of a topic related
+overlay ... for instance for
+heatmaps
+end note
+    
+class OverlayRadiusDef {
+    +**min** Double
+    +**max** Double
+}
+
+
+note top of OverlayRadiusDef
+definition how to calculate radius
+changes based on a reference
+value
+end note
+    
+class OverlayFormatDef {
+    +**default** String
+    +gradations? List<OverlayGradation>
+}
+OverlayFormatDef --> "0..*" OverlayGradation
+
+
+note top of OverlayFormatDef
+definition what format to use
+for a specific reference value
+end note
+    
+class OverlayGradation {
+    +**limit** Double
+    +**format** String
+}
+
+
+note top of OverlayGradation
+gradation entry for switching formats
+for overlays
+end note
+    
+class ProcessStep {
+    +**caption** String
+    +connections? Map<String,ConnectionCont>
+    +comments? Map<String,Comment>
+    +tags? Map<String,Tags>
+    +overlays? List<Overlay>
+    +formatVariations? FormatVariations
+}
+ProcessStep --> "0..*" ConnectionCont
+ProcessStep --> "0..*" Comment
+ProcessStep --> "0..*" Tags
+ProcessStep --> "0..*" Overlay
+ProcessStep o-- FormatVariations
+
+
+class ConnectionCont {
+    +connections? List<Connection>
+}
+ConnectionCont --> "0..*" Connection
+
+
+class Tags {
+    +tags? List<String>
+}
+
+
+class BoxesFileMixings {
+    +title? String
+    +version? String
+    +legend? Legend
+    +layoutMixins? Map<String,LayoutMixin>
+    +connections? Map<String,ConnectionCont>
+    +formats? Map<String,Format>
+    +formatVariations? FormatVariations
+    +comments? Map<String,Comment>
+    +tags? Map<String,Tags>
+    +images? Map<String,ImageDef>
+    +overlays? List<Overlay>
+    +steps? List<ProcessStep>
+}
+BoxesFileMixings o-- Legend
+BoxesFileMixings --> "0..*" LayoutMixin
+BoxesFileMixings --> "0..*" ConnectionCont
+BoxesFileMixings --> "0..*" Format
+BoxesFileMixings o-- FormatVariations
+BoxesFileMixings --> "0..*" Comment
+BoxesFileMixings --> "0..*" Tags
+BoxesFileMixings --> "0..*" ImageDef
+BoxesFileMixings --> "0..*" Overlay
+BoxesFileMixings --> "0..*" ProcessStep
+
+
+note top of BoxesFileMixings
+Model to inject additional things
+in a boxes layout definition
+end note
+    
+
+
+@enduml

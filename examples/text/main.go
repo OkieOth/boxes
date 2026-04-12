@@ -15,7 +15,7 @@ func main() {
 		Type:              nil,
 		Weight:            nil,
 		Color:             "black",
-		Anchor:            types.FontDefAnchorEnum_left,
+		Anchor:            types.AnchorLeft,
 	}
 	var w float64 = 0.5
 	lc := "pink"
@@ -39,14 +39,14 @@ func main() {
 	drawing.DrawVerticalText(testText, x, y, w1, &f1)
 
 	x = 200
-	f1.Anchor = types.FontDefAnchorEnum_middle
+	f1.Anchor = types.AnchorMiddle
 	drawing.DrawLine(x-5, y, x+5, y, fl)
 	drawing.DrawLine(x, y-5, x, y+5, fl)
 	drawing.DrawLine(x-5, y-w1, x+5, y-w1, fl)
 	drawing.DrawVerticalText(testText, x, y, w1, &f1)
 
 	x = 300
-	f1.Anchor = types.FontDefAnchorEnum_right
+	f1.Anchor = types.AnchorRight
 	drawing.DrawLine(x-5, y, x+5, y, fl)
 	drawing.DrawLine(x, y-5, x, y+5, fl)
 	drawing.DrawLine(x-5, y-w1, x+5, y-w1, fl)

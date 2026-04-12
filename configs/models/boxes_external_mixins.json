@@ -6,6 +6,41 @@
   "type": "object",
   "x-domain": "external",
   "$comment": "the IDs of the boxes to connect are the keys of the dictionary",
+  "x-codegen-tasks": [
+    {
+      "description": "generate plantuml types overview",
+      "singleFileTask": {
+        "template": "plantuml:default.v1",
+        "destFile": "{modelDir}/../../docs/models/puml/boxes_mixins.gen.puml"
+      }
+    },
+    {
+      "description": "generate types",
+      "blackListed": [
+        {
+          "text": "boxes.shared",
+          "kind": "namespace"
+        },
+        {
+          "text": "boxes",
+          "kind": "namespace"
+        }
+      ],
+      "singleFileTask": {
+        "template": "golang:default.v1",
+        "destFile": "{modelDir}/../../pkg/types/boxes/boxes_mixins.gen.go",
+        "templateParams": [
+          { "name": "serialization", "value": "yaml" },
+          { "name": "namespace", "value": "boxes" },
+          { "name": "packages", "valueMap": { "boxes.shared": "types" } },
+          {
+            "name": "imports",
+            "valueList": ["github.com/okieoth/boxes/pkg/types"]
+          }
+        ]
+      }
+    }
+  ],
   "properties": {
     "title": {
       "description": "optional title, that's appended to the original layout title",

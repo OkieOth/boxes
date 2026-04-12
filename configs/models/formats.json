@@ -3,7 +3,20 @@
   "title": "Formats",
   "description": "Some types to define base formats",
   "type": "object",
-  "x-domain": "base",
+  "x-namespace": "boxes.shared",
+  "x-codegen-tasks": [
+    {
+      "description": "generate types",
+      "singleFileTask": {
+        "template": "golang:default.v1",
+        "destFile": "{modelDir}/../../pkg/types/formats.gen.go",
+        "templateParams": [
+          { "name": "serialization", "value": "yaml" },
+          { "name": "namespace", "value": "types" }
+        ]
+      }
+    }
+  ],
   "definitions": {
     "FontDef": {
       "type": "object",

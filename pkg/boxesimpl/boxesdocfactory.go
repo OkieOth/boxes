@@ -49,7 +49,7 @@ func initConnections(l []boxes.Connection, inputFormats map[string]boxes.BoxForm
 func initFontFormatAnchorInCase(f *types.FontDef) {
 	if f != nil {
 		if f.Anchor == "" {
-			f.Anchor = types.FontDefAnchorEnum_middle
+			f.Anchor = types.AnchorMiddle
 		}
 	}
 }
@@ -57,7 +57,7 @@ func initFontFormatAnchorInCase(f *types.FontDef) {
 func initFontFormatAnchorLeftInCase(f *types.FontDef) {
 	if f != nil {
 		if f.Anchor == "" {
-			f.Anchor = types.FontDefAnchorEnum_left
+			f.Anchor = types.AnchorLeft
 		}
 	}
 }

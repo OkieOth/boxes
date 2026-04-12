@@ -92,7 +92,7 @@ func (s *SvgTextDimensionCalculator) SplitTxtWithMaxWidth(txt string, format *ty
 		fontSize = 10
 	}
 
-	bold := format.Weight != nil && *format.Weight == types.FontDefWeightEnum_bold
+	bold := format.Weight != nil && *format.Weight == types.WeightBold
 	lineHeight := format.LineHeight
 	if lineHeight == 0 {
 		lineHeight = 1.2
@@ -291,11 +291,11 @@ func (d *SvgDrawing) textFormat(fontDef *types.FontDef) string {
 	txtFormat := fmt.Sprintf("text-anchor:%s;font-family:%s;font-size:%dpx;fill:%s",
 		anchor, font, fontDef.Size, fontDef.Color)
 
-	if fontDef.Weight != nil && *fontDef.Weight == types.FontDefWeightEnum_bold {
+	if fontDef.Weight != nil && *fontDef.Weight == types.WeightBold {
 		txtFormat += ";font-weight:bold"
 	}
 
-	if fontDef.Type != nil && *fontDef.Type == types.FontDefTypeEnum_italic {
+	if fontDef.Type != nil && *fontDef.Type == types.TypeItalic {
 		txtFormat += ";font-style:italic"
 	}
 
@@ -473,11 +473,11 @@ func (d *SvgDrawing) DrawRectWithText(id, caption, text1, text2 string, x, y, wi
 	return nil
 }
 
-func lineStyleForType(style types.LineDefStyleEnum) string {
+func lineStyleForType(style types.Style) string {
 	switch style {
-	case types.LineDefStyleEnum_dashed:
+	case types.StyleDashed:
 		return `stroke-dasharray:10 2;`
-	case types.LineDefStyleEnum_dotted:
+	case types.StyleDotted:
 		return `stroke-dasharray:"1 10;"`
 	default:
 		return ""

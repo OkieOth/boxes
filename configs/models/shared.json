@@ -3,7 +3,20 @@
   "title": "Shared Types",
   "description": "Types that are shared between different models",
   "type": "object",
-  "x-domain": "base",
+  "x-namespace": "boxes.shared",
+  "x-codegen-tasks": [
+    {
+      "description": "generate types",
+      "singleFileTask": {
+        "template": "golang:default.v1",
+        "destFile": "{modelDir}/../../pkg/types/shared.gen.go",
+        "templateParams": [
+          { "name": "serialization", "value": "yaml" },
+          { "name": "namespace", "value": "types" }
+        ]
+      }
+    }
+  ],
   "definitions": {
     "Comment": {
       "type": "object",

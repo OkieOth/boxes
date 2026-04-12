@@ -7,8 +7,8 @@ import (
 var ExpInitLayoutElemContainer = initLayoutElemContainer
 var ExpInitLayoutElement = initLayoutElement
 
-var ExpFontDefTypeEnum_normal types.FontDefTypeEnum = types.FontDefTypeEnum_normal
-var ExpFontDefWeightEnum_normal types.FontDefWeightEnum = types.FontDefWeightEnum_normal
-var ExpFontDefWeightEnum_bold types.FontDefWeightEnum = types.FontDefWeightEnum_bold
-var ExpFontDefAlignedEnum_center types.FontDefAlignedEnum = types.FontDefAlignedEnum_center
-var ExpFontDefAlignedEnum_left types.FontDefAlignedEnum = types.FontDefAlignedEnum_left
+var ExpFontDefTypeEnum_normal types.Type = types.TypeNormal
+var ExpFontDefWeightEnum_normal types.Weight = types.WeightNormal
+var ExpFontDefWeightEnum_bold types.Weight = types.WeightBold
+var ExpFontDefAlignedEnum_center types.Aligned = types.AlignedCenter
+var ExpFontDefAlignedEnum_left types.Aligned = types.AlignedLeft

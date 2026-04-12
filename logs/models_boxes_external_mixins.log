@@ -1,0 +1,18 @@
+{
+  "date": "2026-04-12T13:04:58.583015Z",
+  "schemas": {
+    "configs/models/./shared.json": {
+      "hash": "932816ca2592a1be0687d7d60564c559c6ccdf7af3df71acfacf9cd008bf71f0"
+    },
+    "configs/models/./formats.json": {
+      "hash": "fb3d90c078d4d084bff13326ffa13ff2d9b067d1154032b173966aeedc351f50"
+    },
+    "configs/models/./boxes.json": {
+      "hash": "510e5bd8de52855fefe4fa1f411f8f9112f0b526580ebbd849459953a0f5871f"
+    },
+    "configs/models/boxes_external_mixins.json": {
+      "version": "0.4.0",
+      "hash": "e6a947abf1fb850f170e00fa38d5525d544fa0e84e4d2185680ed8a4d2c24b4d"
+    }
+  }
+}

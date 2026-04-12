@@ -1,0 +1,586 @@
+@startuml BoxesDocument
+
+hide empty methods
+skinparam noteBackgroundColor #EAEAEA
+skinparam classAttributeIconSize 0
+skinparam class {
+    BackgroundColor White
+    BorderColor Black
+}
+
+
+
+
+class Comment {
+    +**text** String
+    +label? String
+    +format? String
+    +step? Integer
+}
+
+
+note top of Comment
+Object to define comments in
+the diagrams
+end note
+    
+class ConnRestriction {
+    +source? ConnRestrItem
+    +dest? ConnRestrItem
+}
+ConnRestriction o-- ConnRestrItem
+
+
+note top of ConnRestriction
+container to define closer how
+a connection should be routed
+end note
+    
+class ConnRestrItem {
+    +**noTop** Boolean
+    +**noBottom** Boolean
+    +**noLeft** Boolean
+    +**noRight** Boolean
+}
+
+
+note top of ConnRestrItem
+possible options to restrict a
+connection start or end
+end note
+    
+class LayoutElement {
+    +**id** String
+    +**caption** String
+    +**text1** String
+    +**text2** String
+    +comments? List<Comment>
+    +**hiddenComments** Boolean
+    +image? ImageContainer
+    +vertical? LayoutElemContainer
+    +horizontal? LayoutElemContainer
+    +**x** Integer
+    +**y** Integer
+    +**width** Integer
+    +**height** Integer
+    +**centerX** Integer
+    +**centerY** Integer
+    +format? BoxFormat
+    +connections? List<LayoutElemConnection>
+    +leftYToStart? Integer
+    +rightYToStart? Integer
+    +topXToStart? Integer
+    +bottomXToStart? Integer
+    +xTextBox? Integer
+    +yTextBox? Integer
+    +widthTextBox? Integer
+    +heightTextBox? Integer
+    +dontBlockConPaths? Boolean
+    +tags? List<String>
+    +dataLink? String
+    +connRestrictions? ConnRestrItem
+}
+LayoutElement --> "0..*" Comment
+LayoutElement o-- ImageContainer
+LayoutElement o-- LayoutElemContainer
+LayoutElement o-- BoxFormat
+LayoutElement --> "0..*" LayoutElemConnection
+LayoutElement o-- ConnRestrItem
+
+
+class LayoutElemContainer {
+    +**x** Integer
+    +**y** Integer
+    +**width** Integer
+    +**height** Integer
+    +**elems** List<LayoutElement>
+}
+LayoutElemContainer --> "0..*" LayoutElement
+
+
+enum Type {
+    normal,
+    italic,
+}
+
+
+enum Weight {
+    normal,
+    bold,
+}
+
+
+enum Aligned {
+    left,
+    center,
+    right,
+}
+
+
+enum Anchor {
+    middle,
+    left,
+    right,
+}
+
+
+class FontDef {
+    +**size** Integer
+    +**font** String
+    +type? Type
+    +weight? Weight
+    +**lineHeight** Double
+    +**color** String
+    +aligned? Aligned
+    +**spaceTop** Integer
+    +**spaceBottom** Integer
+    +**maxLenBeforeBreak** Integer
+    +**anchor** Anchor
+}
+FontDef o-- Type
+FontDef o-- Weight
+FontDef o-- Aligned
+FontDef o-- Anchor
+
+
+note top of FontDef
+Defines the font a text
+end note
+    
+enum Style {
+    solid,
+    dotted,
+    dashed,
+}
+
+
+class LineDef {
+    +width? Double
+    +style? Style
+    +color? String
+    +opacity? Double
+}
+LineDef o-- Style
+
+
+note top of LineDef
+Defines how the border of
+the box looks like
+end note
+    
+class FillDef {
+    +color? String
+    +opacity? Double
+}
+
+
+note top of FillDef
+Defines the fill of the
+box
+end note
+    
+class ImageDef {
+    +description? String
+    +**width** Integer
+    +**height** Integer
+    +base64? String
+    +marginTopBottom? Integer
+    +marginLeftRight? Integer
+    +base64Src? String
+}
+
+
+note top of ImageDef
+parameters of an image to
+be displayed in the SVG
+end note
+    
+class LayoutElemConnection {
+    +**destId** String
+    +comment? Comment
+    +**sourceArrow** Boolean
+    +**destArrow** Boolean
+    +format? LineDef
+    +**hiddenComments** Boolean
+    +connRestrictions? ConnRestriction
+    +**tags** List<String>
+    +step? Integer
+}
+LayoutElemConnection o-- Comment
+LayoutElemConnection o-- LineDef
+LayoutElemConnection o-- ConnRestriction
+
+
+class ConnectionElem {
+    +from? String
+    +to? String
+    +sourceArrow? Boolean
+    +destArrow? Boolean
+    +format? LineDef
+    +**hiddenComments** Boolean
+    +**parts** List<ConnectionLine>
+    +**connectionIndex** Integer
+    +connRestrictions? ConnRestriction
+    +comment? Comment
+    +step? Integer
+}
+ConnectionElem o-- LineDef
+ConnectionElem --> "0..*" ConnectionLine
+ConnectionElem o-- ConnRestriction
+ConnectionElem o-- Comment
+
+
+class ConnectionLine {
+    +**startX** Integer
+    +**startY** Integer
+    +**endX** Integer
+    +**endY** Integer
+    +srcLayoutId? String
+    +destLayoutId? String
+    +**connectionIndex** Integer
+    +**lineIndex** Integer
+    +format? LineDef
+    +**isStart** Boolean
+    +**isEnd** Boolean
+    +**inverseDirection** Boolean
+    +step? Integer
+}
+ConnectionLine o-- LineDef
+
+
+class ImageContainer {
+    +**x** Integer
+    +**y** Integer
+    +**width** Integer
+    +**height** Integer
+    +**marginTopBottom** Integer
+    +**marginLeftRight** Integer
+    +**imgId** String
+}
+
+
+class BoxFormat {
+    +**padding** Integer
+    +**fontCaption** FontDef
+    +**fontText1** FontDef
+    +**fontText2** FontDef
+    +**fontComment** FontDef
+    +**fontCommentMarker** FontDef
+    +line? LineDef
+    +cornerRadius? Integer
+    +fill? FillDef
+    +**minBoxMargin** Integer
+    +widthOfParent? Boolean
+    +fixedWidth? Integer
+    +fixedHeight? Integer
+    +**verticalTxt** Boolean
+}
+BoxFormat o-- FontDef
+BoxFormat o-- LineDef
+BoxFormat o-- FillDef
+
+
+class CommentFormat {
+    +**fontText** FontDef
+    +**fontMarker** FontDef
+    +**line** LineDef
+    +**fill** FillDef
+}
+CommentFormat o-- FontDef
+CommentFormat o-- LineDef
+CommentFormat o-- FillDef
+
+
+class ConnectionNode {
+    +**x** Integer
+    +**y** Integer
+    +nodeId? String
+    +boxId? String
+    +edges? List<ConnectionEdge>
+}
+ConnectionNode --> "0..*" ConnectionEdge
+
+
+note top of ConnectionNode
+helper type for calculating the
+connections between elements
+end note
+    
+class ConnectionEdge {
+    +**x** Integer
+    +**y** Integer
+    +destNodeId? String
+    +**weight** Integer
+}
+
+
+note top of ConnectionEdge
+edge type to store edges
+on a connection node
+end note
+    
+class CommentContainer {
+    +**text** String
+    +**label** String
+    +**format** CommentFormat
+    +**markerX** Integer
+    +**markerY** Integer
+    +**markerTextWidth** Integer
+    +**markerTextHeight** Integer
+    +**textWidth** Integer
+    +**textHeight** Integer
+    +**customMarker** Boolean
+    +connectionIndex? Integer
+    +step? Integer
+}
+CommentContainer o-- CommentFormat
+
+
+note top of CommentContainer
+all parameters to render the
+comments in the graphic
+end note
+    
+class Legend {
+    +entries? List<LegendEntry>
+    +format? String
+}
+Legend --> "0..*" LegendEntry
+
+
+note top of Legend
+Definition of the output for
+the legend
+end note
+    
+class LegendEntry {
+    +**text** String
+    +**format** String
+}
+
+
+note top of LegendEntry
+Definition of one legend entry
+end note
+    
+class Layout {
+    +**id** String
+    +**caption** String
+    +**text1** String
+    +**text2** String
+    +comment? Comment
+    +image? String
+    +**expand** Boolean
+    +extVertical? String
+    +vertical? List<Layout>
+    +extHorizontal? String
+    +horizontal? List<Layout>
+    +tags? List<String>
+    +connections? List<Connection>
+    +format? String
+    +dontBlockConPaths? Boolean
+    +dataLink? String
+    +**hiddenComments** Boolean
+}
+Layout o-- Comment
+Layout --> "0..*" Layout
+Layout --> "0..*" Connection
+
+
+class LayoutMixin {
+    +horizontal? List<Layout>
+    +vertical? List<Layout>
+}
+LayoutMixin --> "0..*" Layout
+
+
+note top of LayoutMixin
+container to extend the layouts
+of a given layout element
+via mixins
+end note
+    
+class Connection {
+    +**dest** String
+    +**destId** String
+    +comment? Comment
+    +**sourceArrow** Boolean
+    +**destArrow** Boolean
+    +format? String
+    +**hiddenComments** Boolean
+    +connRestrictions? ConnRestriction
+    +**tags** List<String>
+    +step? Integer
+}
+Connection o-- Comment
+Connection o-- ConnRestriction
+
+
+class Format {
+    +widthOfParent? Boolean
+    +fixedWidth? Integer
+    +fixedHeight? Integer
+    +verticalTxt? Boolean
+    +fontCaption? FontDef
+    +fontText1? FontDef
+    +fontText2? FontDef
+    +fontComment? FontDef
+    +fontCommentMarker? FontDef
+    +line? LineDef
+    +fill? FillDef
+    +padding? Integer
+    +boxMargin? Integer
+    +cornerRadius? Integer
+}
+Format o-- FontDef
+Format o-- LineDef
+Format o-- FillDef
+
+
+class FormatVariations {
+    +hasTag? Map<String,FormatVariation>
+}
+FormatVariations --> "0..*" FormatVariation
+
+
+class FormatVariation {
+    +formatRef? String
+    +**format** Format
+    +**priority** Integer
+}
+FormatVariation o-- Format
+
+
+class Overlay {
+    +**caption** String
+    +**refValue** Double
+    +refRadius? Double
+    +**centerXOffset** Double
+    +**centerYOffset** Double
+    +**printValue** Boolean
+    +**layouts** Map<String,Double>
+    +radiusDefs? OverlayRadiusDef
+    +formats? OverlayFormatDef
+}
+Overlay o-- OverlayRadiusDef
+Overlay o-- OverlayFormatDef
+
+
+note top of Overlay
+Definition of a topic related
+overlay ... for instance for
+heatmaps
+end note
+    
+class OverlayRadiusDef {
+    +**min** Double
+    +**max** Double
+}
+
+
+note top of OverlayRadiusDef
+definition how to calculate radius
+changes based on a reference
+value
+end note
+    
+class OverlayFormatDef {
+    +**default** String
+    +gradations? List<OverlayGradation>
+}
+OverlayFormatDef --> "0..*" OverlayGradation
+
+
+note top of OverlayFormatDef
+definition what format to use
+for a specific reference value
+end note
+    
+class OverlayGradation {
+    +**limit** Double
+    +**format** String
+}
+
+
+note top of OverlayGradation
+gradation entry for switching formats
+for overlays
+end note
+    
+class DocOverlay {
+    +**caption** String
+    +**refValue** Double
+    +**centerXOffset** Double
+    +**centerYOffset** Double
+    +**printValue** Boolean
+    +**layouts** Map<String,OverlayEntry>
+    +radiusDefs? OverlayRadiusDef
+    +formats? OverlayFormatDef
+}
+DocOverlay --> "0..*" OverlayEntry
+DocOverlay o-- OverlayRadiusDef
+DocOverlay o-- OverlayFormatDef
+
+
+note top of DocOverlay
+Definition of a topic related
+overlay ... for instance for
+heatmaps
+end note
+    
+class OverlayEntry {
+    +**value** Double
+    +**radius** Double
+    +**x** Integer
+    +**y** Integer
+    +**format** BoxFormat
+}
+OverlayEntry o-- BoxFormat
+
+
+class BoxesDocument {
+    +**title** String
+    +titleFormat? String
+    +legend? Legend
+    +**boxes** LayoutElement
+    +**height** Integer
+    +**width** Integer
+    +connections? List<ConnectionElem>
+    +connectedElems? List<String>
+    +**lineDist** Integer
+    +**globalPadding** Integer
+    +**minBoxMargin** Integer
+    +**minConnectorMargin** Integer
+    +formats? Map<String,BoxFormat>
+    +images? Map<String,ImageDef>
+    +verticalRoads? List<ConnectionLine>
+    +horizontalRoads? List<ConnectionLine>
+    +connectionNodes? List<ConnectionNode>
+    +horizontalLines? List<ConnectionLine>
+    +verticalLines? List<ConnectionLine>
+    +comments? List<CommentContainer>
+    +overlays? List<DocOverlay>
+    +**hasHiddenComments** Boolean
+    +**commentMarkerRadius** Integer
+    +**legendEndY** Integer
+    +**commentCurrent** Integer
+}
+BoxesDocument o-- Legend
+BoxesDocument o-- LayoutElement
+BoxesDocument --> "0..*" ConnectionElem
+BoxesDocument --> "0..*" BoxFormat
+BoxesDocument --> "0..*" ImageDef
+BoxesDocument --> "0..*" ConnectionLine
+BoxesDocument --> "0..*" ConnectionNode
+BoxesDocument --> "0..*" CommentContainer
+BoxesDocument --> "0..*" DocOverlay
+
+
+note top of BoxesDocument
+Internal model to describe the
+layout if the boxes chart
+end note
+    
+
+
+@enduml

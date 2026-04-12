@@ -28,7 +28,7 @@ docker-ui-push:
 	docker push ghcr.io/okieoth/boxes.ui:$(VERSION)
 
 generate-all:
-	bash -c scripts/generateAll.sh
+	rjsp generate inline -v --log-dir logs --skip-unchanged --search-dir configs/models
 
 run-ui-docker:
 	docker run -p 8081:80 -d --rm ghcr.io/okieoth/boxes.ui:$(VERSION)
