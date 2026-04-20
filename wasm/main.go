@@ -337,7 +337,7 @@ func getSearchMixin_tags(selectedIds []string) string {
 	mixin.Formats[searchResult] = format
 	fv := boxes.NewFormatVariations()
 	fv.HasTag[searchResult] = boxes.FormatVariation{
-		Priority:  1,
+		Priority:  50,
 		FormatRef: &searchResult,
 	}
 	mixin.FormatVariations = fv
