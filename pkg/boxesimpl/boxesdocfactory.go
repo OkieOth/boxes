@@ -366,6 +366,14 @@ func initLayoutElement(l *boxes.Layout, doc *boxes.BoxesDocument, b *boxes.Boxes
 	if l.Id != "" {
 		newParents = append(newParents, l.Id)
 	}
+	dontBlockConPaths := l.DontBlockConPaths
+	format := adjustFormatBasedOnVariations(l, b, f, doc)
+	if format != nil && format.RenderType != nil {
+		if *format.RenderType != types.BoxRenderTypeRectangle {
+			t := true
+			dontBlockConPaths = &t
+		}
+	}
 	elem := boxes.LayoutElement{
 		Id:                l.Id,
 		Caption:           l.Caption,
@@ -376,8 +384,8 @@ func initLayoutElement(l *boxes.Layout, doc *boxes.BoxesDocument, b *boxes.Boxes
 		Image:             initImage(l, b.Images),
 		Vertical:          initLayoutElemContainer(l.Vertical, doc, b, newParents),
 		Horizontal:        initLayoutElemContainer(l.Horizontal, doc, b, newParents),
-		Format:            adjustFormatBasedOnVariations(l, b, f, doc),
-		DontBlockConPaths: l.DontBlockConPaths,
+		Format:            format,
+		DontBlockConPaths: dontBlockConPaths,
 		DataLink:          l.DataLink,
 		Connections:       initConnections(l.Connections, doc.Formats),
 		ParentIds:         parents,

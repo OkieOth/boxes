@@ -1,0 +1,113 @@
+title: Simple Diamond
+legend:
+  entries:
+    - text: From Main Layout
+      format: default
+formats:
+  default:
+    line:
+      width: 2
+      color: black
+    fill:
+      color: white
+  extraMargin:
+    line:
+      width: 2
+      color: black
+    fill:
+      color: white
+    margin: 5
+  horizontalLine:
+    renderType: centeredHorizontalLine
+    line:
+      width: 3
+      color: purple
+      style: dashed
+  verticalLine:
+    renderType: centeredVerticalLine
+    line:
+      width: 3
+      color: purple
+      style: dashed
+
+images:
+  smilie_02_80:
+    width: 32
+    height: 32
+    base64Src: ../../resources/pngs/smilie_02_80x80_base64.txt
+  smilie_03_80:
+    width: 32
+    height: 32
+    base64Src: ../../resources/pngs/smilie_03_80x80_base64.txt
+boxes:
+  horizontal:
+    - vertical:
+        - id: r4_1
+          caption: Ferdows
+          text1: Stuff ...
+          text2: More stuff
+          connections:
+            - destId: r6_4
+            - destId: r6_5
+          horizontal:
+            - format: img2
+            - format: img3
+            - format: img2
+            - format: img3
+    - caption: A stupid vertical line
+      format: verticalLine
+    - vertical:
+        - id: r5_1
+          caption: Most Left Element, Das ist für Matthias mal sehen was passiert
+          text1: I am in the second line
+        - id: r5_2
+          caption: Center Element 1
+          text1: I am in the second line
+        - caption: A stupid Line
+          format: horizontalLine
+        - id: r5_3
+          caption: Right Element 0
+          text1: I am in the second line
+          connections:
+            - destId: r4_1
+          horizontal:
+            - format: img1
+    - vertical:
+        - id: r6_1
+          caption: Most Left Element
+          text1: I am in the second line
+          connections:
+            - destId: r4_1
+        - id: r6_2
+          caption: Center Element 2
+          text1: I am in the second line
+          connections:
+            - destId: r4_1
+        - id: r6_3
+          caption: Right Element 1
+          text1: I am in the second line
+        - id: r6_4
+          caption: Right Element 2
+          text1: I am in the second line
+        - id: r6_5
+          caption: Right Element 3
+          text1: I am in the second line
+    - vertical:
+        - id: r7_1
+          caption: Another Box
+          horizontal:
+            - format: img2
+            - format: img3
+            - format: img2
+            - format: img3
+          connections:
+            - destId: r6_4
+            - destId: r6_5
+        - id: r7_2
+          caption: Last Box
+          horizontal:
+            - format: img1
+            - format: img1
+            - format: img1
+          connections:
+            - destId: r5_1
