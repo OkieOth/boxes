@@ -1,3 +1,6 @@
+# v1.6.2
+* fixing UI click error, was different behavior between click on a box caption or clicking on the box area
+
 # v1.6.1
 * fixing connection error
 

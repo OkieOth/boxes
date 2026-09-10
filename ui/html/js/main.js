@@ -2014,8 +2014,15 @@ function initPage() {
         // Global click handler for SVG shapes
         window.shapeClick = function (evt) {
             if (window.presentationState?.active) return;
-            const el = evt.target;
+            let el = evt.target;
             if (!el || !el.id) return;
+
+            if (el.id.endsWith("_capt")) {
+                parentId = el.id.slice(0, -5);
+                newEl = document.getElementById(parentId);
+                if (!newEl) return;
+                el = newEl;
+            }
 
             // If blacklist collector is visible, collect to blacklist; otherwise, collect to expanded collector
             const blacklistBox = document.getElementById("blacklist-collector");
@@ -4082,13 +4089,13 @@ function getBoxPrefix(id) {
     //   'id_1_l2_3_g' -> 'id_1_l2_3'
     //   'box_1_g' -> 'box_1'
     if (!id) return id;
-    
+
     // Remove trailing '_g' suffix (SVG group element indicator)
     let result = id;
     if (result.endsWith('_g')) {
         result = result.slice(0, -2);
     }
-    
+
     return result;
 }
 
