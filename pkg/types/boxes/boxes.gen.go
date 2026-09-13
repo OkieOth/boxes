@@ -639,6 +639,8 @@ Caption *string `yaml:"caption,omitempty"`
 Text1 *string `yaml:"text1,omitempty"`
     // Second additional text
 Text2 *string `yaml:"text2,omitempty"`
+    // reference to the format to use for this box
+Format *string `yaml:"format,omitempty"`
     // Tags to annotate the box, tags are used to format and filter
 Tags []string `yaml:"tags,omitempty"`
 }
@@ -663,6 +665,11 @@ func CopySubsWrapperObj(src *SubsWrapperObj) *SubsWrapperObj {
     if src.Text2 != nil {
         v := *src.Text2
         ret.Text2 = &v
+    }
+
+    if src.Format != nil {
+        v := *src.Format
+        ret.Format = &v
     }
 
     if src.Tags != nil {

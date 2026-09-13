@@ -1,14 +1,14 @@
 {
-  "date": "2026-09-13T09:59:44.847894Z",
+  "date": "2026-09-13T10:06:34.779487Z",
   "schemas": {
-    "configs/models/./boxes.json": {
-      "hash": "c1c3ae662e7f225511204c07f4b43f9032bb0b3c9656ae642fa7edb9427a9dd3"
+    "configs/models/./shared.json": {
+      "hash": "932816ca2592a1be0687d7d60564c559c6ccdf7af3df71acfacf9cd008bf71f0"
     },
     "configs/models/./formats.json": {
       "hash": "200a6df798ee00d1ebbc9ee84d343979de65330bc74636c10af4ad96aed9fc1d"
     },
-    "configs/models/./shared.json": {
-      "hash": "932816ca2592a1be0687d7d60564c559c6ccdf7af3df71acfacf9cd008bf71f0"
+    "configs/models/./boxes.json": {
+      "hash": "563100af3644cc68bd16af714c8db286cd1487d8ad507bdc0bfda12bf0a87589"
     },
     "configs/models/boxes_external_mixins.json": {
       "version": "0.4.0",

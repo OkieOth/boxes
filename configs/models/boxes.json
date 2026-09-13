@@ -521,6 +521,10 @@
           "description": "Second additional text",
           "type": "string"
         },
+        "format": {
+          "description": "reference to the format to use for this box",
+          "type": "string"
+        },
         "tags": {
           "description": "Tags to annotate the box, tags are used to format and filter",
           "type": "array",

@@ -333,6 +333,7 @@ class SubsWrapperObj {
     +caption? String
     +text1? String
     +text2? String
+    +format? String
     +tags? List<String>
 }
 
