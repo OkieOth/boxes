@@ -63,6 +63,10 @@ func TestSimpleSvg(t *testing.T) {
 			outputFile: "../../temp/TestSimpleSvg_ccomplex.svg",
 		},
 		{
+			inputFile:  "../../resources/examples_boxes/complex_complex_with_lines.yaml",
+			outputFile: "../../temp/TestSimpleSvg_ccomplex_with_lines.svg",
+		},
+		{
 			inputFile:  "../../resources/examples_boxes/horizontal_nested_diamond.yaml",
 			outputFile: "../../temp/TestSimpleSvg_hdiamond_nestedx.svg",
 		},

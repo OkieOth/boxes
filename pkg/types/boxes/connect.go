@@ -87,6 +87,10 @@ func (doc *BoxesDocument) checkColl(x, y int, currentElem, startElem *LayoutElem
 		}
 		if !currentElemIsParentToStart {
 			// end - not needed any longer because only roads need that this function
+			if currentElem.DontBlockConPaths != nil && *currentElem.DontBlockConPaths && currentElem.Format.RenderType != nil && *currentElem.Format.RenderType != types.BoxRenderTypeRectangle {
+				return CollisionType_NoCollision
+			}
+
 			if currentElem.XTextBox != nil && currentElem.DontBlockConPaths != nil && *currentElem.DontBlockConPaths {
 				curMinX := *currentElem.XTextBox
 				curMaxX := *currentElem.XTextBox + *currentElem.WidthTextBox

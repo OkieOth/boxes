@@ -18,12 +18,21 @@ formats:
       color: white
     margin: 5
   horizontalLine:
+    fontCaption:
+      size: 5
+      color: purple
+    padding: 1
     renderType: centeredHorizontalLine
     line:
       width: 3
       color: purple
       style: dashed
   verticalLine:
+    fontCaption:
+      size: 5
+      color: purple
+    verticalTxt: true
+    padding: 1
     renderType: centeredVerticalLine
     line:
       width: 3
@@ -72,6 +81,8 @@ boxes:
             - destId: r4_1
           horizontal:
             - format: img1
+    - caption: Another stupid vertical line
+      format: verticalLine
     - vertical:
         - id: r6_1
           caption: Most Left Element

@@ -192,7 +192,7 @@ func (l *LayoutElement) initHorizontal(c types.TextDimensionCalculator, yInnerOf
 		curY := l.Y + yInnerOffset
 		l.Horizontal.Y = curY
 		var h, w int
-		var hasChilds bool
+		var hasChilds, hasVerticalLine bool
 		margin := types.GlobalMinBoxMargin
 		if l.Format != nil {
 			margin = l.Format.MinBoxMargin
@@ -201,6 +201,9 @@ func (l *LayoutElement) initHorizontal(c types.TextDimensionCalculator, yInnerOf
 			sub := &l.Horizontal.Elems[i]
 			if (sub.Horizontal != nil && len(sub.Horizontal.Elems) > 0) || (sub.Vertical != nil && len(sub.Vertical.Elems) > 0) {
 				hasChilds = true
+			}
+			if sub.Format != nil && sub.Format.RenderType != nil && *sub.Format.RenderType == types.BoxRenderTypeCenteredVerticalLine {
+				hasVerticalLine = true
 			}
 			marginToUse := margin
 			if sub.Caption == "" && sub.Text1 == "" && sub.Text2 == "" && sub.Image != nil {
@@ -228,6 +231,14 @@ func (l *LayoutElement) initHorizontal(c types.TextDimensionCalculator, yInnerOf
 			for i := 0; i < len(l.Horizontal.Elems); i++ {
 				sub := &l.Horizontal.Elems[i]
 				sub.Height = h
+			}
+		}
+		if hasVerticalLine {
+			for i := 0; i < len(l.Horizontal.Elems); i++ {
+				sub := &l.Horizontal.Elems[i]
+				if sub.Format != nil && sub.Format.RenderType != nil && *sub.Format.RenderType == types.BoxRenderTypeCenteredVerticalLine {
+					sub.Height = l.Horizontal.Height
+				}
 			}
 		}
 
@@ -260,7 +271,7 @@ func getMin(v1, v2 int) int {
 	return v1
 }
 
-func (l *LayoutElement) initDimensionsForRectangle(c types.TextDimensionCalculator) {
+func (l *LayoutElement) InitDimensions(c types.TextDimensionCalculator) {
 	var cW, cH, t1W, t1H, t2W, t2H, textWidth, textHeight int
 	//var yCaptionOffset, yText1Offset, yText2Offset, yInnerOffset int
 	var yInnerOffset int
@@ -425,187 +436,6 @@ func (l *LayoutElement) initDimensionsForRectangle(c types.TextDimensionCalculat
 	if l.Image != nil {
 		l.Image.X = l.X + ((l.Width - l.Image.Width - l.Image.MarginLeftRight - l.Image.MarginLeftRight) / 2)
 	}
-}
-
-func (l *LayoutElement) initDimensionsForHorizontalLine(c types.TextDimensionCalculator) {
-	var cW, cH, t1W, t2W, textWidth, textHeight int
-	//var yCaptionOffset, yText1Offset, yText2Offset, yInnerOffset int
-	var yInnerOffset int
-	padding := types.GlobalPadding
-	if l.Format != nil && l.Format.Padding > 0 {
-		padding = l.Format.Padding
-	}
-	yTextBox := l.Y + padding
-	if l.Format != nil && l.Format.Padding > 0 {
-		padding = l.Format.Padding
-	}
-	if l.Image != nil {
-		w := (l.Image.Width + (2 * l.Image.MarginLeftRight))
-		h := l.Image.Height + (2 * l.Image.MarginTopBottom)
-		l.Image.Y = l.Y + l.Image.MarginTopBottom
-		l.Height += h
-		if l.Width < w {
-			l.Width = w
-		}
-		yInnerOffset += h
-		yTextBox = l.Y + h
-	}
-	p := types.GlobalPadding
-	if l.Format != nil && l.Format.Padding > 0 {
-		p = l.Format.Padding
-	}
-	if l.Caption != "" {
-		if l.Caption != "" {
-			cW, cH = c.Dimensions(l.Caption, &l.Format.FontCaption)
-			if !l.Format.VerticalTxt {
-				l.Height += cH
-				l.Height += l.Format.FontCaption.SpaceBottom
-				l.Height += p
-				if l.Text1 == "" && l.Text2 == "" && l.Vertical == nil && l.Horizontal == nil {
-					p := l.Format.Padding
-					if l.Format.FontCaption.SpaceBottom > 0 {
-						p = l.Format.FontCaption.SpaceBottom
-					}
-					l.Height += p
-				}
-			} else {
-				// vertical text
-				cW, cH = cH, cW
-				l.Width += cW + p + l.Format.FontCaption.SpaceBottom
-				// if l.Text1 == "" && l.Text2 == "" {
-				// 	l.Width += l.Format.Padding
-				// }
-			}
-			textWidth = cW
-			textHeight = cH
-		}
-		// normal horizontal text
-		h := l.Height
-		if l.Format.FixedHeight != nil {
-			h = *l.Format.FixedHeight
-		}
-		l.Height = l.adjustToRaster(h)
-		yInnerOffset = l.Height + types.RasterSize
-		var w int
-		if l.Format.FixedWidth != nil {
-			w = *l.Format.FixedWidth
-		} else {
-			w = max(cW, max(t1W, t2W))
-		}
-		l.Width = l.adjustToRaster(w + (2 * l.Format.Padding))
-		l.WidthTextBox = &textWidth
-		l.HeightTextBox = &textHeight
-	} else if l.Format != nil {
-		if l.Format.FixedHeight != nil {
-			l.Height = l.adjustToRaster(*l.Format.FixedHeight)
-		}
-		if l.Format.FixedWidth != nil {
-			l.Width = l.adjustToRaster(*l.Format.FixedWidth)
-		}
-	}
-	l.adjustToParentWidth(l.Vertical)   // doesn't go recursive through the children
-	l.adjustToParentWidth(l.Horizontal) // doesn't go recursive through the children
-
-	xTextBox := l.X + (l.Width-textWidth)/2
-	l.XTextBox = &xTextBox
-	l.YTextBox = &yTextBox
-	if l.Image != nil {
-		l.Image.X = l.X + ((l.Width - l.Image.Width - l.Image.MarginLeftRight - l.Image.MarginLeftRight) / 2)
-	}
-}
-
-func (l *LayoutElement) initDimensionsForVerticalLine(c types.TextDimensionCalculator) {
-	var cW, cH, t1H, t2H, textWidth, textHeight int
-	//var yCaptionOffset, yText1Offset, yText2Offset, yInnerOffset int
-	var yInnerOffset int
-	padding := types.GlobalPadding
-	if l.Format != nil && l.Format.Padding > 0 {
-		padding = l.Format.Padding
-	}
-	yTextBox := l.Y + padding
-	if l.Format != nil && l.Format.Padding > 0 {
-		padding = l.Format.Padding
-	}
-	if l.Image != nil {
-		w := (l.Image.Width + (2 * l.Image.MarginLeftRight))
-		h := l.Image.Height + (2 * l.Image.MarginTopBottom)
-		l.Image.Y = l.Y + l.Image.MarginTopBottom
-		l.Height += h
-		if l.Width < w {
-			l.Width = w
-		}
-		yInnerOffset += h
-		yTextBox = l.Y + h
-	}
-	p := types.GlobalPadding
-	if l.Format != nil && l.Format.Padding > 0 {
-		p = l.Format.Padding
-	}
-	if l.Caption != "" {
-		if l.Caption != "" {
-			cW, cH = c.Dimensions(l.Caption, &l.Format.FontCaption)
-			// vertical text
-			cW, cH = cH, cW
-			l.Width += cW + p + l.Format.FontCaption.SpaceBottom
-			// if l.Text1 == "" && l.Text2 == "" {
-			// 	l.Width += l.Format.Padding
-			// }
-			textWidth = cW
-			textHeight = cH
-		}
-		// vertical text
-		w := l.Width
-		if l.Format.FixedWidth != nil {
-			w = *l.Format.FixedWidth
-		}
-		l.Width = l.adjustToRaster(w)
-		yInnerOffset = l.Width
-		var h int
-		if l.Format.FixedHeight != nil {
-			h = *l.Format.FixedHeight
-		} else {
-			h = max(cH, max(t1H, t2H)) + (2 * l.Format.Padding)
-		}
-		l.Height = l.adjustToRaster(h)
-		l.WidthTextBox = &textWidth
-		l.HeightTextBox = &textHeight
-	} else if l.Format != nil {
-		if l.Format.FixedHeight != nil {
-			l.Height = l.adjustToRaster(*l.Format.FixedHeight)
-		}
-		if l.Format.FixedWidth != nil {
-			l.Width = l.adjustToRaster(*l.Format.FixedWidth)
-		}
-	}
-	l.adjustToParentWidth(l.Vertical)   // doesn't go recursive through the children
-	l.adjustToParentWidth(l.Horizontal) // doesn't go recursive through the children
-
-	xTextBox := l.X + (l.Width-textWidth)/2
-	l.XTextBox = &xTextBox
-	l.YTextBox = &yTextBox
-	if l.Image != nil {
-		l.Image.X = l.X + ((l.Width - l.Image.Width - l.Image.MarginLeftRight - l.Image.MarginLeftRight) / 2)
-	}
-}
-
-func (l *LayoutElement) InitDimensions(c types.TextDimensionCalculator) {
-	if l.Format != nil {
-		if l.Format.RenderType != nil {
-			switch *l.Format.RenderType {
-			case types.BoxRenderTypeCenteredHorizontalLine:
-				l.initDimensionsForHorizontalLine(c)
-			case types.BoxRenderTypeCenteredVerticalLine:
-				l.initDimensionsForVerticalLine(c)
-			default:
-				l.initDimensionsForRectangle(c)
-			}
-		} else {
-			l.initDimensionsForRectangle(c)
-		}
-	} else {
-		l.initDimensionsForRectangle(c)
-	}
-
 }
 
 func (l *LayoutElement) adjustToParentWidth(cont *LayoutElemContainer) {
