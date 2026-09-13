@@ -249,6 +249,10 @@
         },
         "vertical": {
           "$ref": "#/definitions/LayoutArray"
+        },
+        "wrapSubElems": {
+          "description": "use this field if you want to wrap existing horizontal or vertical containers in it's own box.",
+          "$ref": "#/definitions/SubsWrapperObj"
         }
       }
     },
@@ -500,6 +504,31 @@
         }
       },
       "required": ["limit", "format"]
+    },
+    "SubsWrapperObj": {
+      "description": "attributes used to build dynamic wrapper boxes around horizontal or vertical containers",
+      "type": "object",
+      "properties": {
+        "caption": {
+          "description": "Some kind of the main text",
+          "type": "string"
+        },
+        "text1": {
+          "description": "First additional text",
+          "type": "string"
+        },
+        "text2": {
+          "description": "Second additional text",
+          "type": "string"
+        },
+        "tags": {
+          "description": "Tags to annotate the box, tags are used to format and filter",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
     }
   }
 }

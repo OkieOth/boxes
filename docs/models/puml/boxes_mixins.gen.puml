@@ -100,8 +100,10 @@ class LayoutMixin {
     +putAfter? String
     +horizontal? List<Layout>
     +vertical? List<Layout>
+    +wrapSubElems? SubsWrapperObj
 }
 LayoutMixin --> "0..*" Layout
+LayoutMixin o-- SubsWrapperObj
 
 
 note top of LayoutMixin
@@ -325,6 +327,20 @@ class OverlayGradation {
 note top of OverlayGradation
 gradation entry for switching formats
 for overlays
+end note
+    
+class SubsWrapperObj {
+    +caption? String
+    +text1? String
+    +text2? String
+    +tags? List<String>
+}
+
+
+note top of SubsWrapperObj
+attributes used to build dynamic
+wrapper boxes around horizontal or
+vertical containers
 end note
     
 class ProcessStep {

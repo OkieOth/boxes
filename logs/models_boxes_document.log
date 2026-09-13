@@ -1,17 +1,17 @@
 {
-  "date": "2026-09-07T14:11:00.872278Z",
+  "date": "2026-09-13T09:59:44.836252Z",
   "schemas": {
-    "configs/models/./boxes.json": {
-      "hash": "7d5af7519f873d5a58c0cd15e1af3784096ce7669ea47e385a56ff46faa9a168"
-    },
-    "configs/models/boxes_document.json": {
-      "hash": "342e4f34b303bf47cabbb0c6baa40bc31145630938012c024235fd7521c9ddba"
+    "configs/models/./formats.json": {
+      "hash": "200a6df798ee00d1ebbc9ee84d343979de65330bc74636c10af4ad96aed9fc1d"
     },
     "configs/models/./shared.json": {
       "hash": "932816ca2592a1be0687d7d60564c559c6ccdf7af3df71acfacf9cd008bf71f0"
     },
-    "configs/models/./formats.json": {
-      "hash": "200a6df798ee00d1ebbc9ee84d343979de65330bc74636c10af4ad96aed9fc1d"
+    "configs/models/./boxes.json": {
+      "hash": "c1c3ae662e7f225511204c07f4b43f9032bb0b3c9656ae642fa7edb9427a9dd3"
+    },
+    "configs/models/boxes_document.json": {
+      "hash": "342e4f34b303bf47cabbb0c6baa40bc31145630938012c024235fd7521c9ddba"
     }
   }
 }
