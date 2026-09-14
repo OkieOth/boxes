@@ -376,6 +376,15 @@ func mergeStepComments(additional *BoxesFileMixings, step ProcessStep, stepIdx i
 	}
 }
 
+func mergeStepFormats(additional *BoxesFileMixings, step ProcessStep, stepIdx int) {
+	if additional.Formats == nil {
+		additional.Formats = make(map[string]Format)
+	}
+	for k, v := range step.Formats {
+		additional.Formats[k] = v
+	}
+}
+
 func mergeStepTags(additional *BoxesFileMixings, step ProcessStep) {
 	if len(step.Tags) == 0 {
 		return
@@ -420,6 +429,7 @@ func (b *Boxes) MixinThingsWithSteps(additional BoxesFileMixings, activeSteps []
 			mergeStepLayoutMixins(&additional, step, idx)
 			mergeStepConnections(&additional, step, idx)
 			mergeStepComments(&additional, step, idx)
+			mergeStepFormats(&additional, step, idx)
 			mergeStepTags(&additional, step)
 			mergeStepOverlays(&additional, step)
 			mergeStepFormatVariations(&additional, step)

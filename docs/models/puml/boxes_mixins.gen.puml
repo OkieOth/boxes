@@ -351,12 +351,14 @@ class ProcessStep {
     +comments? Map<String,Comment>
     +tags? Map<String,List<String>>
     +overlays? List<Overlay>
+    +formats? Map<String,Format>
     +formatVariations? FormatVariations
 }
 ProcessStep --> "0..*" LayoutMixin
 ProcessStep --> "0..*" ConnectionCont
 ProcessStep --> "0..*" Comment
 ProcessStep --> "0..*" Overlay
+ProcessStep --> "0..*" Format
 ProcessStep o-- FormatVariations
 
 

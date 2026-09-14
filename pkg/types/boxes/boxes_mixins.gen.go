@@ -26,6 +26,8 @@ Comments map[string]types.Comment `yaml:"comments,omitempty"`
     // dictionary of tag array, the additional tags will be applied on the existing layout and can be used for instance to define display formats
 Tags map[string][]string `yaml:"tags,omitempty"`
 Overlays []Overlay `yaml:"overlays,omitempty"`
+    // Be careful it can mess up the stype of the picture! This allows to overwrite global formats in an available step. It can be helpful in cases this step wants to highlight things, that are visual pressed back by existing formats
+Formats map[string]Format `yaml:"formats,omitempty"`
     // Set of formats that overwrites the style of boxes, if specific conditions are met
 FormatVariations *FormatVariations `yaml:"formatVariations,omitempty"`
 }
@@ -74,6 +76,13 @@ func CopyProcessStep(src *ProcessStep) *ProcessStep {
         }
     }
 
+    if src.Formats != nil {
+        ret.Formats = make(map[string]Format, len(src.Formats))
+        for k, v := range src.Formats {
+            ret.Formats[k] = *CopyFormat(&v)
+        }
+    }
+
     ret.FormatVariations = CopyFormatVariations(src.FormatVariations)
 return &ret
 }
@@ -86,6 +95,7 @@ func NewProcessStep() *ProcessStep {
     ret.Comments = make(map[string]types.Comment, 0)
     ret.Tags = make(map[string][]string, 0)
     ret.Overlays = make([]Overlay, 0)
+    ret.Formats = make(map[string]Format, 0)
     return &ret
 }
 

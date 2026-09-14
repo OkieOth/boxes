@@ -164,6 +164,13 @@
             "$ref": "./boxes.json#/definitions/Overlay"
           }
         },
+        "formats": {
+          "description": "Be careful it can mess up the stype of the picture! This allows to overwrite global formats in an available step. It can be helpful in cases this step wants to highlight things, that are visual pressed back by existing formats",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "./boxes.json#/definitions/Format"
+          }
+        },
         "formatVariations": {
           "description": "Set of formats that overwrites the style of boxes, if specific conditions are met",
           "$ref": "./boxes.json#/definitions/FormatVariations"
