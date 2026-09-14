@@ -347,6 +347,7 @@ end note
 class ProcessStep {
     +**caption** String
     +layoutMixins? Map<String,LayoutMixin>
+    +boxMixins? List<BoxMixin>
     +connections? Map<String,ConnectionCont>
     +comments? Map<String,Comment>
     +tags? Map<String,List<String>>
@@ -355,11 +356,51 @@ class ProcessStep {
     +formatVariations? FormatVariations
 }
 ProcessStep --> "0..*" LayoutMixin
+ProcessStep --> "0..*" BoxMixin
 ProcessStep --> "0..*" ConnectionCont
 ProcessStep --> "0..*" Comment
 ProcessStep --> "0..*" Overlay
 ProcessStep --> "0..*" Format
 ProcessStep o-- FormatVariations
+
+
+class BoxMixin {
+    +**id** String
+    +**caption** String
+    +**text1** String
+    +**text2** String
+    +comment? Comment
+    +image? String
+    +**expand** Boolean
+    +extVertical? String
+    +vertical? List<Layout>
+    +extHorizontal? String
+    +horizontal? List<Layout>
+    +tags? List<String>
+    +connections? List<Connection>
+    +format? String
+    +dontBlockConPaths? Boolean
+    +dataLink? String
+    +**hiddenComments** Boolean
+    +**reference** String
+    +putBefore? String
+    +putAfter? String
+}
+BoxMixin o-- Comment
+BoxMixin --> "0..*" Layout
+BoxMixin --> "0..*" Connection
+
+
+note top of BoxMixin
+definition of a box to
+be mixed in
+end note
+    
+class BoxMixinBase {
+    +**reference** String
+    +putBefore? String
+    +putAfter? String
+}
 
 
 class ConnectionCont {

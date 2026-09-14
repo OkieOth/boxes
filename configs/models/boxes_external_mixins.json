@@ -134,6 +134,13 @@
             "$ref": "./boxes.json#/definitions/LayoutMixin"
           }
         },
+        "boxMixins": {
+          "description": "array for box mixins. It's useful in cases where the dictionary reference to boxes to mix in is limiting",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/BoxMixin"
+          }
+        },
         "connections": {
           "description": "dictionary of connection objects",
           "type": "object",
@@ -176,6 +183,35 @@
           "$ref": "./boxes.json#/definitions/FormatVariations"
         }
       }
+    },
+    "BoxMixin": {
+      "description": "definition of a box to be mixed in",
+      "allOf": [
+        {
+          "$ref": "./boxes.json#/definitions/Layout"
+        },
+        {
+          "$ref": "./boxes.json#/definitions/BoxMixinBase"
+        }
+      ]
+    },
+    "BoxMixinBase": {
+      "type": "object",
+      "properties": {
+        "reference": {
+          "description": "either ID or caption of the box where this mixin is placed before or after",
+          "type": "string"
+        },
+        "putBefore": {
+          "description": "triggers the new mixin elemente to put either left or above the object with the given ID or caption",
+          "type": "string"
+        },
+        "putAfter": {
+          "description": "triggers the new mixin elemente to put either right or below the object with the given ID or caption",
+          "type": "string"
+        }
+      },
+      "required": ["reference"]
     },
     "ConnectionCont": {
       "type": "object",
