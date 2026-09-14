@@ -161,8 +161,41 @@ func (b *Boxes) mixInLayoutNow(l *Layout, mixin *LayoutMixin) {
 		}
 	} else {
 		// existing containers (vertical or horizontal) should be wrapped in a dedicated box
-		// TODO
+		newBox := newLayoutFromWrapSubMixin(mixin.WrapSubElems)
+		if newBox != nil {
+			// assign the container content to the new Boxes
+			if len(l.Horizontal) > 0 {
+				newBox.Horizontal = append(newBox.Horizontal, l.Horizontal...)
+				l.Horizontal = []Layout{*newBox}
+			} else if len(l.Vertical) > 0 {
+				newBox.Vertical = append(newBox.Vertical, l.Vertical...)
+				l.Vertical = []Layout{*newBox}
+			}
+		}
 	}
+}
+
+func newLayoutFromWrapSubMixin(wrapperDef *SubsWrapperObj) *Layout {
+	if wrapperDef == nil {
+		return nil
+	}
+	newBox := NewLayout()
+	if wrapperDef.Caption != nil {
+		newBox.Caption = *wrapperDef.Caption
+	}
+	if wrapperDef.Text1 != nil {
+		newBox.Text1 = *wrapperDef.Text1
+	}
+	if wrapperDef.Text2 != nil {
+		newBox.Text2 = *wrapperDef.Text2
+	}
+	if wrapperDef.Format != nil {
+		newBox.Format = wrapperDef.Format
+	}
+	if len(wrapperDef.Tags) > 0 {
+		newBox.Tags = append(newBox.Tags, wrapperDef.Tags...)
+	}
+	return newBox
 }
 
 func (b *Boxes) mixInLayoutsImplCont(cont []Layout, additional *map[string]LayoutMixin) {

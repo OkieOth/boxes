@@ -41,7 +41,8 @@ boxes:
             - format: img3
             - format: img2
             - format: img3
-    - vertical:
+    - id: id_1111
+      vertical:
         - id: r5_1
           caption: Most Left Element, Das ist für Matthias mal sehen was passiert
           text1: I am in the second line
