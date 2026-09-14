@@ -17,12 +17,14 @@ import (
 type ProcessStep struct {
     // title, that's appended to the original layout title
 Caption string `yaml:"caption"`
+    // dictionary for layout mixins. key of the dictionary is the caption of the box that will take the additional content
+LayoutMixins map[string]LayoutMixin `yaml:"layoutMixins,omitempty"`
     // dictionary of connection objects
 Connections map[string]ConnectionCont `yaml:"connections,omitempty"`
     // dictionary of comment objects, this comment will applied on layout objects and replace existing comments there
 Comments map[string]types.Comment `yaml:"comments,omitempty"`
     // dictionary of tag array, the additional tags will be applied on the existing layout and can be used for instance to define display formats
-Tags map[string]Tags `yaml:"tags,omitempty"`
+Tags map[string][]string `yaml:"tags,omitempty"`
 Overlays []Overlay `yaml:"overlays,omitempty"`
     // Set of formats that overwrites the style of boxes, if specific conditions are met
 FormatVariations *FormatVariations `yaml:"formatVariations,omitempty"`
@@ -36,6 +38,13 @@ func CopyProcessStep(src *ProcessStep) *ProcessStep {
     var ret ProcessStep
 
     ret.Caption = src.Caption
+
+    if src.LayoutMixins != nil {
+        ret.LayoutMixins = make(map[string]LayoutMixin, len(src.LayoutMixins))
+        for k, v := range src.LayoutMixins {
+            ret.LayoutMixins[k] = *CopyLayoutMixin(&v)
+        }
+    }
 
     if src.Connections != nil {
         ret.Connections = make(map[string]ConnectionCont, len(src.Connections))
@@ -52,9 +61,9 @@ func CopyProcessStep(src *ProcessStep) *ProcessStep {
     }
 
     if src.Tags != nil {
-        ret.Tags = make(map[string]Tags, len(src.Tags))
+        ret.Tags = make(map[string][]string, len(src.Tags))
         for k, v := range src.Tags {
-            ret.Tags[k] = *CopyTags(&v)
+            ret.Tags[k] = v
         }
     }
 
@@ -72,9 +81,10 @@ return &ret
 
 func NewProcessStep() *ProcessStep {
     var ret ProcessStep
+    ret.LayoutMixins = make(map[string]LayoutMixin, 0)
     ret.Connections = make(map[string]ConnectionCont, 0)
     ret.Comments = make(map[string]types.Comment, 0)
-    ret.Tags = make(map[string]Tags, 0)
+    ret.Tags = make(map[string][]string, 0)
     ret.Overlays = make([]Overlay, 0)
     return &ret
 }
@@ -106,33 +116,6 @@ func NewConnectionCont() *ConnectionCont {
     return &ret
 }
 
-type Tags struct {
-Tags []string `yaml:"tags,omitempty"`
-}
-
-
-func CopyTags(src *Tags) *Tags {
-    if src == nil {
-        return nil
-    }
-    var ret Tags
-
-    if src.Tags != nil {
-        ret.Tags = make([]string, len(src.Tags))
-        for i, v := range src.Tags {
-            ret.Tags[i] = v
-        }
-    }
-return &ret
-}
-
-
-func NewTags() *Tags {
-    var ret Tags
-    ret.Tags = make([]string, 0)
-    return &ret
-}
-
 // Model to inject additional things in a boxes layout definition
 type BoxesFileMixings struct {
     // optional title, that's appended to the original layout title
@@ -151,7 +134,7 @@ FormatVariations *FormatVariations `yaml:"formatVariations,omitempty"`
     // dictionary of comment objects, this comment will applied on layout objects and replace existing comments there
 Comments map[string]types.Comment `yaml:"comments,omitempty"`
     // dictionary of tag array, the additional tags will be applied on the existing layout and can be used for instance to define display formats
-Tags map[string]Tags `yaml:"tags,omitempty"`
+Tags map[string][]string `yaml:"tags,omitempty"`
     // optional map of images used in the generated graphic
 Images map[string]types.ImageDef `yaml:"images,omitempty"`
 Overlays []Overlay `yaml:"overlays,omitempty"`
@@ -209,9 +192,9 @@ func CopyBoxesFileMixings(src *BoxesFileMixings) *BoxesFileMixings {
     }
 
     if src.Tags != nil {
-        ret.Tags = make(map[string]Tags, len(src.Tags))
+        ret.Tags = make(map[string][]string, len(src.Tags))
         for k, v := range src.Tags {
-            ret.Tags[k] = *CopyTags(&v)
+            ret.Tags[k] = v
         }
     }
 
@@ -245,7 +228,7 @@ func NewBoxesFileMixings() *BoxesFileMixings {
     ret.Connections = make(map[string]ConnectionCont, 0)
     ret.Formats = make(map[string]Format, 0)
     ret.Comments = make(map[string]types.Comment, 0)
-    ret.Tags = make(map[string]Tags, 0)
+    ret.Tags = make(map[string][]string, 0)
     ret.Images = make(map[string]types.ImageDef, 0)
     ret.Overlays = make([]Overlay, 0)
     ret.Steps = make([]ProcessStep, 0)

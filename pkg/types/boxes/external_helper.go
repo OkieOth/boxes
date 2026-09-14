@@ -58,18 +58,18 @@ func (b *Boxes) mixInConnectionsImpl(l *Layout, additional map[string]Connection
 	b.mixInConnectionsImplCont(l.Vertical, additional)
 }
 
-func (b *Boxes) mixInTagsImplCont(cont []Layout, additional map[string]Tags) {
+func (b *Boxes) mixInTagsImplCont(cont []Layout, additional map[string][]string) {
 	for i := range len(cont) {
 		b.mixInTagsImpl(&cont[i], additional)
 	}
 }
 
-func (b *Boxes) mixInTagsImpl(l *Layout, additional map[string]Tags) {
+func (b *Boxes) mixInTagsImpl(l *Layout, additional map[string][]string) {
 	if l.Caption != "" {
 		if tags, ok := additional[l.Caption]; ok {
-			l.Tags = append(l.Tags, tags.Tags...)
+			l.Tags = append(l.Tags, tags...)
 		} else if tags, ok := additional[l.Id]; ok {
-			l.Tags = append(l.Tags, tags.Tags...)
+			l.Tags = append(l.Tags, tags...)
 		}
 	}
 	b.mixInTagsImplCont(l.Horizontal, additional)
@@ -180,6 +180,7 @@ func newLayoutFromWrapSubMixin(wrapperDef *SubsWrapperObj) *Layout {
 		return nil
 	}
 	newBox := NewLayout()
+	newBox.Expand = true
 	if wrapperDef.Caption != nil {
 		newBox.Caption = *wrapperDef.Caption
 	}
@@ -288,6 +289,64 @@ func (b *Boxes) MixinThings(additional BoxesFileMixings) {
 	}
 }
 
+func mergeStepLayoutMixins(additional *BoxesFileMixings, step ProcessStep, stepIdx int) {
+	if additional.LayoutMixins == nil {
+		additional.LayoutMixins = make(map[string]LayoutMixin)
+	}
+	for k, v := range step.LayoutMixins {
+		if existing, ok := additional.LayoutMixins[k]; ok {
+			if len(v.Horizontal) > 0 {
+				if v.PutAfter != nil {
+					for i := range len(existing.Horizontal) - 1 {
+						e := existing.Horizontal[i]
+						if e.Caption == *v.PutAfter || e.Id == *v.PutAfter {
+							existing.Horizontal = slices.Insert(existing.Horizontal, i+1, v.Horizontal...)
+							break
+						}
+					}
+				} else if v.PutBefore != nil {
+					for i := range len(existing.Horizontal) {
+						e := existing.Horizontal[i]
+						if e.Caption == *v.PutBefore || e.Id == *v.PutBefore {
+							existing.Horizontal = slices.Insert(existing.Horizontal, i, v.Horizontal...)
+							break
+						}
+					}
+				} else {
+					existing.Horizontal = append(existing.Horizontal, v.Horizontal...)
+				}
+			}
+			if len(v.Vertical) > 0 {
+				if v.PutAfter != nil {
+					for i := range len(existing.Vertical) - 1 {
+						e := existing.Vertical[i]
+						if e.Caption == *v.PutAfter || e.Id == *v.PutAfter {
+							existing.Vertical = slices.Insert(existing.Vertical, i+1, v.Vertical...)
+							break
+						}
+					}
+				} else if v.PutBefore != nil {
+					for i := range len(existing.Vertical) {
+						e := existing.Vertical[i]
+						if e.Caption == *v.PutBefore || e.Id == *v.PutBefore {
+							existing.Vertical = slices.Insert(existing.Vertical, i, v.Vertical...)
+							break
+						}
+					}
+				} else {
+					existing.Vertical = append(existing.Vertical, v.Vertical...)
+				}
+			}
+			if v.WrapSubElems != nil {
+				existing.WrapSubElems = v.WrapSubElems
+			}
+			additional.LayoutMixins[k] = existing
+		} else {
+			additional.LayoutMixins[k] = v
+		}
+	}
+}
+
 func mergeStepConnections(additional *BoxesFileMixings, step ProcessStep, stepIdx int) {
 	if additional.Connections == nil {
 		additional.Connections = make(map[string]ConnectionCont)
@@ -322,11 +381,11 @@ func mergeStepTags(additional *BoxesFileMixings, step ProcessStep) {
 		return
 	}
 	if additional.Tags == nil {
-		additional.Tags = make(map[string]Tags)
+		additional.Tags = make(map[string][]string, 0)
 	}
 	for k, v := range step.Tags {
 		if existing, ok := additional.Tags[k]; ok {
-			existing.Tags = append(existing.Tags, v.Tags...)
+			existing = append(existing, v...)
 			additional.Tags[k] = existing
 		} else {
 			additional.Tags[k] = v
@@ -358,6 +417,7 @@ func (b *Boxes) MixinThingsWithSteps(additional BoxesFileMixings, activeSteps []
 				continue
 			}
 			step := additional.Steps[idx]
+			mergeStepLayoutMixins(&additional, step, idx)
 			mergeStepConnections(&additional, step, idx)
 			mergeStepComments(&additional, step, idx)
 			mergeStepTags(&additional, step)

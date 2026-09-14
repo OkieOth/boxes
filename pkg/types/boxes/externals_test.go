@@ -173,15 +173,15 @@ func TestMixinThingsWithSteps_Tags(t *testing.T) {
 		Steps: []boxes.ProcessStep{
 			{
 				Caption: "Step 1",
-				Tags: map[string]boxes.Tags{
-					"Box A": {Tags: []string{"tag1", "tag2"}},
+				Tags: map[string][]string{
+					"Box A": []string{"tag1", "tag2"},
 				},
 			},
 			{
 				Caption: "Step 2",
-				Tags: map[string]boxes.Tags{
-					"Box A": {Tags: []string{"tag3"}},
-					"Box B": {Tags: []string{"tag4"}},
+				Tags: map[string][]string{
+					"Box A": []string{"tag3"},
+					"Box B": []string{"tag4"},
 				},
 			},
 		},

@@ -11,6 +11,28 @@ skinparam class {
 
 
 
+class Legend {
+    +entries? List<LegendEntry>
+    +format? String
+}
+Legend --> "0..*" LegendEntry
+
+
+note top of Legend
+Definition of the output for
+the legend
+end note
+    
+class LegendEntry {
+    +**text** String
+    +**format** String
+}
+
+
+note top of LegendEntry
+Definition of one legend entry
+end note
+    
 class Comment {
     +**text** String
     +label? String
@@ -47,28 +69,6 @@ class ConnRestrItem {
 note top of ConnRestrItem
 possible options to restrict a
 connection start or end
-end note
-    
-class Legend {
-    +entries? List<LegendEntry>
-    +format? String
-}
-Legend --> "0..*" LegendEntry
-
-
-note top of Legend
-Definition of the output for
-the legend
-end note
-    
-class LegendEntry {
-    +**text** String
-    +**format** String
-}
-
-
-note top of LegendEntry
-Definition of one legend entry
 end note
     
 class Layout {
@@ -346,15 +346,16 @@ end note
     
 class ProcessStep {
     +**caption** String
+    +layoutMixins? Map<String,LayoutMixin>
     +connections? Map<String,ConnectionCont>
     +comments? Map<String,Comment>
-    +tags? Map<String,Tags>
+    +tags? Map<String,List<String>>
     +overlays? List<Overlay>
     +formatVariations? FormatVariations
 }
+ProcessStep --> "0..*" LayoutMixin
 ProcessStep --> "0..*" ConnectionCont
 ProcessStep --> "0..*" Comment
-ProcessStep --> "0..*" Tags
 ProcessStep --> "0..*" Overlay
 ProcessStep o-- FormatVariations
 
@@ -363,11 +364,6 @@ class ConnectionCont {
     +connections? List<Connection>
 }
 ConnectionCont --> "0..*" Connection
-
-
-class Tags {
-    +tags? List<String>
-}
 
 
 class BoxesFileMixings {
@@ -379,7 +375,7 @@ class BoxesFileMixings {
     +formats? Map<String,Format>
     +formatVariations? FormatVariations
     +comments? Map<String,Comment>
-    +tags? Map<String,Tags>
+    +tags? Map<String,List<String>>
     +images? Map<String,ImageDef>
     +overlays? List<Overlay>
     +steps? List<ProcessStep>
@@ -390,7 +386,6 @@ BoxesFileMixings --> "0..*" ConnectionCont
 BoxesFileMixings --> "0..*" Format
 BoxesFileMixings o-- FormatVariations
 BoxesFileMixings --> "0..*" Comment
-BoxesFileMixings --> "0..*" Tags
 BoxesFileMixings --> "0..*" ImageDef
 BoxesFileMixings --> "0..*" Overlay
 BoxesFileMixings --> "0..*" ProcessStep
