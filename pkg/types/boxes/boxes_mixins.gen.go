@@ -327,6 +327,8 @@ Version *string `yaml:"version,omitempty"`
 Legend *Legend `yaml:"legend,omitempty"`
     // dictionary for layout mixins. key of the dictionary is the caption of the box that will take the additional content
 LayoutMixins map[string]LayoutMixin `yaml:"layoutMixins,omitempty"`
+    // array for box mixins. It's useful in cases where the dictionary reference to boxes to mix in is limiting
+BoxMixins []BoxMixin `yaml:"boxMixins,omitempty"`
     // dictionary of connection objects
 Connections map[string]ConnectionCont `yaml:"connections,omitempty"`
 Formats map[string]Format `yaml:"formats,omitempty"`
@@ -366,6 +368,13 @@ func CopyBoxesFileMixings(src *BoxesFileMixings) *BoxesFileMixings {
         ret.LayoutMixins = make(map[string]LayoutMixin, len(src.LayoutMixins))
         for k, v := range src.LayoutMixins {
             ret.LayoutMixins[k] = *CopyLayoutMixin(&v)
+        }
+    }
+
+    if src.BoxMixins != nil {
+        ret.BoxMixins = make([]BoxMixin, len(src.BoxMixins))
+        for i, v := range src.BoxMixins {
+            ret.BoxMixins[i] = *CopyBoxMixin(&v)
         }
     }
 
@@ -426,6 +435,7 @@ return &ret
 func NewBoxesFileMixings() *BoxesFileMixings {
     var ret BoxesFileMixings
     ret.LayoutMixins = make(map[string]LayoutMixin, 0)
+    ret.BoxMixins = make([]BoxMixin, 0)
     ret.Connections = make(map[string]ConnectionCont, 0)
     ret.Formats = make(map[string]Format, 0)
     ret.Comments = make(map[string]types.Comment, 0)

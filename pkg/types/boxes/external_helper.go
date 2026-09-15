@@ -208,6 +208,29 @@ func (b *Boxes) mixInLayoutsImplCont(cont []Layout, additional *map[string]Layou
 	}
 }
 
+func (b *Boxes) mixInBoxesImpl(l *Layout, additional *[]BoxMixin) {
+	if len(*additional) == 0 {
+		return
+	}
+	// Eiko - TODO
+	// handled := false
+	// if l.Caption != "" {
+	// 	if mixin, ok := (*additional)[l.Caption]; ok {
+	// 		b.mixInLayoutNow(l, &mixin)
+	// 		delete(*additional, l.Caption)
+	// 		handled = true
+	// 	}
+	// }
+	// if (!handled) && (l.Id != "") {
+	// 	if mixin, ok := (*additional)[l.Id]; ok {
+	// 		b.mixInLayoutNow(l, &mixin)
+	// 		delete(*additional, l.Id)
+	// 	}
+	// }
+	// b.mixInLayoutsImplCont(l.Horizontal, additional)
+	// b.mixInLayoutsImplCont(l.Vertical, additional)
+}
+
 func (b *Boxes) mixInLayoutsImpl(l *Layout, additional *map[string]LayoutMixin) {
 	if len(*additional) == 0 {
 		return
@@ -263,6 +286,7 @@ func (b *Boxes) MixinThings(additional BoxesFileMixings) {
 		maps.Copy(b.Formats, additional.Formats)
 	}
 	b.mixInLayoutsImpl(&b.Boxes, &additional.LayoutMixins)
+	b.mixInBoxesImpl(&b.Boxes, &additional.BoxMixins)
 	b.mixInConnectionsImpl(&b.Boxes, additional.Connections)
 	b.mixInTagsImpl(&b.Boxes, additional.Tags)
 	b.mixInCommentsImpl(&b.Boxes, additional.Comments)
@@ -347,6 +371,65 @@ func mergeStepLayoutMixins(additional *BoxesFileMixings, step ProcessStep, stepI
 	}
 }
 
+func mergeStepBoxMixins(additional *BoxesFileMixings, step ProcessStep, stepIdx int) {
+	if additional.BoxMixins == nil {
+		additional.BoxMixins = make([]BoxMixin, 0)
+	}
+	// Eiko - TODO
+	// for k, v := range step.LayoutMixins {
+	// 	if existing, ok := additional.LayoutMixins[k]; ok {
+	// 		if len(v.Horizontal) > 0 {
+	// 			if v.PutAfter != nil {
+	// 				for i := range len(existing.Horizontal) - 1 {
+	// 					e := existing.Horizontal[i]
+	// 					if e.Caption == *v.PutAfter || e.Id == *v.PutAfter {
+	// 						existing.Horizontal = slices.Insert(existing.Horizontal, i+1, v.Horizontal...)
+	// 						break
+	// 					}
+	// 				}
+	// 			} else if v.PutBefore != nil {
+	// 				for i := range len(existing.Horizontal) {
+	// 					e := existing.Horizontal[i]
+	// 					if e.Caption == *v.PutBefore || e.Id == *v.PutBefore {
+	// 						existing.Horizontal = slices.Insert(existing.Horizontal, i, v.Horizontal...)
+	// 						break
+	// 					}
+	// 				}
+	// 			} else {
+	// 				existing.Horizontal = append(existing.Horizontal, v.Horizontal...)
+	// 			}
+	// 		}
+	// 		if len(v.Vertical) > 0 {
+	// 			if v.PutAfter != nil {
+	// 				for i := range len(existing.Vertical) - 1 {
+	// 					e := existing.Vertical[i]
+	// 					if e.Caption == *v.PutAfter || e.Id == *v.PutAfter {
+	// 						existing.Vertical = slices.Insert(existing.Vertical, i+1, v.Vertical...)
+	// 						break
+	// 					}
+	// 				}
+	// 			} else if v.PutBefore != nil {
+	// 				for i := range len(existing.Vertical) {
+	// 					e := existing.Vertical[i]
+	// 					if e.Caption == *v.PutBefore || e.Id == *v.PutBefore {
+	// 						existing.Vertical = slices.Insert(existing.Vertical, i, v.Vertical...)
+	// 						break
+	// 					}
+	// 				}
+	// 			} else {
+	// 				existing.Vertical = append(existing.Vertical, v.Vertical...)
+	// 			}
+	// 		}
+	// 		if v.WrapSubElems != nil {
+	// 			existing.WrapSubElems = v.WrapSubElems
+	// 		}
+	// 		additional.LayoutMixins[k] = existing
+	// 	} else {
+	// 		additional.LayoutMixins[k] = v
+	// 	}
+	// }
+}
+
 func mergeStepConnections(additional *BoxesFileMixings, step ProcessStep, stepIdx int) {
 	if additional.Connections == nil {
 		additional.Connections = make(map[string]ConnectionCont)
@@ -427,6 +510,7 @@ func (b *Boxes) MixinThingsWithSteps(additional BoxesFileMixings, activeSteps []
 			}
 			step := additional.Steps[idx]
 			mergeStepLayoutMixins(&additional, step, idx)
+			mergeStepBoxMixins(&additional, step, idx)
 			mergeStepConnections(&additional, step, idx)
 			mergeStepComments(&additional, step, idx)
 			mergeStepFormats(&additional, step, idx)

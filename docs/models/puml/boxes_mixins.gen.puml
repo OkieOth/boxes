@@ -414,6 +414,7 @@ class BoxesFileMixings {
     +version? String
     +legend? Legend
     +layoutMixins? Map<String,LayoutMixin>
+    +boxMixins? List<BoxMixin>
     +connections? Map<String,ConnectionCont>
     +formats? Map<String,Format>
     +formatVariations? FormatVariations
@@ -425,6 +426,7 @@ class BoxesFileMixings {
 }
 BoxesFileMixings o-- Legend
 BoxesFileMixings --> "0..*" LayoutMixin
+BoxesFileMixings --> "0..*" BoxMixin
 BoxesFileMixings --> "0..*" ConnectionCont
 BoxesFileMixings --> "0..*" Format
 BoxesFileMixings o-- FormatVariations

@@ -62,6 +62,13 @@
         "$ref": "./boxes.json#/definitions/LayoutMixin"
       }
     },
+    "boxMixins": {
+      "description": "array for box mixins. It's useful in cases where the dictionary reference to boxes to mix in is limiting",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/BoxMixin"
+      }
+    },
     "connections": {
       "description": "dictionary of connection objects",
       "type": "object",
