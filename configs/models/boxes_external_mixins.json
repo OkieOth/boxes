@@ -198,7 +198,7 @@
           "$ref": "./boxes.json#/definitions/Layout"
         },
         {
-          "$ref": "./boxes.json#/definitions/BoxMixinBase"
+          "$ref": "#/definitions/BoxMixinBase"
         }
       ]
     },
@@ -210,12 +210,16 @@
           "type": "string"
         },
         "putBefore": {
-          "description": "triggers the new mixin elemente to put either left or above the object with the given ID or caption",
-          "type": "string"
+          "description": "triggers the new mixin elemente to put either left or above the object with the given reference",
+          "type": "boolean"
         },
         "putAfter": {
-          "description": "triggers the new mixin elemente to put either right or below the object with the given ID or caption",
-          "type": "string"
+          "description": "triggers the new mixin elemente to put either right or below the object with the given reference",
+          "type": "boolean"
+        },
+        "wrapSubElems": {
+          "description": "use this field if you want to wrap existing horizontal or vertical containers in it's own box.",
+          "$ref": "#/definitions/SubsWrapperObj"
         }
       },
       "required": ["reference"]

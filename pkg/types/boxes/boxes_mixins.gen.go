@@ -145,10 +145,10 @@ DataLink *string `yaml:"dataLink,omitempty"`
 HiddenComments bool `yaml:"hiddenComments"`
     // either ID or caption of the box where this mixin is placed before or after
 Reference string `yaml:"reference"`
-    // triggers the new mixin elemente to put either left or above the object with the given ID or caption
-PutBefore *string `yaml:"putBefore,omitempty"`
-    // triggers the new mixin elemente to put either right or below the object with the given ID or caption
-PutAfter *string `yaml:"putAfter,omitempty"`
+    // triggers the new mixin elemente to put either left or above the object with the given reference
+PutBefore *bool `yaml:"putBefore,omitempty"`
+    // triggers the new mixin elemente to put either right or below the object with the given reference
+PutAfter *bool `yaml:"putAfter,omitempty"`
 }
 
 
@@ -257,10 +257,10 @@ func NewBoxMixin() *BoxMixin {
 type BoxMixinBase struct {
     // either ID or caption of the box where this mixin is placed before or after
 Reference string `yaml:"reference"`
-    // triggers the new mixin elemente to put either left or above the object with the given ID or caption
-PutBefore *string `yaml:"putBefore,omitempty"`
-    // triggers the new mixin elemente to put either right or below the object with the given ID or caption
-PutAfter *string `yaml:"putAfter,omitempty"`
+    // triggers the new mixin elemente to put either left or above the object with the given reference
+PutBefore *bool `yaml:"putBefore,omitempty"`
+    // triggers the new mixin elemente to put either right or below the object with the given reference
+PutAfter *bool `yaml:"putAfter,omitempty"`
 }
 
 

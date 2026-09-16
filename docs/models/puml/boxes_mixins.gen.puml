@@ -383,8 +383,8 @@ class BoxMixin {
     +dataLink? String
     +**hiddenComments** Boolean
     +**reference** String
-    +putBefore? String
-    +putAfter? String
+    +putBefore? Boolean
+    +putAfter? Boolean
 }
 BoxMixin o-- Comment
 BoxMixin --> "0..*" Layout
@@ -398,8 +398,8 @@ end note
     
 class BoxMixinBase {
     +**reference** String
-    +putBefore? String
-    +putAfter? String
+    +putBefore? Boolean
+    +putAfter? Boolean
 }
 
 
