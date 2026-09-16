@@ -238,6 +238,19 @@ func (b *Boxes) mixInBoxesImplCont(cont *[]Layout, additional *[]BoxMixin) *[]La
 				offset++
 				i = contIndex + offset
 				toDelete = append(toDelete, j)
+			} else if mixin.WrapSubElems != nil {
+				newBox := newLayoutFromWrapSubMixin(mixin.WrapSubElems)
+				if newBox != nil {
+					// assign the container content to the new Boxes
+					if len(elem.Horizontal) > 0 {
+						newBox.Horizontal = append(newBox.Horizontal, elem.Horizontal...)
+						(*cont)[i].Horizontal = []Layout{*newBox}
+					} else if len(elem.Vertical) > 0 {
+						newBox.Vertical = append(newBox.Vertical, elem.Vertical...)
+						(*cont)[i].Vertical = []Layout{*newBox}
+					}
+				}
+				toDelete = append(toDelete, j)
 			}
 		}
 	}

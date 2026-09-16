@@ -149,6 +149,8 @@ Reference string `yaml:"reference"`
 PutBefore *bool `yaml:"putBefore,omitempty"`
     // triggers the new mixin elemente to put either right or below the object with the given reference
 PutAfter *bool `yaml:"putAfter,omitempty"`
+    // use this field if you want to wrap existing horizontal or vertical containers in it's own box.
+WrapSubElems *SubsWrapperObj `yaml:"wrapSubElems,omitempty"`
 }
 
 
@@ -241,6 +243,8 @@ func CopyBoxMixin(src *BoxMixin) *BoxMixin {
         v := *src.PutAfter
         ret.PutAfter = &v
     }
+
+    ret.WrapSubElems = CopySubsWrapperObj(src.WrapSubElems)
 return &ret
 }
 
@@ -261,6 +265,8 @@ Reference string `yaml:"reference"`
 PutBefore *bool `yaml:"putBefore,omitempty"`
     // triggers the new mixin elemente to put either right or below the object with the given reference
 PutAfter *bool `yaml:"putAfter,omitempty"`
+    // use this field if you want to wrap existing horizontal or vertical containers in it's own box.
+WrapSubElems *SubsWrapperObj `yaml:"wrapSubElems,omitempty"`
 }
 
 
@@ -281,6 +287,8 @@ func CopyBoxMixinBase(src *BoxMixinBase) *BoxMixinBase {
         v := *src.PutAfter
         ret.PutAfter = &v
     }
+
+    ret.WrapSubElems = CopySubsWrapperObj(src.WrapSubElems)
 return &ret
 }
 

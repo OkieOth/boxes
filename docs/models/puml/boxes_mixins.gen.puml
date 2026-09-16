@@ -385,10 +385,12 @@ class BoxMixin {
     +**reference** String
     +putBefore? Boolean
     +putAfter? Boolean
+    +wrapSubElems? SubsWrapperObj
 }
 BoxMixin o-- Comment
 BoxMixin --> "0..*" Layout
 BoxMixin --> "0..*" Connection
+BoxMixin o-- SubsWrapperObj
 
 
 note top of BoxMixin
@@ -400,7 +402,9 @@ class BoxMixinBase {
     +**reference** String
     +putBefore? Boolean
     +putAfter? Boolean
+    +wrapSubElems? SubsWrapperObj
 }
+BoxMixinBase o-- SubsWrapperObj
 
 
 class ConnectionCont {
