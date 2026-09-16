@@ -719,6 +719,9 @@ boxes:
                   id: id_3_2_0
                   format: boundary
                   dontBlockConPaths: true
+                  comment:
+                    text: There is still a bug that comments without text but with a label are not proper display. Replace this with 'b1'
+                    label: b2
                 - id: id_3_2_1
                   expand: true
                   horizontal:
@@ -747,6 +750,8 @@ boxes:
                                   destArrow: true
                                   tags: []
                                   hiddenComments: false
+                                  comment:
+                                    text: I am a connection comment without a label
                                 - destId: id_3_2_1_1_1_14
                                   dest: srv.c.state.composer
                                   format: grpc
@@ -827,6 +832,9 @@ boxes:
                             - caption: srv.c.weekly.automatic
                               id: id_3_2_1_1_2_2
                               format: service
+                              comment:
+                                text: I am also a quite important comment on a box
+                                label: b1
                             - caption: srv.c.action.plans
                               id: id_3_2_1_1_2_3
                               format: service
@@ -1022,6 +1030,9 @@ boxes:
                       format: core
                       tags:
                         - domain
+                      comment:
+                        text: I am also a quite important comment on a box
+                        label: b1
                       vertical:
                         - caption: srv.c.tenant.configuration
                           id: id_3_2_2_3_1
