@@ -343,9 +343,9 @@ func getSearchMixin_tags(selectedIds []string) string {
 	mixin.FormatVariations = fv
 
 	for _, id := range selectedIds {
-		tags := boxes.NewTags()
-		tags.Tags = append(tags.Tags, searchResult)
-		mixin.Tags[id] = *tags
+		tags := make([]string, 0)
+		tags = append(tags, searchResult)
+		mixin.Tags[id] = tags
 	}
 	bytes, err := yaml.Marshal(mixin)
 	if err != nil {

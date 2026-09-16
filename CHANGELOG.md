@@ -1,3 +1,11 @@
+# v1.7.0
+* introducing the rendering of horizontal or vertical lines in the boxes pic
+* extends LayoutMixins with an option wrap vertical or horizontal sub elements in a dedicated box
+* allow partial overwrite of format properties from mixins
+
+# v1.6.2
+* fixing UI click error, was different behavior between click on a box caption or clicking on the box area
+
 # v1.6.1
 * fixing connection error
 

@@ -1,0 +1,24 @@
+formats:
+  newBox:
+    fontText2:
+      size: 6
+      color: purple
+    fontText1:
+      size: 8
+      color: blue
+    fontCaption:
+      size: 12
+      color: green
+    fill:
+      color: "#efebe9"
+    line:
+      color: "#6d4c41"
+      width: 2
+    padding: 25
+layoutMixins:
+  id_1111:
+    wrapSubElems:
+      caption: I am a Wrapper
+      text1: comes from the 'ext_wrappers.yaml file'
+      text2: I am linked over a dummy ID
+      format: newBox

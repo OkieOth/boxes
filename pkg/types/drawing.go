@@ -38,9 +38,17 @@ type RectWithTextFormat struct {
 	CornerRadius *int `yaml:"cornerRadius"`
 }
 
+type LineWithTextFormat struct {
+	FontCaption FontDef `yaml:"fontCaption"`
+
+	Line *LineDef `yaml:"border,omitempty"`
+}
+
 type Drawing interface {
 	Start(title string, height, width int) error
 	DrawRectWithText(id, caption, text1, text2 string, x, y, width, height, textYOffset int, format RectWithTextFormat, isLeaf bool) error
+	DrawHorizontalLineWithText(id, caption, text1, text2 string, x, y, width, height, textYOffset int, format LineWithTextFormat, isLeaf bool) error
+	DrawVerticalLineWithText(id, caption, text1, text2 string, x, y, width, height, textYOffset int, format LineWithTextFormat, isLeaf bool) error
 	DrawPng(x, y int, pngId string) error
 	DrawPngWithAdditionalLink(x, y int, pngId, link string) error
 	DrawLine(x1, y1, x2, y2 int, format LineDef) error

@@ -192,7 +192,7 @@ func (l *LayoutElement) initHorizontal(c types.TextDimensionCalculator, yInnerOf
 		curY := l.Y + yInnerOffset
 		l.Horizontal.Y = curY
 		var h, w int
-		var hasChilds bool
+		var hasChilds, hasVerticalLine bool
 		margin := types.GlobalMinBoxMargin
 		if l.Format != nil {
 			margin = l.Format.MinBoxMargin
@@ -201,6 +201,9 @@ func (l *LayoutElement) initHorizontal(c types.TextDimensionCalculator, yInnerOf
 			sub := &l.Horizontal.Elems[i]
 			if (sub.Horizontal != nil && len(sub.Horizontal.Elems) > 0) || (sub.Vertical != nil && len(sub.Vertical.Elems) > 0) {
 				hasChilds = true
+			}
+			if sub.Format != nil && sub.Format.RenderType != nil && *sub.Format.RenderType == types.BoxRenderTypeCenteredVerticalLine {
+				hasVerticalLine = true
 			}
 			marginToUse := margin
 			if sub.Caption == "" && sub.Text1 == "" && sub.Text2 == "" && sub.Image != nil {
@@ -228,6 +231,14 @@ func (l *LayoutElement) initHorizontal(c types.TextDimensionCalculator, yInnerOf
 			for i := 0; i < len(l.Horizontal.Elems); i++ {
 				sub := &l.Horizontal.Elems[i]
 				sub.Height = h
+			}
+		}
+		if hasVerticalLine {
+			for i := 0; i < len(l.Horizontal.Elems); i++ {
+				sub := &l.Horizontal.Elems[i]
+				if sub.Format != nil && sub.Format.RenderType != nil && *sub.Format.RenderType == types.BoxRenderTypeCenteredVerticalLine {
+					sub.Height = l.Horizontal.Height
+				}
 			}
 		}
 

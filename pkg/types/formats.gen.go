@@ -246,3 +246,15 @@ func NewImageDef() *ImageDef {
     var ret ImageDef
     return &ret
 }
+
+type BoxRenderType string
+
+const (
+    BoxRenderTypeRectangle BoxRenderType = "rectangle"
+    BoxRenderTypeCenteredHorizontalLine BoxRenderType = "centeredHorizontalLine"
+    BoxRenderTypeHorizontalArcDown BoxRenderType = "horizontalArcDown"
+    BoxRenderTypeHorizontalArcUp BoxRenderType = "horizontalArcUp"
+    BoxRenderTypeCenteredVerticalLine BoxRenderType = "centeredVerticalLine"
+    BoxRenderTypeVerticalArcLeft BoxRenderType = "verticalArcLeft"
+    BoxRenderTypeVerticalArcRight BoxRenderType = "verticalArcRight"
+)

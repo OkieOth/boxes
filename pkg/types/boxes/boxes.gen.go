@@ -209,6 +209,8 @@ PutBefore *string `yaml:"putBefore,omitempty"`
 PutAfter *string `yaml:"putAfter,omitempty"`
 Horizontal []Layout `yaml:"horizontal,omitempty"`
 Vertical []Layout `yaml:"vertical,omitempty"`
+    // use this field if you want to wrap existing horizontal or vertical containers in it's own box.
+WrapSubElems *SubsWrapperObj `yaml:"wrapSubElems,omitempty"`
 }
 
 
@@ -241,6 +243,8 @@ func CopyLayoutMixin(src *LayoutMixin) *LayoutMixin {
             ret.Vertical[i] = *CopyLayout(&v)
         }
     }
+
+    ret.WrapSubElems = CopySubsWrapperObj(src.WrapSubElems)
 return &ret
 }
 
@@ -344,6 +348,8 @@ Padding *int `yaml:"padding,omitempty"`
 BoxMargin *int `yaml:"boxMargin,omitempty"`
     // radius of the box corners in pixel
 CornerRadius *int `yaml:"cornerRadius,omitempty"`
+    // defines how this box is rendered, default is 'rectangle'
+RenderType *types.BoxRenderType `yaml:"renderType,omitempty"`
 }
 
 
@@ -400,6 +406,11 @@ func CopyFormat(src *Format) *Format {
     if src.CornerRadius != nil {
         v := *src.CornerRadius
         ret.CornerRadius = &v
+    }
+
+    if src.RenderType != nil {
+        v := *src.RenderType
+        ret.RenderType = &v
     }
 return &ret
 }
@@ -617,6 +628,63 @@ return &ret
 
 func NewOverlayGradation() *OverlayGradation {
     var ret OverlayGradation
+    return &ret
+}
+
+// attributes used to build dynamic wrapper boxes around horizontal or vertical containers
+type SubsWrapperObj struct {
+    // Some kind of the main text
+Caption *string `yaml:"caption,omitempty"`
+    // First additional text
+Text1 *string `yaml:"text1,omitempty"`
+    // Second additional text
+Text2 *string `yaml:"text2,omitempty"`
+    // reference to the format to use for this box
+Format *string `yaml:"format,omitempty"`
+    // Tags to annotate the box, tags are used to format and filter
+Tags []string `yaml:"tags,omitempty"`
+}
+
+
+func CopySubsWrapperObj(src *SubsWrapperObj) *SubsWrapperObj {
+    if src == nil {
+        return nil
+    }
+    var ret SubsWrapperObj
+
+    if src.Caption != nil {
+        v := *src.Caption
+        ret.Caption = &v
+    }
+
+    if src.Text1 != nil {
+        v := *src.Text1
+        ret.Text1 = &v
+    }
+
+    if src.Text2 != nil {
+        v := *src.Text2
+        ret.Text2 = &v
+    }
+
+    if src.Format != nil {
+        v := *src.Format
+        ret.Format = &v
+    }
+
+    if src.Tags != nil {
+        ret.Tags = make([]string, len(src.Tags))
+        for i, v := range src.Tags {
+            ret.Tags[i] = v
+        }
+    }
+return &ret
+}
+
+
+func NewSubsWrapperObj() *SubsWrapperObj {
+    var ret SubsWrapperObj
+    ret.Tags = make([]string, 0)
     return &ret
 }
 

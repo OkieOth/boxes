@@ -473,6 +473,38 @@ func (d *SvgDrawing) DrawRectWithText(id, caption, text1, text2 string, x, y, wi
 	return nil
 }
 
+func (d *SvgDrawing) DrawHorizontalLineWithText(id, caption, text1, text2 string, x, y, width, height, textYOffset int, format types.LineWithTextFormat, isLeaf bool) error {
+	if format.Line != nil {
+		x1 := x
+		x2 := x + width
+		y1 := y + (height / 2)
+		y2 := y1
+		d.DrawLineWithClass(x1, y1, x2, y2, *format.Line, "box_line")
+		if caption != "" {
+			textFormat := d.textFormat(&format.FontCaption)
+			h := format.FontCaption.Size
+			d.canvas.Text(x1+(width/2), y1-h, caption, textFormat)
+		}
+	}
+
+	return nil
+}
+
+func (d *SvgDrawing) DrawVerticalLineWithText(id, caption, text1, text2 string, x, y, width, height, textYOffset int, format types.LineWithTextFormat, isLeaf bool) error {
+	if format.Line != nil {
+		x1 := x + (width / 2)
+		x2 := x1
+		y1 := y
+		y2 := y + height
+		d.DrawLineWithClass(x1, y1, x2, y2, *format.Line, "box_line")
+		if caption != "" {
+			h := format.FontCaption.Size
+			d.DrawVerticalTextWithId(caption, x1-(2*h), y1+(height/2), h, &format.FontCaption, "")
+		}
+	}
+	return nil
+}
+
 func lineStyleForType(style types.Style) string {
 	switch style {
 	case types.StyleDashed:

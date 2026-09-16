@@ -62,6 +62,13 @@
         "$ref": "./boxes.json#/definitions/LayoutMixin"
       }
     },
+    "boxMixins": {
+      "description": "array for box mixins. It's useful in cases where the dictionary reference to boxes to mix in is limiting",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/BoxMixin"
+      }
+    },
     "connections": {
       "description": "dictionary of connection objects",
       "type": "object",
@@ -90,7 +97,10 @@
       "description": "dictionary of tag array, the additional tags will be applied on the existing layout and can be used for instance to define display formats",
       "type": "object",
       "additionalProperties": {
-        "$ref": "#/definitions/Tags"
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
       }
     },
     "images": {
@@ -123,6 +133,21 @@
           "description": "title, that's appended to the original layout title",
           "type": "string"
         },
+        "layoutMixins": {
+          "description": "dictionary for layout mixins. key of the dictionary is the caption of the box that will take the additional content",
+          "$comment": "attention, take care that the captions used are unique, without that the content my apprear in the wrong place",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "./boxes.json#/definitions/LayoutMixin"
+          }
+        },
+        "boxMixins": {
+          "description": "array for box mixins. It's useful in cases where the dictionary reference to boxes to mix in is limiting",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/BoxMixin"
+          }
+        },
         "connections": {
           "description": "dictionary of connection objects",
           "type": "object",
@@ -141,7 +166,10 @@
           "description": "dictionary of tag array, the additional tags will be applied on the existing layout and can be used for instance to define display formats",
           "type": "object",
           "additionalProperties": {
-            "$ref": "#/definitions/Tags"
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "overlays": {
@@ -150,11 +178,51 @@
             "$ref": "./boxes.json#/definitions/Overlay"
           }
         },
+        "formats": {
+          "description": "Be careful it can mess up the stype of the picture! This allows to overwrite global formats in an available step. It can be helpful in cases this step wants to highlight things, that are visual pressed back by existing formats",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "./boxes.json#/definitions/Format"
+          }
+        },
         "formatVariations": {
           "description": "Set of formats that overwrites the style of boxes, if specific conditions are met",
           "$ref": "./boxes.json#/definitions/FormatVariations"
         }
       }
+    },
+    "BoxMixin": {
+      "description": "definition of a box to be mixed in",
+      "allOf": [
+        {
+          "$ref": "./boxes.json#/definitions/Layout"
+        },
+        {
+          "$ref": "#/definitions/BoxMixinBase"
+        }
+      ]
+    },
+    "BoxMixinBase": {
+      "type": "object",
+      "properties": {
+        "reference": {
+          "description": "either ID or caption of the box where this mixin is placed before or after",
+          "type": "string"
+        },
+        "putBefore": {
+          "description": "triggers the new mixin elemente to put either left or above the object with the given reference",
+          "type": "boolean"
+        },
+        "putAfter": {
+          "description": "triggers the new mixin elemente to put either right or below the object with the given reference",
+          "type": "boolean"
+        },
+        "wrapSubElems": {
+          "description": "use this field if you want to wrap existing horizontal or vertical containers in it's own box.",
+          "$ref": "#/definitions/SubsWrapperObj"
+        }
+      },
+      "required": ["reference"]
     },
     "ConnectionCont": {
       "type": "object",
@@ -163,17 +231,6 @@
           "type": "array",
           "items": {
             "$ref": "./boxes.json#/definitions/Connection"
-          }
-        }
-      }
-    },
-    "Tags": {
-      "type": "object",
-      "properties": {
-        "tags": {
-          "type": "array",
-          "items": {
-            "type": "string"
           }
         }
       }

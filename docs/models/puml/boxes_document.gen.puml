@@ -196,6 +196,17 @@ parameters of an image to
 be displayed in the SVG
 end note
     
+enum BoxRenderType {
+    rectangle,
+    centeredHorizontalLine,
+    horizontalArcDown,
+    horizontalArcUp,
+    centeredVerticalLine,
+    verticalArcLeft,
+    verticalArcRight,
+}
+
+
 class LayoutElemConnection {
     +**destId** String
     +comment? Comment
@@ -275,10 +286,12 @@ class BoxFormat {
     +fixedWidth? Integer
     +fixedHeight? Integer
     +**verticalTxt** Boolean
+    +renderType? BoxRenderType
 }
 BoxFormat o-- FontDef
 BoxFormat o-- LineDef
 BoxFormat o-- FillDef
+BoxFormat o-- BoxRenderType
 
 
 class CommentFormat {
@@ -393,8 +406,10 @@ class LayoutMixin {
     +putAfter? String
     +horizontal? List<Layout>
     +vertical? List<Layout>
+    +wrapSubElems? SubsWrapperObj
 }
 LayoutMixin --> "0..*" Layout
+LayoutMixin o-- SubsWrapperObj
 
 
 note top of LayoutMixin
@@ -434,10 +449,12 @@ class Format {
     +padding? Integer
     +boxMargin? Integer
     +cornerRadius? Integer
+    +renderType? BoxRenderType
 }
 Format o-- FontDef
 Format o-- LineDef
 Format o-- FillDef
+Format o-- BoxRenderType
 
 
 class FormatVariations {
@@ -508,6 +525,21 @@ class OverlayGradation {
 note top of OverlayGradation
 gradation entry for switching formats
 for overlays
+end note
+    
+class SubsWrapperObj {
+    +caption? String
+    +text1? String
+    +text2? String
+    +format? String
+    +tags? List<String>
+}
+
+
+note top of SubsWrapperObj
+attributes used to build dynamic
+wrapper boxes around horizontal or
+vertical containers
 end note
     
 class DocOverlay {

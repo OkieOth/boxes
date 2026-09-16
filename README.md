@@ -165,7 +165,7 @@ A live preview UI runs in the browser via WebAssembly. Write YAML in the left pa
 ```bash
 make run-ui-docker   # serves on http://localhost:8081
 
-YOUR_BROWSER http://localhost:8080/?input=boxes_random.yaml&options=options.yaml
+YOUR_BROWSER http://localhost:8080/?input=boxes_aac_example.yaml&options=options.yaml
 ```
 
 Features:

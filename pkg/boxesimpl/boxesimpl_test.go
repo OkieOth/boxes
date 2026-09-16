@@ -303,10 +303,28 @@ func TestDrawBoxesForUiExt(t *testing.T) {
 		blacklisted         []string
 	}{
 		{
+			inputFile:           "../../resources/examples_boxes/complex_horizontal_connected_pics_lines.yaml",
+			inputExtConnections: "../../resources/examples_boxes/ext_connections.yaml",
+			inputExtFormats:     "../../resources/examples_boxes/ext_formats.yaml",
+			outputFile:          "../../temp/ext_complex_horizontal_connected_pics_lines.svg",
+			depth:               2,
+			expanded:            []string{},
+			blacklisted:         []string{},
+		},
+		{
 			inputFile:           "../../resources/examples_boxes/oooo_1.yaml",
 			inputExtConnections: "../../resources/examples_boxes/oooo_2.yaml",
 			inputExtFormats:     "",
 			outputFile:          "../../temp/orga.svg",
+			depth:               2,
+			expanded:            []string{"id_3_3_0_1"},
+			blacklisted:         []string{},
+		},
+		{
+			inputFile:           "../../resources/examples_boxes/oooo_1.yaml",
+			inputExtConnections: "../../resources/examples_boxes/oooo_3.yaml",
+			inputExtFormats:     "",
+			outputFile:          "../../temp/orga2.svg",
 			depth:               2,
 			expanded:            []string{"id_3_3_0_1"},
 			blacklisted:         []string{},
@@ -466,16 +484,16 @@ func TestDrawBoxesWithOverlays(t *testing.T) {
 		outputFile  string
 		maxdepth    int
 	}{
-		// {
-		// 	inputFile: "../../resources/examples_boxes/ext_complex_horizontal_connected_pics.yaml",
-		// 	mixins: []string{
-		// 		"../../resources/examples_boxes/ext_connections.yaml",
-		// 		"../../resources/examples_boxes/ext_formats.yaml",
-		// 		"../../resources/examples_boxes/ext_overlays.yaml",
-		// 	},
-		// 	maxdepth:   100,
-		// 	outputFile: "../../temp/ext_complex_horizontal_connected_pics2.svg",
-		// },
+		{
+			inputFile: "../../resources/examples_boxes/ext_complex_horizontal_connected_pics.yaml",
+			mixins: []string{
+				"../../resources/examples_boxes/ext_connections.yaml",
+				"../../resources/examples_boxes/ext_formats.yaml",
+				"../../resources/examples_boxes/ext_overlays.yaml",
+			},
+			maxdepth:   100,
+			outputFile: "../../temp/ext_complex_horizontal_connected_pics2.svg",
+		},
 		{
 			inputFile:   "../../resources/examples_boxes/boxes_connected.yaml",
 			outputFile:  "../../temp/boxes_connected.svg",
@@ -489,6 +507,17 @@ func TestDrawBoxesWithOverlays(t *testing.T) {
 			expandedIds: []string{},
 			mixins:      []string{},
 			maxdepth:    1,
+		},
+		{
+			inputFile: "../../resources/examples_boxes/ext_complex_horizontal_connected_pics.yaml",
+			mixins: []string{
+				"../../resources/examples_boxes/ext_connections.yaml",
+				"../../resources/examples_boxes/ext_formats.yaml",
+				"../../resources/examples_boxes/ext_overlays.yaml",
+				"../../resources/examples_boxes/ext_wrappers.yaml",
+			},
+			maxdepth:   100,
+			outputFile: "../../temp/ext_complex_horizontal_connected_pics3.svg",
 		},
 	}
 	for i, test := range tests {

@@ -11,6 +11,28 @@ skinparam class {
 
 
 
+class Legend {
+    +entries? List<LegendEntry>
+    +format? String
+}
+Legend --> "0..*" LegendEntry
+
+
+note top of Legend
+Definition of the output for
+the legend
+end note
+    
+class LegendEntry {
+    +**text** String
+    +**format** String
+}
+
+
+note top of LegendEntry
+Definition of one legend entry
+end note
+    
 class Comment {
     +**text** String
     +label? String
@@ -49,28 +71,6 @@ possible options to restrict a
 connection start or end
 end note
     
-class Legend {
-    +entries? List<LegendEntry>
-    +format? String
-}
-Legend --> "0..*" LegendEntry
-
-
-note top of Legend
-Definition of the output for
-the legend
-end note
-    
-class LegendEntry {
-    +**text** String
-    +**format** String
-}
-
-
-note top of LegendEntry
-Definition of one legend entry
-end note
-    
 class Layout {
     +**id** String
     +**caption** String
@@ -100,8 +100,10 @@ class LayoutMixin {
     +putAfter? String
     +horizontal? List<Layout>
     +vertical? List<Layout>
+    +wrapSubElems? SubsWrapperObj
 }
 LayoutMixin --> "0..*" Layout
+LayoutMixin o-- SubsWrapperObj
 
 
 note top of LayoutMixin
@@ -223,6 +225,17 @@ parameters of an image to
 be displayed in the SVG
 end note
     
+enum BoxRenderType {
+    rectangle,
+    centeredHorizontalLine,
+    horizontalArcDown,
+    horizontalArcUp,
+    centeredVerticalLine,
+    verticalArcLeft,
+    verticalArcRight,
+}
+
+
 class Format {
     +widthOfParent? Boolean
     +fixedWidth? Integer
@@ -238,10 +251,12 @@ class Format {
     +padding? Integer
     +boxMargin? Integer
     +cornerRadius? Integer
+    +renderType? BoxRenderType
 }
 Format o-- FontDef
 Format o-- LineDef
 Format o-- FillDef
+Format o-- BoxRenderType
 
 
 class FormatVariations {
@@ -314,19 +329,82 @@ gradation entry for switching formats
 for overlays
 end note
     
+class SubsWrapperObj {
+    +caption? String
+    +text1? String
+    +text2? String
+    +format? String
+    +tags? List<String>
+}
+
+
+note top of SubsWrapperObj
+attributes used to build dynamic
+wrapper boxes around horizontal or
+vertical containers
+end note
+    
 class ProcessStep {
     +**caption** String
+    +layoutMixins? Map<String,LayoutMixin>
+    +boxMixins? List<BoxMixin>
     +connections? Map<String,ConnectionCont>
     +comments? Map<String,Comment>
-    +tags? Map<String,Tags>
+    +tags? Map<String,List<String>>
     +overlays? List<Overlay>
+    +formats? Map<String,Format>
     +formatVariations? FormatVariations
 }
+ProcessStep --> "0..*" LayoutMixin
+ProcessStep --> "0..*" BoxMixin
 ProcessStep --> "0..*" ConnectionCont
 ProcessStep --> "0..*" Comment
-ProcessStep --> "0..*" Tags
 ProcessStep --> "0..*" Overlay
+ProcessStep --> "0..*" Format
 ProcessStep o-- FormatVariations
+
+
+class BoxMixin {
+    +**id** String
+    +**caption** String
+    +**text1** String
+    +**text2** String
+    +comment? Comment
+    +image? String
+    +**expand** Boolean
+    +extVertical? String
+    +vertical? List<Layout>
+    +extHorizontal? String
+    +horizontal? List<Layout>
+    +tags? List<String>
+    +connections? List<Connection>
+    +format? String
+    +dontBlockConPaths? Boolean
+    +dataLink? String
+    +**hiddenComments** Boolean
+    +**reference** String
+    +putBefore? Boolean
+    +putAfter? Boolean
+    +wrapSubElems? SubsWrapperObj
+}
+BoxMixin o-- Comment
+BoxMixin --> "0..*" Layout
+BoxMixin --> "0..*" Connection
+BoxMixin o-- SubsWrapperObj
+
+
+note top of BoxMixin
+definition of a box to
+be mixed in
+end note
+    
+class BoxMixinBase {
+    +**reference** String
+    +putBefore? Boolean
+    +putAfter? Boolean
+    +wrapSubElems? SubsWrapperObj
+}
+BoxMixinBase o-- SubsWrapperObj
 
 
 class ConnectionCont {
@@ -335,32 +413,28 @@ class ConnectionCont {
 ConnectionCont --> "0..*" Connection
 
 
-class Tags {
-    +tags? List<String>
-}
-
-
 class BoxesFileMixings {
     +title? String
     +version? String
     +legend? Legend
     +layoutMixins? Map<String,LayoutMixin>
+    +boxMixins? List<BoxMixin>
     +connections? Map<String,ConnectionCont>
     +formats? Map<String,Format>
     +formatVariations? FormatVariations
     +comments? Map<String,Comment>
-    +tags? Map<String,Tags>
+    +tags? Map<String,List<String>>
     +images? Map<String,ImageDef>
     +overlays? List<Overlay>
     +steps? List<ProcessStep>
 }
 BoxesFileMixings o-- Legend
 BoxesFileMixings --> "0..*" LayoutMixin
+BoxesFileMixings --> "0..*" BoxMixin
 BoxesFileMixings --> "0..*" ConnectionCont
 BoxesFileMixings --> "0..*" Format
 BoxesFileMixings o-- FormatVariations
 BoxesFileMixings --> "0..*" Comment
-BoxesFileMixings --> "0..*" Tags
 BoxesFileMixings --> "0..*" ImageDef
 BoxesFileMixings --> "0..*" Overlay
 BoxesFileMixings --> "0..*" ProcessStep

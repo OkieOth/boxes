@@ -621,6 +621,10 @@
           "type": "boolean",
           "description": "If true, the text will be displayed vertically",
           "default": false
+        },
+        "renderType": {
+          "description": "defines how this box is rendered, default is 'rectangle'",
+          "$ref": "./formats.json#/BoxRenderType"
         }
       },
       "required": [

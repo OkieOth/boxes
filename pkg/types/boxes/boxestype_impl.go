@@ -461,23 +461,48 @@ func (doc *BoxesDocument) AdjustDocHeightTLegend(c types.TextDimensionCalculator
 
 func (b *LayoutElement) Draw(drawing types.Drawing) error {
 	if b.Format != nil {
-		f := types.RectWithTextFormat{
-			FontCaption:  b.Format.FontCaption,
-			FontText1:    b.Format.FontText1,
-			FontText2:    b.Format.FontText2,
-			Padding:      b.Format.Padding,
-			Border:       b.Format.Line,
-			Fill:         b.Format.Fill,
-			VerticalTxt:  b.Format.VerticalTxt,
-			CornerRadius: b.Format.CornerRadius,
+		initRectFormat := func() types.RectWithTextFormat {
+			return types.RectWithTextFormat{
+				FontCaption:  b.Format.FontCaption,
+				FontText1:    b.Format.FontText1,
+				FontText2:    b.Format.FontText2,
+				Padding:      b.Format.Padding,
+				Border:       b.Format.Line,
+				Fill:         b.Format.Fill,
+				VerticalTxt:  b.Format.VerticalTxt,
+				CornerRadius: b.Format.CornerRadius,
+			}
+		}
+		initLineFormat := func() types.LineWithTextFormat {
+			return types.LineWithTextFormat{
+				FontCaption: b.Format.FontCaption,
+				Line:        types.InitLineDef(b.Format.Line),
+			}
 		}
 		textYOffset := 0
 		if b.Image != nil {
 			textYOffset = (b.Image.Y - b.Y) + b.Image.Height + b.Image.MarginTopBottom
 		}
 		isLeaf := b.Vertical == nil && b.Horizontal == nil
-		if err := drawing.DrawRectWithText(b.Id, b.Caption, b.Text1, b.Text2, b.X, b.Y, b.Width, b.Height, textYOffset, f, isLeaf); err != nil {
-			return fmt.Errorf("Error drawing element %s: %w", b.Id, err)
+		if b.Format.RenderType != nil {
+			switch *b.Format.RenderType {
+			case types.BoxRenderTypeCenteredHorizontalLine:
+				if err := drawing.DrawHorizontalLineWithText(b.Id, b.Caption, b.Text1, b.Text2, b.X, b.Y, b.Width, b.Height, textYOffset, initLineFormat(), isLeaf); err != nil {
+					return fmt.Errorf("Error drawing element %s: %w", b.Id, err)
+				}
+			case types.BoxRenderTypeCenteredVerticalLine:
+				if err := drawing.DrawVerticalLineWithText(b.Id, b.Caption, b.Text1, b.Text2, b.X, b.Y, b.Width, b.Height, textYOffset, initLineFormat(), isLeaf); err != nil {
+					return fmt.Errorf("Error drawing element %s: %w", b.Id, err)
+				}
+			default:
+				if err := drawing.DrawRectWithText(b.Id, b.Caption, b.Text1, b.Text2, b.X, b.Y, b.Width, b.Height, textYOffset, initRectFormat(), isLeaf); err != nil {
+					return fmt.Errorf("Error drawing element %s: %w", b.Id, err)
+				}
+			}
+		} else {
+			if err := drawing.DrawRectWithText(b.Id, b.Caption, b.Text1, b.Text2, b.X, b.Y, b.Width, b.Height, textYOffset, initRectFormat(), isLeaf); err != nil {
+				return fmt.Errorf("Error drawing element %s: %w", b.Id, err)
+			}
 		}
 	}
 	if b.Image != nil {

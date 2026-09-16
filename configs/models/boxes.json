@@ -249,6 +249,10 @@
         },
         "vertical": {
           "$ref": "#/definitions/LayoutArray"
+        },
+        "wrapSubElems": {
+          "description": "use this field if you want to wrap existing horizontal or vertical containers in it's own box.",
+          "$ref": "#/definitions/SubsWrapperObj"
         }
       }
     },
@@ -362,6 +366,10 @@
         "cornerRadius": {
           "description": "radius of the box corners in pixel",
           "type": "integer"
+        },
+        "renderType": {
+          "description": "defines how this box is rendered, default is 'rectangle'",
+          "$ref": "./formats.json#/BoxRenderType"
         }
       }
     },
@@ -496,6 +504,35 @@
         }
       },
       "required": ["limit", "format"]
+    },
+    "SubsWrapperObj": {
+      "description": "attributes used to build dynamic wrapper boxes around horizontal or vertical containers",
+      "type": "object",
+      "properties": {
+        "caption": {
+          "description": "Some kind of the main text",
+          "type": "string"
+        },
+        "text1": {
+          "description": "First additional text",
+          "type": "string"
+        },
+        "text2": {
+          "description": "Second additional text",
+          "type": "string"
+        },
+        "format": {
+          "description": "reference to the format to use for this box",
+          "type": "string"
+        },
+        "tags": {
+          "description": "Tags to annotate the box, tags are used to format and filter",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
     }
   }
 }

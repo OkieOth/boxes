@@ -17,6 +17,28 @@ formats:
     fill:
       color: white
     margin: 5
+  horizontalLine:
+    fontCaption:
+      size: 5
+      color: purple
+    padding: 1
+    renderType: centeredHorizontalLine
+    line:
+      width: 3
+      color: purple
+      style: dashed
+  verticalLine:
+    fontCaption:
+      size: 5
+      color: purple
+    verticalTxt: true
+    padding: 1
+    renderType: centeredVerticalLine
+    line:
+      width: 3
+      color: purple
+      style: dashed
+
 images:
   smilie_02_80:
     width: 32
@@ -41,14 +63,17 @@ boxes:
             - format: img3
             - format: img2
             - format: img3
-    - id: id_1111
-      vertical:
+    - caption: A stupid vertical line
+      format: verticalLine
+    - vertical:
         - id: r5_1
           caption: Most Left Element, Das ist für Matthias mal sehen was passiert
           text1: I am in the second line
         - id: r5_2
           caption: Center Element 1
           text1: I am in the second line
+        - caption: A stupid Line
+          format: horizontalLine
         - id: r5_3
           caption: Right Element 0
           text1: I am in the second line
@@ -56,6 +81,8 @@ boxes:
             - destId: r4_1
           horizontal:
             - format: img1
+    - caption: Another stupid vertical line
+      format: verticalLine
     - vertical:
         - id: r6_1
           caption: Most Left Element

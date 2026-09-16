@@ -1,0 +1,350 @@
+title: ruerpwer epwrerwe
+version: v0.2
+legend:
+  format: title
+  entries:
+    - text: Jjjj Easdfpe
+      format: jjjj
+    - text: Sxxdre Üasdfö
+      format: sprintboard
+formats:
+  jjjj:
+    line:
+      width: 0.5
+      color: "#9C27B0"
+    fill:
+      color: "#E1BEE7"
+  sprintboard:
+    padding: 5
+    boxMargin: 3
+    fontCaption:
+      maxLenBeforeBreak: 100
+      size: 8
+    text1:
+      size: 7
+    line:
+      width: 0.5
+      color: "#d81b60"
+    fill:
+      color: "#f06292"
+  dfpasdreferk:
+    padding: 5
+    boxMargin: 3
+    verticalTxt: true
+    fontCaption:
+      maxLenBeforeBreak: 100
+      size: 8
+    text1:
+      size: 7
+    line:
+      width: 0.5
+      color: "#d81b60"
+    fill:
+      color: "#f06292"
+
+  horizontalLine:
+    fontCaption:
+      size: 5
+      color: purple
+    padding: 1
+    renderType: centeredHorizontalLine
+    line:
+      width: 2
+      color: purple
+      style: dashed
+  verticalLine:
+    fontCaption:
+      size: 5
+      color: purple
+    verticalTxt: true
+    padding: 1
+    renderType: centeredVerticalLine
+    line:
+      width: 3
+      color: purple
+      style: dashed
+
+layoutMixins:
+  id_0:
+    vertical:
+      - id: id_3
+        caption: Jjjj
+        format: jjjj
+        horizontal:
+          - id: id_3_1
+            caption: fasdflöd fasödf sadf dfjlsd fsdljf
+            format: jjjj
+          - id: id_3_2
+            caption: aöf eereererer
+            format: jjjj
+            horizontal:
+              - id: id_3_2_1
+                caption: XXXs
+                format: jjjj
+                connections:
+                  - destId: id_3_2_2
+                    format: linked
+          - id: id_3_3
+            caption: fasdf
+            format: jjjj
+            expand: true
+            vertical:
+              - id: id_3_3_0_1
+                caption: dföasd föae re
+                format: jjjj
+                horizontal:
+                  - id: id_3_3_0_1_1
+                    caption: öfdad fdfadff Easdfpe
+                    format: dfpasdreferk
+                    comment:
+                      text: dfkasdö föasdf ösdf ösöfd söfösdöf ödf sföljsaö dfösdalf ösdfjösaöf
+                      label: r4
+                  - id: id_3_3_0_1_2
+                    caption: döfdas fösd fsdöf ösd Easdfpe
+                    format: dfpasdreferk
+                    comment:
+                      label: r4
+                  - id: id_3_3_0_1_3
+                    caption: adf sdöfs dfsdöf sdöf sdö Easdfpe
+                    format: dfpasdreferk
+                    comment:
+                      label: r4
+                  - id: id_3_3_0_1_4
+                    caption: eprwer eprewprpwerere Easdfpe
+                    format: dfpasdreferk
+                    comment:
+                      label: r4
+                  - id: id_3_3_0_1_5
+                    caption: eöaf asdöf dsfdf Easdfpe
+                    format: dfpasdreferk
+                    comment:
+                      label: r4
+                  - id: id_3_3_0_1_6
+                    caption: dafadsfe Easdfpe
+                    format: dfpasdreferk
+                    comment:
+                      label: r4
+                  - id: id_3_3_0_1_7
+                    caption: daf dsfösd fösdf sdöf Easdfpe
+                    format: dfpasdreferk
+                    comment:
+                      label: r4
+                  - id: id_3_3_0_1_8
+                    caption: Imflow Easdfpe
+                    format: dfpasdreferk
+                    comment:
+                      label: r4
+                  - id: id_3_3_0_1_9
+                    caption: wwaf dfösd fösdf sdöf Easdfpe
+                    format: dfpasdreferk
+                    comment:
+                      label: r4
+                  - id: id_3_3_0_1_10
+                    caption: pererewr erpiqweiürq eüwir Easdfpe
+                    format: dfpasdreferk
+                    comment:
+                      label: r4
+                  - id: id_3_3_0_1_11
+                    caption: prwer eprepwrpewrperri Easdfpe
+                    format: dfpasdreferk
+                    comment:
+                      label: r4
+
+
+              - id: id_3_3_1
+                caption: AAA Easdfpe
+                text1: Xefsdf DASFEdsaf
+                format: jjjj
+                expand: true
+                comment:
+                  text: döfa dasöf sdaöf asdöfasödfdasdf ödf saöfö asfj sadföasdjföasdlf ösdaf södafjösafjas föasdfö sdaöfjösadfjdsö fsdölf södf
+                vertical:
+                  - caption: A stupid Line
+                    format: horizontalLine
+                  - id: id_3_3_1_1
+                    caption: fasdf Backlogs
+                    expand: true
+                    format: jjjj
+                    horizontal:
+                      - id: id_3_3_1_1_1
+                        caption: afasdfsd fösdf asdfedf DASFEdsaf
+                        text1: Sxxdre Üasdfö
+                        format: sprintboard
+                        comment:
+                          text: öasdf saödf södaf sdöf sdöjf dsöfaöe föafle ofdsö f öadfs dfösdf ösal
+                          label: r3
+                      - id: id_3_3_1_1_2
+                        caption: jlfaödfasdfd DASFEdsaf
+                        text1: Sxxdre Üasdfö
+                        format: sprintboard
+                        comment:
+                          label: r3
+                      - id: id_3_3_1_1_3
+                        caption: rrrerr eredaf dsfösd fösdf sdöf DASFEdsaf
+                        text1: Sxxdre Üasdfö
+                        format: sprintboard
+                        comment:
+                          label: r3
+                      - id: id_3_3_1_1_4
+                        caption: eriqwerprew erpewrwerueore DASFEdsaf
+                        text1: Sxxdre Üasdfö
+                        format: sprintboard
+                  - id: id_3_2_1_2
+                    caption: AAAs
+                    text1: Afmd DASFEdsaf
+                    format: jjjj
+                    comment:
+                      text: öa dfösd fösdf sdöf sdfösad föas dföxfjöxdf söfdjl
+                      label: r1
+                    connections:
+                      - destId: _1
+                        format: linked
+          - id: id_3_4
+            caption: lkklööe er eör eaör aeör
+            format: jjjj
+
+boxMixins:
+  - reference: id_3_4
+    putAfter: true
+    caption: "Line after XXXXX :)"
+    format: verticalLine
+
+  - reference: id_0_1
+    putBefore: true
+    caption: Line before ... from a box mixin
+    format: horizontalLine
+  - reference: id_3_2
+    putAfter: true
+    caption: "Line after ... :)"
+    format: verticalLine
+
+  - reference: id_0_1
+    putAfter: true
+    caption: Line after ... from a box mixin
+    format: horizontalLine
+  - reference: id_3_2_1_2
+    putBefore: true
+    caption: Line before ... does this work too?
+    format: horizontalLine
+
+  - reference: id_3_2
+    putBefore: true
+    caption: "Line before ... :)"
+    format: verticalLine
+
+  - reference: id_3_4
+    putBefore: true
+    caption: "Line before YYYYY :)"
+    format: verticalLine
+
+  - reference: id_3_4
+    putAfter: true
+    caption: "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZ"
+    format: verticalLine
+
+connections:
+  fdasöfdsdfsadfasdf d dfdsafdsaffd:
+    connections:
+      - dest: XXXs
+        format: owned
+        comment:
+          text: ödsaf sdöf sdöf sdöflsd fösldf söldf axöflsdö
+  lödfsdf döf ds:
+    connections:
+      - dest: AAAs
+        format: owned
+        comment:
+          text: afasdf sdfasdf asdfa sd.fsdöfasdölfs fdfedferdf ekdfe
+  afasdfsd fösdf asdfedf DASFEdsaf:
+    connections:
+      - dest: öfdad fdfadff Easdfpe
+        format: owned
+      - dest: döfdas fösd fsdöf ösd Easdfpe
+        format: owned
+      - dest: adf sdöfs dfsdöf sdöf sdö Easdfpe
+        format: owned
+      - dest: eprwer eprewprpwerere Easdfpe
+        format: owned
+  jlfaödfasdfd DASFEdsaf:
+    connections:
+      - dest: eöaf asdöf dsfdf Easdfpe
+        format: owned
+      - dest: dafadsfe Easdfpe
+        format: owned
+      - dest: daf dsfösd fösdf sdöf Easdfpe
+        format: owned
+  rrrerr eredaf dsfösd fösdf sdöf DASFEdsaf:
+    connections:
+      - dest: Imflow Easdfpe
+        format: owned
+      - dest: wwaf dfösd fösdf sdöf Easdfpe
+        format: owned
+      - dest: pererewr erpiqweiürq eüwir Easdfpe
+        format: owned
+      - dest: prwer eprepwrpewrperri Easdfpe
+        format: owned
+
+  öfdad fdfadff:
+    connections:
+      - dest: öfdad fdfadff Easdfpe
+        format: owned
+  döfdas fösd fsdöf ösd:
+    connections:
+      - dest: döfdas fösd fsdöf ösd Easdfpe
+        format: owned
+  adf sdöfs dfsdöf sdöf sdö:
+    connections:
+      - dest: adf sdöfs dfsdöf sdöf sdö Easdfpe
+        format: owned
+  eprwer eprewprpwerere:
+    connections:
+      - dest: eprwer eprewprpwerere Easdfpe
+        format: owned
+  eöaf asdöf dsfdf:
+    connections:
+      - dest: eöaf asdöf dsfdf Easdfpe
+        format: owned
+  dafadsfe:
+    connections:
+      - dest: dafadsfe Easdfpe
+        format: owned
+  daf dsfösd fösdf sdöf:
+    connections:
+      - dest: daf dsfösd fösdf sdöf Easdfpe
+        format: owned
+  Imflow:
+    connections:
+      - dest: Imflow Easdfpe
+        format: owned
+  wwaf dfösd fösdf sdöf:
+    connections:
+      - dest: wwaf dfösd fösdf sdöf Easdfpe
+        format: owned
+  pererewr erpiqweiürq eüwir:
+    connections:
+      - dest: pererewr erpiqweiürq eüwir Easdfpe
+        format: owned
+  prwer eprepwrpewrperri:
+    connections:
+      - dest: prwer eprepwrpewrperri Easdfpe
+        format: owned
+
+
+  eriqwerprew erpewrwerueore:
+    connections:
+      - dest: eriqwerprew erpewrwerueore Üasdfö
+        format: owned
+
+  AAAs:
+    connections:
+      - dest: afasdfsd fösdf asdfedf DASFEdsaf
+        format: owned
+        comment:
+          text: dföads fösdf sdöf sdfösdjfsdjfösd földfsödlfjeoif löerjfölsdf dfölsd fjöadsfejd
+          label: r2
+      - dest: jlfaödfasdfd DASFEdsaf
+        format: owned
+      - dest: rrrerr eredaf dsfösd fösdf sdöf DASFEdsaf
+        format: owned
+      - dest: eriqwerprew erpewrwerueore DASFEdsaf
+        format: owned

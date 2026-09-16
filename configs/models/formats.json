@@ -139,6 +139,11 @@
         }
       },
       "required": ["id", "height", "width"]
+    },
+    "BoxRenderType": {
+      "description": "defines how the box should be rendered, default is 'rectangle'",
+      "type": "string",
+      "enum": ["rectangle", "centeredHorizontalLine", "horizontalArcDown", "horizontalArcUp", "centeredVerticalLine", "verticalArcLeft", "verticalArcRight"]
     }
   }
 }
