@@ -156,7 +156,7 @@
           }
         },
         "comments": {
-          "description": "dictionary of comment objects, this comment will applied on layout objects and replace existing comments there",
+          "description": "array of comment objects, this comment will applied on layout objects and replace existing comments there",
           "type": "object",
           "additionalProperties": {
             "$ref": "./shared.json#/definitions/Comment"
@@ -188,6 +188,31 @@
         "formatVariations": {
           "description": "Set of formats that overwrites the style of boxes, if specific conditions are met",
           "$ref": "./boxes.json#/definitions/FormatVariations"
+        }
+      }
+    },
+    "StepComment": {
+      "description": "definition of a comment to be mixed-in in steps",
+      "allOf": [
+        {
+          "$ref": "./shared.json#/definitions/Comment"
+        },
+        {
+          "$ref": "#/definitions/StepCommentBase"
+        }
+      ]
+    },
+    "StepCommentBase": {
+      "description": "base parameters for step comments",
+      "type": "object",
+      "properties": {
+        "layoutId": {
+          "description": "layoutId where this comment is put to",
+          "type": "string"
+        },
+        "commentLabel": {
+          "description": "optional label that's replaced by this",
+          "type": "string"
         }
       }
     },

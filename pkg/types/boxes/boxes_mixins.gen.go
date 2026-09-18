@@ -23,7 +23,7 @@ LayoutMixins map[string]LayoutMixin `yaml:"layoutMixins,omitempty"`
 BoxMixins []BoxMixin `yaml:"boxMixins,omitempty"`
     // dictionary of connection objects
 Connections map[string]ConnectionCont `yaml:"connections,omitempty"`
-    // dictionary of comment objects, this comment will applied on layout objects and replace existing comments there
+    // array of comment objects, this comment will applied on layout objects and replace existing comments there
 Comments map[string]types.Comment `yaml:"comments,omitempty"`
     // dictionary of tag array, the additional tags will be applied on the existing layout and can be used for instance to define display formats
 Tags map[string][]string `yaml:"tags,omitempty"`
@@ -106,6 +106,97 @@ func NewProcessStep() *ProcessStep {
     ret.Tags = make(map[string][]string, 0)
     ret.Overlays = make([]Overlay, 0)
     ret.Formats = make(map[string]Format, 0)
+    return &ret
+}
+
+// definition of a comment to be mixed-in in steps
+type StepComment struct {
+    // text of the comment
+Text string `yaml:"text"`
+    // optional number or a short text, displayed in the marker of that comment
+Label *string `yaml:"label,omitempty"`
+    // format to use to render this comment
+Format *string `yaml:"format,omitempty"`
+    // optional step where this comment is part of, is filled via processing not by the user
+Step *int `yaml:"step,omitempty"`
+    // layoutId where this comment is put to
+LayoutId *string `yaml:"layoutId,omitempty"`
+    // optional label that's replaced by this
+CommentLabel *string `yaml:"commentLabel,omitempty"`
+}
+
+
+func CopyStepComment(src *StepComment) *StepComment {
+    if src == nil {
+        return nil
+    }
+    var ret StepComment
+
+    ret.Text = src.Text
+
+    if src.Label != nil {
+        v := *src.Label
+        ret.Label = &v
+    }
+
+    if src.Format != nil {
+        v := *src.Format
+        ret.Format = &v
+    }
+
+    if src.Step != nil {
+        v := *src.Step
+        ret.Step = &v
+    }
+
+    if src.LayoutId != nil {
+        v := *src.LayoutId
+        ret.LayoutId = &v
+    }
+
+    if src.CommentLabel != nil {
+        v := *src.CommentLabel
+        ret.CommentLabel = &v
+    }
+return &ret
+}
+
+
+func NewStepComment() *StepComment {
+    var ret StepComment
+    return &ret
+}
+
+// base parameters for step comments
+type StepCommentBase struct {
+    // layoutId where this comment is put to
+LayoutId *string `yaml:"layoutId,omitempty"`
+    // optional label that's replaced by this
+CommentLabel *string `yaml:"commentLabel,omitempty"`
+}
+
+
+func CopyStepCommentBase(src *StepCommentBase) *StepCommentBase {
+    if src == nil {
+        return nil
+    }
+    var ret StepCommentBase
+
+    if src.LayoutId != nil {
+        v := *src.LayoutId
+        ret.LayoutId = &v
+    }
+
+    if src.CommentLabel != nil {
+        v := *src.CommentLabel
+        ret.CommentLabel = &v
+    }
+return &ret
+}
+
+
+func NewStepCommentBase() *StepCommentBase {
+    var ret StepCommentBase
     return &ret
 }
 

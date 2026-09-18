@@ -364,6 +364,31 @@ ProcessStep --> "0..*" Format
 ProcessStep o-- FormatVariations
 
 
+class StepComment {
+    +**text** String
+    +label? String
+    +format? String
+    +step? Integer
+    +layoutId? String
+    +commentLabel? String
+}
+
+
+note top of StepComment
+definition of a comment to
+be mixed-in in steps
+end note
+    
+class StepCommentBase {
+    +layoutId? String
+    +commentLabel? String
+}
+
+
+note top of StepCommentBase
+base parameters for step comments
+end note
+    
 class BoxMixin {
     +**id** String
     +**caption** String
