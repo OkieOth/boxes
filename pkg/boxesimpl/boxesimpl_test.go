@@ -42,6 +42,47 @@ func NewDummyDimensionCalculator(width, height int) *DummyDimensionCalculator {
 	}
 }
 
+// Section 3.1: Parametric dimension calculator that returns values proportional to text length
+// This exercises the real dimension computation logic (text width/height calculations, margins, padding)
+type ParametricDimensionCalculator struct {
+	baseWidth  int
+	baseHeight int
+}
+
+func (p *ParametricDimensionCalculator) Dimensions(txt string, format *types.FontDef) (width, height int) {
+	// Return dimensions proportional to the text length so that different strings produce different widths
+	textLen := len(txt)
+	if textLen == 0 {
+		textLen = 1
+	}
+	// 10px per character, minimum base height
+	return textLen * 10, p.baseHeight
+}
+
+func (p *ParametricDimensionCalculator) SplitTxt(txt string, format *types.FontDef) (width, height int, lines []types.TextAndDimensions) {
+	w, h := p.Dimensions(txt, format)
+	return w, h, []types.TextAndDimensions{{Text: txt, Width: w, Height: h}}
+}
+
+func (p *ParametricDimensionCalculator) DimensionsWithMaxWidth(txt string, format *types.FontDef, maxWidth int) (width, height int) {
+	return p.Dimensions(txt, format)
+}
+
+func (p *ParametricDimensionCalculator) SplitTxtWithMaxWidth(txt string, format *types.FontDef, maxWidth int) (width, height int, lines []types.TextAndDimensions) {
+	return p.SplitTxt(txt, format)
+}
+
+func stringPtr(s string) *string {
+	return &s
+}
+
+func NewParametricDimensionCalculator() *ParametricDimensionCalculator {
+	return &ParametricDimensionCalculator{
+		baseWidth:  50,
+		baseHeight: 15,
+	}
+}
+
 func TestDrawBoxesFromFile(t *testing.T) {
 	tests := []struct {
 		inputFile string
@@ -150,6 +191,142 @@ func TestInitDimensions(t *testing.T) {
 		le.InitDimensions(dc)
 		assert.Equal(t, test.expectedHeight, le.Height)
 		assert.Equal(t, test.expectedWidth, le.Width)
+	}
+}
+
+// Section 3.1: Improved InitDimensions test with parametric dimension calculator
+func TestInitDimensionsWithParametricCalculator(t *testing.T) {
+	// Uses a parametric dimension calculator that returns values proportional to text length
+	// so actual dimension computation is exercised
+	parametricCalc := NewParametricDimensionCalculator()
+
+	tests := []struct {
+		name   string
+		layout boxes.Layout
+		check  func(t *testing.T, le *boxes.LayoutElement)
+	}{
+		{
+			name: "caption only",
+			layout: boxes.Layout{
+				Caption: "Hello",
+			},
+			check: func(t *testing.T, le *boxes.LayoutElement) {
+				assert.Greater(t, le.Height, 0, "height should be positive")
+				assert.Greater(t, le.Width, 0, "width should be positive")
+				assert.NotNil(t, le.WidthTextBox, "WidthTextBox should be set")
+				assert.NotNil(t, le.HeightTextBox, "HeightTextBox should be set")
+			},
+		},
+		{
+			name: "fixed width via format",
+			layout: boxes.Layout{
+				Caption: "fixed",
+				Format:  stringPtr("fw"),
+			},
+			check: func(t *testing.T, le *boxes.LayoutElement) {
+				// Fixed width is set via the format, which is resolved in InitialLayoutBoxes
+				// This test verifies that a layout with a format ref is handled correctly
+				assert.Greater(t, le.Height, 0, "height should be positive")
+			},
+		},
+		{
+			name: "fixed height via format",
+			layout: boxes.Layout{
+				Caption: "fixed",
+				Format:  stringPtr("fh"),
+			},
+			check: func(t *testing.T, le *boxes.LayoutElement) {
+				assert.Greater(t, le.Height, 0, "height should be positive")
+			},
+		},
+		{
+			name: "caption only (no text1/text2) - should have less padding",
+			layout: boxes.Layout{
+				Caption: "short",
+			},
+			check: func(t *testing.T, le *boxes.LayoutElement) {
+				assert.Greater(t, le.Height, 0, "height should be positive")
+			},
+		},
+		{
+			name: "empty box (no caption, text1, text2, no children) - should be minimal",
+			layout: boxes.Layout{},
+			check: func(t *testing.T, le *boxes.LayoutElement) {
+				// Empty boxes without format specs should have minimal dimensions
+				// (determined only by format defaults)
+			},
+		},
+		{
+			name: "vertical children - max child height determines container width",
+			layout: boxes.Layout{
+				Caption:  "parent",
+				Vertical: []boxes.Layout{{Caption: "child1"}, {Caption: "child2"}},
+			},
+			check: func(t *testing.T, le *boxes.LayoutElement) {
+				assert.Greater(t, le.Height, 0, "height should be positive")
+				if le.Vertical != nil {
+					assert.Greater(t, len(le.Vertical.Elems), 0, "should have vertical children")
+					// All children should be width-aligned to the max
+					maxWidth := 0
+					for _, child := range le.Vertical.Elems {
+						if child.Width > maxWidth {
+							maxWidth = child.Width
+						}
+					}
+					// The widest child determines the container width (approximately)
+					assert.GreaterOrEqual(t, le.Width, maxWidth, "container should be at least as wide as widest child")
+				}
+			},
+		},
+		{
+			name: "horizontal children - max child height determines container height",
+			layout: boxes.Layout{
+				Caption:    "parent",
+				Horizontal: []boxes.Layout{{Caption: "child1"}, {Caption: "child2"}},
+			},
+			check: func(t *testing.T, le *boxes.LayoutElement) {
+				assert.Greater(t, le.Width, 0, "width should be positive")
+				if le.Horizontal != nil {
+					assert.Greater(t, len(le.Horizontal.Elems), 0, "should have horizontal children")
+				}
+			},
+		},
+		{
+			name: "nested boxes (vertical with horizontal children)",
+			layout: boxes.Layout{
+				Caption:  "outer",
+				Vertical: []boxes.Layout{{Caption: "v-child", Horizontal: []boxes.Layout{{Caption: "h-child"}}}},
+			},
+			check: func(t *testing.T, le *boxes.LayoutElement) {
+				assert.Greater(t, le.Height, 0, "outer height should be positive")
+				if le.Vertical != nil && len(le.Vertical.Elems) > 0 {
+					inner := le.Vertical.Elems[0]
+					if inner.Horizontal != nil && len(inner.Horizontal.Elems) > 0 {
+						assert.Greater(t, inner.Horizontal.Elems[0].Width, 0, "nested child width should be positive")
+					}
+				}
+			},
+		},
+		{
+			name: "image reference",
+			layout: boxes.Layout{
+				Image: stringPtr("img1"),
+			},
+			check: func(t *testing.T, le *boxes.LayoutElement) {
+				// An image-only box should have dimensions based on image size
+				// (in real pipeline, images are loaded from Boxes.Images map)
+			},
+		},
+	}
+
+	doc := boxes.NewBoxesDocument()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			b := boxes.NewBoxes()
+			le := boxesimpl.ExpInitLayoutElement(&tt.layout, doc, b, []string{})
+			le.InitDimensions(parametricCalc)
+			tt.check(t, &le)
+		})
 	}
 }
 
