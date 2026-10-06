@@ -39,3 +39,26 @@ func TestConnections(t *testing.T) {
 		test.checkFunc(doc)
 	}
 }
+
+// TestConnectionsRenderSvgCorrectly validates that connected documents produce
+// valid SVG with connection lines (from plan §3.1).
+func TestConnectionsRenderSvgCorrectly(t *testing.T) {
+	b, err := types.LoadInputFromFile[boxes.Boxes]("../../ui/data/boxes_random.yaml")
+	require.Nil(t, err)
+
+	filtered := boxesimpl.FilterBoxes(*b, 2, []string{}, []string{})
+	textDimensionCalulator := svgdrawing.NewSvgTextDimensionCalculator()
+	doc, err := boxesimpl.InitialLayoutBoxes(&filtered, textDimensionCalulator)
+	require.Nil(t, err)
+	doc.ConnectBoxes()
+
+	// Generate SVG and validate connection lines are present
+	svgReturn := boxesimpl.DrawBoxesFiltered(*b, 2, []string{}, []string{}, false)
+
+	// Verify connection lines exist in the SVG
+	conLines := svgdrawing.ExtractConnections(svgReturn.SVG)
+	require.Greater(t, len(conLines), 0, "connected doc should produce connection lines")
+
+	// Also verify the document structure (original check)
+	require.NotNil(t, doc)
+}

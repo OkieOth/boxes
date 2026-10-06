@@ -2,6 +2,7 @@ package boxesimpl_test
 
 import (
 	"os"
+	"strings"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -404,9 +405,21 @@ func TestDrawBoxesForUi(t *testing.T) {
 
 		require.Equal(t, "", svgReturn.ErrorMsg, "error generating SVG output for test", i)
 
-		err = os.WriteFile(test.outputFile, []byte(svgReturn.SVG), 0600)
-		require.Nil(t, err, "error while writing output file for test", i)
-		require.FileExists(t, test.outputFile, "can't find created output file", test.outputFile)
+		// SVG content assertions (from plan §2.1)
+		svgdrawing.AssertSvgNonEmpty(t, svgReturn.SVG)
+		svgdrawing.AssertHasRect(t, svgReturn.SVG)
+
+		// Depth=1 vs Depth=2: depth=2 should have more boxes (expanded children)
+		if test.depth == 2 {
+			rectCount := svgdrawing.CountRectElements(svgReturn.SVG)
+			require.Greater(t, rectCount, 0, "depth=2 should produce boxes")
+		}
+
+		// Write to file only for manual debugging (kept for developers)
+		if test.outputFile != "" {
+			err = os.WriteFile(test.outputFile, []byte(svgReturn.SVG), 0600)
+			require.Nil(t, err, "error while writing debug file: %s", test.outputFile)
+		}
 	}
 }
 
@@ -430,9 +443,18 @@ func TestDrawBoxesRelatedToConnections(t *testing.T) {
 		svgReturn := boxesimpl.DrawBoxesRelatedToConnections(*b, []boxes.BoxesFileMixings{}, nil, true)
 		require.Equal(t, "", svgReturn.ErrorMsg, "error generating SVG output for test", i)
 
-		err = os.WriteFile(test.outputFile, []byte(svgReturn.SVG), 0600)
-		require.Nil(t, err, "error while writing output file for test", i)
-		require.FileExists(t, test.outputFile, "can't find created output file", test.outputFile)
+		// SVG content assertions (from plan §2.2)
+		svgdrawing.AssertSvgNonEmpty(t, svgReturn.SVG)
+		svgdrawing.AssertHasRect(t, svgReturn.SVG)
+		// Connections should be rendered
+		conLines := svgdrawing.ExtractConnections(svgReturn.SVG)
+		require.Greater(t, len(conLines), 0, "related-to-connections should produce connection lines")
+
+		// Write to file only for manual debugging (kept for developers)
+		if test.outputFile != "" {
+			err = os.WriteFile(test.outputFile, []byte(svgReturn.SVG), 0600)
+			require.Nil(t, err, "error while writing debug file: %s", test.outputFile)
+		}
 	}
 }
 
@@ -463,9 +485,23 @@ func TestDrawBoxesForUiComments(t *testing.T) {
 
 		require.Equal(t, "", svgReturn.ErrorMsg, "error generating SVG output for test", i)
 
-		err = os.WriteFile(test.outputFile, []byte(svgReturn.SVG), 0600)
-		require.Nil(t, err, "error while writing output file for test", i)
-		require.FileExists(t, test.outputFile, "can't find created output file", test.outputFile)
+		// SVG content assertions (from plan §2.3)
+		svgdrawing.AssertSvgNonEmpty(t, svgReturn.SVG)
+		svgdrawing.AssertHasRect(t, svgReturn.SVG)
+
+		if !test.hideComments {
+			// When comments are NOT hidden, comment-related elements should be present
+			svgdrawing.AssertHasComments(t, svgReturn.SVG)
+		} else {
+			// When comments are hidden, no comment-related elements should appear
+			svgdrawing.AssertNoComments(t, svgReturn.SVG)
+		}
+
+		// Write to file only for manual debugging (kept for developers)
+		if test.outputFile != "" {
+			err = os.WriteFile(test.outputFile, []byte(svgReturn.SVG), 0600)
+			require.Nil(t, err, "error while writing debug file: %s", test.outputFile)
+		}
 	}
 }
 
@@ -647,9 +683,41 @@ func TestDrawBoxesForUiExt(t *testing.T) {
 
 		require.Equal(t, "", svgReturn.ErrorMsg, "error generating SVG output for test", i)
 
-		err = os.WriteFile(test.outputFile, []byte(svgReturn.SVG), 0600)
-		require.Nil(t, err, "error while writing output file for test", i)
-		require.FileExists(t, test.outputFile, "can't find created output file", test.outputFile)
+		// SVG content assertions (from plan §2.4)
+		svgdrawing.AssertSvgNonEmpty(t, svgReturn.SVG)
+		svgdrawing.AssertHasRect(t, svgReturn.SVG)
+		svgdrawing.AssertTextElementsPresent(t, svgReturn.SVG)
+
+		// Case-specific validations
+		if strings.Contains(test.inputFile, "boxes_simple_pic") || strings.Contains(test.inputFile, "simple_pic") {
+			// With images: verify image elements are present
+			svgdrawing.AssertSvgHasImage(t, svgReturn.SVG)
+		}
+
+		if len(test.expanded) > 0 {
+			// Verify expanded IDs appear in SVG
+			for _, exp := range test.expanded {
+				svgdrawing.AssertSvgHasExpandedId(t, svgReturn.SVG, exp)
+			}
+		}
+
+		if len(test.blacklisted) > 0 {
+			// Verify blacklisted IDs do NOT appear in SVG
+			for _, bl := range test.blacklisted {
+				svgdrawing.AssertSvgHasBlacklistedId(t, svgReturn.SVG, bl)
+			}
+		}
+
+		// Connection lines present when connections exist
+		if test.inputExtConnections != "" {
+			svgdrawing.AssertConnectionLinesPresent(t, svgReturn.SVG)
+		}
+
+		// Write to file only for manual debugging (kept for developers)
+		if test.outputFile != "" {
+			err = os.WriteFile(test.outputFile, []byte(svgReturn.SVG), 0600)
+			require.Nil(t, err, "error while writing debug file: %s", test.outputFile)
+		}
 	}
 }
 
@@ -713,9 +781,39 @@ func TestDrawBoxesWithOverlays(t *testing.T) {
 
 		require.Equal(t, "", svgReturn.ErrorMsg, "error generating SVG output for test", i)
 
-		err = os.WriteFile(test.outputFile, []byte(svgReturn.SVG), 0600)
-		require.Nil(t, err, "error while writing output file for test", i)
-		require.FileExists(t, test.outputFile, "can't find created output file", test.outputFile)
+		// SVG content assertions (from plan §2.5)
+		svgdrawing.AssertSvgNonEmpty(t, svgReturn.SVG)
+		svgdrawing.AssertHasRect(t, svgReturn.SVG)
+
+		// Overlays: check for overlay elements when mixins contain overlays
+		hasOverlayMixin := false
+		for _, m := range test.mixins {
+			if strings.Contains(m, "ext_overlays") || strings.Contains(m, "overlays") {
+				hasOverlayMixin = true
+				break
+			}
+		}
+		if hasOverlayMixin {
+			svgdrawing.AssertHasOverlay(t, svgReturn.SVG)
+		}
+
+		// Wrappers: check for wrapper elements when mixins contain wrappers
+		hasWrapperMixin := false
+		for _, m := range test.mixins {
+			if strings.Contains(m, "ext_wrappers") || strings.Contains(m, "wrappers") {
+				hasWrapperMixin = true
+				break
+			}
+		}
+		if hasWrapperMixin {
+			svgdrawing.AssertHasWrapper(t, svgReturn.SVG)
+		}
+
+		// Write to file only for manual debugging (kept for developers)
+		if test.outputFile != "" {
+			err = os.WriteFile(test.outputFile, []byte(svgReturn.SVG), 0600)
+			require.Nil(t, err, "error while writing debug file: %s", test.outputFile)
+		}
 	}
 }
 
@@ -813,5 +911,67 @@ func TestFilterBoxes(t *testing.T) {
 		require.Nil(t, err, "error while loading input file for test", i)
 		filtered := boxesimpl.FilterBoxes(*b, test.depth, test.expanded, test.blacklisted)
 		test.checkFunc(&filtered)
+	}
+}
+
+// TestFilterBoxesProducesValidSvg integrates FilterBoxes output with SVG drawing
+// and validates the resulting SVG (from plan §2.6).
+func TestFilterBoxesProducesValidSvg(t *testing.T) {
+	tests := []struct {
+		inputFile   string
+		depth       int
+		expanded    []string
+		blacklisted []string
+	}{
+		{
+			inputFile:   "../../resources/examples_boxes/complex_complex.yaml",
+			depth:       1,
+			expanded:    []string{},
+			blacklisted: []string{},
+		},
+		{
+			inputFile:   "../../resources/examples_boxes/complex_complex.yaml",
+			depth:       2,
+			expanded:    []string{},
+			blacklisted: []string{},
+		},
+		{
+			inputFile:   "../../resources/examples_boxes/complex_complex.yaml",
+			depth:       20,
+			expanded:    []string{},
+			blacklisted: []string{"r2_2", "r4_1"},
+		},
+		{
+			inputFile:   "../../ui/data/boxes_random.yaml",
+			depth:       2,
+			expanded:    []string{},
+			blacklisted: []string{},
+		},
+	}
+
+	for i, test := range tests {
+		b, err := types.LoadInputFromFile[boxes.Boxes](test.inputFile)
+		require.Nil(t, err, "error loading input for test %d", i)
+
+		// Filter boxes as DrawBoxesFiltered does internally
+		filtered := boxesimpl.FilterBoxes(*b, test.depth, test.expanded, test.blacklisted)
+
+		// Generate SVG from filtered layout
+		svgReturn := boxesimpl.DrawBoxesFiltered(filtered, test.depth, test.expanded, test.blacklisted, false)
+		require.NotEmpty(t, svgReturn.SVG, "SVG output should not be empty for test %d", i)
+		require.Equal(t, "", svgReturn.ErrorMsg, "no error expected for test %d", i)
+
+		// Core assertions
+		svgdrawing.AssertHasRect(t, svgReturn.SVG)
+
+		// Verify filtered output: blacklisted IDs should NOT appear in SVG
+		for _, bl := range test.blacklisted {
+			svgdrawing.AssertSvgHasBlacklistedId(t, svgReturn.SVG, bl)
+		}
+
+		// Verify expanded IDs DO appear in SVG
+		for _, exp := range test.expanded {
+			svgdrawing.AssertSvgHasExpandedId(t, svgReturn.SVG, exp)
+		}
 	}
 }

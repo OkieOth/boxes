@@ -1,0 +1,18 @@
+title: Test Comments
+boxes:
+  vertical:
+    - id: box1
+      caption: Box 1
+      comment:
+        text: "This is a comment on Box 1"
+        label: "a1"
+      format: default
+    - id: box2
+      caption: Box 2
+      connections:
+        - destId: box1
+          dest: "Box 1"
+          format: defaultConnection
+          comment:
+            text: "This is a connection comment"
+            label: "b1"

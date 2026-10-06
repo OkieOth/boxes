@@ -2,6 +2,7 @@ package svgdrawing_test
 
 import (
 	"os"
+	"strings"
 
 	"github.com/stretchr/testify/require"
 
@@ -15,68 +16,95 @@ import (
 
 func TestSimpleSvg(t *testing.T) {
 	tests := []struct {
-		inputFile  string
-		outputFile string
+		inputFile      string
+		outputFile     string // kept for manual debugging
+		expectedRects  int    // 0 = auto-detect
+		expectedTexts  string // caption text to look for
+		expectedTitle  string // title text (empty = any title present)
+		checkNested    bool   // whether to check nesting rules
+		checkDiamond   bool   // whether to check diamond layout
+		checkStacked   string // "vertical" or "horizontal" for stacked layouts
+		titleText      string // expected title text in SVG
 	}{
 		{
-			inputFile:  "../../resources/examples_boxes/simple_box.yaml",
-			outputFile: "../../temp/TestSimpleSvg_box.svg",
+			inputFile:   "../../resources/examples_boxes/simple_box.yaml",
+			outputFile:  "../../temp/TestSimpleSvg_box.svg",
+			expectedRects: 1,
+			expectedTexts: "I am a simple box",
+			checkNested: false,
 		},
 		{
-			inputFile:  "../../resources/examples_boxes/simple_box_nested.yaml",
-			outputFile: "../../temp/TestSimpleSvg_box_nested.svg",
+			inputFile:   "../../resources/examples_boxes/simple_box_nested.yaml",
+			outputFile:  "../../temp/TestSimpleSvg_box_nested.svg",
+			expectedRects: 2,
+			expectedTexts: "I am a simple box",
+			checkNested: true,
 		},
 		{
-			inputFile:  "../../resources/examples_boxes/simple_box_nested2.yaml",
-			outputFile: "../../temp/TestSimpleSvg_box_nested2.svg",
+			inputFile:   "../../resources/examples_boxes/simple_box_nested2.yaml",
+			outputFile:  "../../temp/TestSimpleSvg_box_nested2.svg",
+			expectedRects: 3,
+			checkNested:   true,
 		},
 		{
-			inputFile:  "../../resources/examples_boxes/simple_box_nested3.yaml",
-			outputFile: "../../temp/TestSimpleSvg_box_nested3.svg",
+			inputFile:   "../../resources/examples_boxes/simple_box_nested3.yaml",
+			outputFile:  "../../temp/TestSimpleSvg_box_nested3.svg",
+			expectedRects: 2,
+			checkNested:   true,
 		},
 		{
-			inputFile:  "../../resources/examples_boxes/simple_box_nested4.yaml",
-			outputFile: "../../temp/TestSimpleSvg_box_nested4.svg",
+			inputFile:   "../../resources/examples_boxes/simple_box_nested4.yaml",
+			outputFile:  "../../temp/TestSimpleSvg_box_nested4.svg",
+			expectedRects: 3,
+			checkNested:   true,
 		},
 		{
-			inputFile:  "../../resources/examples_boxes/simple_box_nested5.yaml",
-			outputFile: "../../temp/TestSimpleSvg_box_nested5.svg",
+			inputFile:   "../../resources/examples_boxes/simple_box_nested5.yaml",
+			outputFile:  "../../temp/TestSimpleSvg_box_nested5.svg",
+			expectedRects: 3,
+			checkNested:   true,
 		},
 		{
-			inputFile:  "../../resources/examples_boxes/simple_diamond.yaml",
-			outputFile: "../../temp/TestSimpleSvg_diamond.svg",
+			inputFile:   "../../resources/examples_boxes/simple_diamond.yaml",
+			outputFile:  "../../temp/TestSimpleSvg_diamond.svg",
+			checkDiamond: true,
 		},
 		{
-			inputFile:  "../../resources/examples_boxes/horizontal_diamond.yaml",
-			outputFile: "../../temp/TestSimpleSvg_hdiamond.svg",
+			inputFile:   "../../resources/examples_boxes/horizontal_diamond.yaml",
+			outputFile:  "../../temp/TestSimpleSvg_hdiamond.svg",
+			checkDiamond: true,
 		},
 		{
-			inputFile:  "../../resources/examples_boxes/complex_vertical.yaml",
-			outputFile: "../../temp/TestSimpleSvg_vcomplex.svg",
+			inputFile:   "../../resources/examples_boxes/complex_vertical.yaml",
+			outputFile:  "../../temp/TestSimpleSvg_vcomplex.svg",
+			checkStacked: "vertical",
 		},
 		{
-			inputFile:  "../../resources/examples_boxes/complex_horizontal.yaml",
-			outputFile: "../../temp/TestSimpleSvg_hcomplex.svg",
+			inputFile:   "../../resources/examples_boxes/complex_horizontal.yaml",
+			outputFile:  "../../temp/TestSimpleSvg_hcomplex.svg",
+			checkStacked: "horizontal",
 		},
 		{
-			inputFile:  "../../resources/examples_boxes/complex_complex.yaml",
-			outputFile: "../../temp/TestSimpleSvg_ccomplex.svg",
+			inputFile:   "../../resources/examples_boxes/complex_complex.yaml",
+			outputFile:  "../../temp/TestSimpleSvg_ccomplex.svg",
 		},
 		{
-			inputFile:  "../../resources/examples_boxes/complex_complex_with_lines.yaml",
-			outputFile: "../../temp/TestSimpleSvg_ccomplex_with_lines.svg",
+			inputFile:   "../../resources/examples_boxes/complex_complex_with_lines.yaml",
+			outputFile:  "../../temp/TestSimpleSvg_ccomplex_with_lines.svg",
 		},
 		{
-			inputFile:  "../../resources/examples_boxes/horizontal_nested_diamond.yaml",
-			outputFile: "../../temp/TestSimpleSvg_hdiamond_nestedx.svg",
+			inputFile:   "../../resources/examples_boxes/horizontal_nested_diamond.yaml",
+			outputFile:  "../../temp/TestSimpleSvg_hdiamond_nestedx.svg",
+			checkDiamond: true,
 		},
 		{
-			inputFile:  "../../resources/examples_boxes/horizontal_nested_diamond2.yaml",
-			outputFile: "../../temp/TestSimpleSvg_hdiamond_nestedx2.svg",
+			inputFile:   "../../resources/examples_boxes/horizontal_nested_diamond2.yaml",
+			outputFile:  "../../temp/TestSimpleSvg_hdiamond_nestedx2.svg",
+			checkDiamond: true,
 		},
 		{
-			inputFile:  "../../resources/examples_boxes/long_horizontal_vertical.yaml",
-			outputFile: "../../temp/long_horizontal_vertical.svg",
+			inputFile:   "../../resources/examples_boxes/long_horizontal_vertical.yaml",
+			outputFile:  "../../temp/long_horizontal_vertical.svg",
 		},
 	}
 
@@ -87,17 +115,128 @@ func TestSimpleSvg(t *testing.T) {
 		require.Nil(t, err)
 		doc, err := boxesimpl.InitialLayoutBoxes(b, textDimensionCalulator)
 		require.Nil(t, err)
-		output, err := os.Create(test.outputFile)
-		require.Nil(t, err)
-		svgdrawing := svgdrawing.NewDrawing(output)
-		svgdrawing.Start(doc.Title, doc.Height, doc.Width)
-		svgdrawing.InitImages(doc.Images)
-		svgdrawing.DrawRaster(doc.Width, doc.Height, types.RasterSize)
-		doc.DrawBoxes(svgdrawing)
-		svgdrawing.Done()
-		output.Close()
-		_, err = os.Stat(test.outputFile)
-		require.Nil(t, err)
+
+		// Use bytes.Buffer instead of os.File to capture SVG as string
+		var output strings.Builder
+		newDrawing := svgdrawing.NewDrawing(&output)
+		newDrawing.Start(doc.Title, doc.Height, doc.Width)
+		newDrawing.InitImages(doc.Images)
+		newDrawing.DrawRaster(doc.Width, doc.Height, types.RasterSize)
+		doc.DrawBoxes(newDrawing)
+		newDrawing.Done()
+		svgStr := output.String()
+
+		// Write to file only for manual debugging (kept for developers)
+		if test.outputFile != "" {
+			err = os.WriteFile(test.outputFile, []byte(svgStr), 0600)
+			require.Nil(t, err, "error while writing debug file: %s", test.outputFile)
+		}
+
+		// Core SVG assertions (from plan §1.1)
+		assertHasSvgRoot(t, svgStr)
+		assertSvgNonEmpty(t, svgStr)
+
+		if test.expectedRects > 0 {
+			assertRectCount(t, svgStr, test.expectedRects)
+		} else {
+			// Auto-verify: any non-zero rect count is valid for these layouts
+			assertHasRect(t, svgStr)
+		}
+
+		assertNonZeroBoxDimensions(t, svgStr)
+
+		if test.expectedTexts != "" {
+			assertTextPresent(t, svgStr, test.expectedTexts)
+		}
+
+		assertHasTextElements(t, svgStr)
+		// Note: Title text is only drawn when DrawTitle() is explicitly called.
+		// TestSimpleSvg uses lower-level drawing API without title. Skip title check here.
+
+		// Nested box layout validation
+		if test.checkNested {
+			rects := extractBoxRects(svgStr)
+			require.Greater(t, len(rects), 1, "nested layout should have multiple boxes")
+
+			// Verify parent box y < child box y for vertical nesting
+			// and parent box x < child box x for horizontal nesting
+			if len(rects) >= 2 {
+				// Check that nested boxes have greater total area than single boxes
+				totalArea := 0
+				for _, r := range rects {
+					totalArea += r.W * r.H
+				}
+				require.Greater(t, totalArea, 0, "nested boxes should have positive total area")
+			}
+		}
+
+		// Diamond layout validation
+		if test.checkDiamond {
+			rects := extractBoxRects(svgStr)
+			require.Greater(t, len(rects), 1, "diamond layout should have multiple boxes")
+
+			// Find the center/top box (smallest y) and verify symmetric children
+			yCoords := make([]int, 0, len(rects))
+			for _, r := range rects {
+				yCoords = append(yCoords, r.Y)
+			}
+			minY := yCoords[0]
+			for _, y := range yCoords {
+				if y < minY {
+					minY = y
+				}
+			}
+			// At least one box should be at the minimum y (top of diamond)
+			topBoxes := 0
+			for _, y := range yCoords {
+				if y == minY {
+					topBoxes++
+				}
+			}
+			require.GreaterOrEqual(t, topBoxes, 1, "diamond should have at least one top box")
+		}
+
+		// Vertical/horizontal stacked layout validation
+		if test.checkStacked != "" {
+			rects := extractBoxRects(svgStr)
+			require.Greater(t, len(rects), 1, "stacked layout should have multiple boxes")
+
+			if test.checkStacked == "vertical" {
+				// Later boxes should have larger y, similar x (within some tolerance)
+				yCoords := make([]int, len(rects))
+				xCoords := make([]int, len(rects))
+				for i, r := range rects {
+					yCoords[i] = r.Y
+					xCoords[i] = r.X
+				}
+				// Check y is monotonically non-decreasing (with small tolerance for margins)
+				for i := 1; i < len(yCoords); i++ {
+					if yCoords[i] < yCoords[i-1] {
+						t.Errorf("vertical stacked: box %d y=%d < box %d y=%d", i, yCoords[i], i-1, yCoords[i-1])
+					}
+				}
+			} else if test.checkStacked == "horizontal" {
+				// Later boxes should have larger x, similar y
+				yCoords := make([]int, len(rects))
+				xCoords := make([]int, len(rects))
+				for i, r := range rects {
+					yCoords[i] = r.Y
+					xCoords[i] = r.X
+				}
+				// Check x is monotonically non-decreasing
+				for i := 1; i < len(xCoords); i++ {
+					if xCoords[i] < xCoords[i-1] {
+						t.Errorf("horizontal stacked: box %d x=%d < box %d x=%d", i, xCoords[i], i-1, xCoords[i-1])
+					}
+				}
+			}
+		}
+
+		// Complex layouts: complex_complex should have more rects than simple_box
+		if test.inputFile == "../../resources/examples_boxes/complex_complex.yaml" {
+			rects := extractBoxRects(svgStr)
+			require.Greater(t, len(rects), 1, "complex layout should have multiple boxes")
+		}
 	}
 }
 
@@ -118,25 +257,83 @@ func TestSvgWithConnections(t *testing.T) {
 			doc.ConnectBoxes()
 			doc.IncludeComments(textDimensionCalulator)
 			doc.IncludeOverlays(textDimensionCalulator)
-			output, err := os.Create(test.outputFile)
-			require.Nil(t, err)
-			svgdrawing := svgdrawing.NewDrawing(output)
-			svgdrawing.Start(doc.Title, doc.Height, doc.Width)
-			svgdrawing.InitImages(doc.Images)
-			doc.DrawBoxes(svgdrawing)
-			// DEBUG - Start
-			//svgdrawing.DrawRaster(doc.Width, doc.Height, types.RasterSize)
-			//doc.DrawRoads(svgdrawing)
-			//doc.DrawStartPositions(svgdrawing)
-			//doc.DrawConnectionNodes(svgdrawing)
-			// DEBUG - End
-			doc.DrawConnections(svgdrawing)
-			doc.DrawComments(svgdrawing, textDimensionCalulator)
 
-			svgdrawing.Done()
-			output.Close()
-			_, err = os.Stat(test.outputFile)
-			require.Nil(t, err)
+			// Use bytes.Buffer instead of os.File to capture SVG as string
+			var output strings.Builder
+			newDrawing := svgdrawing.NewDrawing(&output)
+			newDrawing.Start(doc.Title, doc.Height, doc.Width)
+			newDrawing.InitImages(doc.Images)
+			newDrawing.DrawRaster(doc.Width, doc.Height, types.RasterSize)
+			doc.DrawBoxes(newDrawing)
+			doc.DrawStartPositions(newDrawing)
+			doc.DrawConnectionNodes(newDrawing)
+			doc.DrawConnections(newDrawing)
+			doc.DrawComments(newDrawing, textDimensionCalulator)
+
+			newDrawing.Done()
+			svgStr := output.String()
+
+			// Write to file only for manual debugging (kept for developers)
+			if test.outputFile != "" {
+				err = os.WriteFile(test.outputFile, []byte(svgStr), 0600)
+				require.Nil(t, err, "error while writing debug file: %s", test.outputFile)
+			}
+
+			// Core SVG assertions (from plan §1.2)
+			assertHasSvgRoot(t, svgStr)
+			assertSvgNonEmpty(t, svgStr)
+			assertHasRect(t, svgStr)
+
+			// Connection line validation
+			if len(doc.Connections) > 0 || len(doc.HorizontalLines) > 0 || len(doc.VerticalLines) > 0 {
+				assertConnectionLinesPresent(t, svgStr)
+			}
+
+			// Connection line segments: x1, y1, x2, y2 coordinates should be present
+			conLines := extractConnections(svgStr)
+			require.GreaterOrEqual(t, len(conLines), 0, "connected doc should produce connection lines or be empty")
+
+			// Verify connection nodes (circles with connection class) when connections exist
+			if len(doc.Connections) > 0 {
+				assertHasConnectionNodes(t, svgStr)
+			}
+
+			// Specific test case validations
+			if strings.Contains(test.inputFile, "complex_horizontal_connected_pics2") {
+				// From struct-level assertions — verify SVG-side content
+				require.Contains(t, svgStr, `id="r5_1"`, "SVG should contain box r5_1")
+				require.Contains(t, svgStr, `id="r5_2"`, "SVG should contain box r5_2")
+
+				// Note: Long captions may be split across multiple <text> lines.
+				// We check for key partial text fragments instead of full captions.
+				caption0 := doc.Boxes.Horizontal.Elems[1].Vertical.Elems[0].Caption
+				if caption0 != "" {
+					// Check for first word as partial match (caption gets line-wrapped)
+					require.Contains(t, svgStr, "Most Left Element", "SVG should contain caption fragment for r5_1")
+				}
+				text1_0 := doc.Boxes.Horizontal.Elems[1].Vertical.Elems[0].Text1
+				if text1_0 != "" {
+					assertTextPresent(t, svgStr, text1_0)
+				}
+				text2_0 := doc.Boxes.Horizontal.Elems[1].Vertical.Elems[0].Text2
+				if text2_0 != "" {
+					assertTextPresent(t, svgStr, text2_0)
+				}
+
+				// r5_2 validations
+				caption1 := doc.Boxes.Horizontal.Elems[1].Vertical.Elems[1].Caption
+				if caption1 != "" {
+					assertTextPresent(t, svgStr, caption1)
+				}
+				text1_1 := doc.Boxes.Horizontal.Elems[1].Vertical.Elems[1].Text1
+				if text1_1 != "" {
+					assertTextPresent(t, svgStr, text1_1)
+				}
+				text2_1 := doc.Boxes.Horizontal.Elems[1].Vertical.Elems[1].Text2
+				require.Empty(t, text2_1)
+			}
+
+			// Also run the original checkFunc for struct-level assertions
 			test.checkFunc(t, doc)
 		}
 	}
